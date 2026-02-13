@@ -12,7 +12,9 @@ const navItems = [
 const currentPath = Astro.url.pathname;
 ---
 
-<nav class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 z-50 shadow-lg">
+<nav
+  class="fixed bottom-0 left-0 right-0 bg-pearl dark:bg-onyx border-t border-marble dark:border-velvet z-50 shadow-lg"
+>
   <div class="max-w-7xl mx-auto px-4">
     <ul class="flex justify-around items-center py-2">
       {
@@ -25,8 +27,8 @@ const currentPath = Astro.url.pathname;
                 class:list={[
                   'flex flex-col items-center gap-1 px-3 py-1 rounded-lg transition-colors',
                   isActive
-                    ? 'text-green-600 dark:text-green-400'
-                    : 'text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400',
+                    ? 'text-accent dark:text-accent font-bold'
+                    : 'text-silk/60 dark:text-silk/60 hover:text-accent dark:hover:text-accent',
                 ]}
               >
                 <Icon name={item.icon} class="w-6 h-6" />

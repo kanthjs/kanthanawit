@@ -11,6 +11,12 @@ module.exports = {
         accent: 'var(--aw-color-accent)',
         default: 'var(--aw-color-text-default)',
         muted: 'var(--aw-color-text-muted)',
+        onyx: 'var(--color-onyx)',
+        velvet: 'var(--color-velvet)',
+        champagne: 'var(--color-champagne)',
+        silk: 'var(--color-silk)',
+        marble: 'var(--color-marble)',
+        pearl: 'var(--color-pearl)',
       },
       fontFamily: {
         sans: ['var(--aw-font-sans, ui-sans-serif)', ...defaultTheme.fontFamily.sans],

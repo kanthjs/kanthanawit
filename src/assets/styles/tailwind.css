@@ -95,3 +95,38 @@
 .font-heading {
   @apply leading-tight;
 }
+
+h1 {
+  font-size: var(--font-size-h1, 100px);
+  line-height: 0.9;
+}
+
+body {
+  font-size: var(--font-size-body, 14px);
+}
+
+.button-primary {
+  background-color: var(--aw-color-primary);
+  color: var(--aw-color-text-default);
+  border-radius: 8px;
+  padding: 10px 20px;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.button-primary:hover {
+  filter: brightness(0.9);
+}
+
+.link-accent {
+  color: var(--aw-color-accent);
+  text-decoration: none;
+}
+
+.link-accent:hover {
+  text-decoration: underline;
+}

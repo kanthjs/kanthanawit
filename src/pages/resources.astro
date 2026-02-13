@@ -8,14 +8,12 @@ const metadata = {
 
 const books = [
   {
-    title: 'สถิติการทดลองข้าว',
-    titleLink: '#',
-    description: 'is a dynamic online book rooted on the teaching notes of my graduate course, FIP 602 – Plant Disease Epidemiology, which is offered every year for students in the Graduate Program in Plant Pathology of the Universidade Federal de Viçosa. This book provides context and showcases various methods for describing, visualizing and analyzing epidemic data collected over time and/or space using R.',
-    links: [
-      { text: 'Graduate Program in Plant Pathology', url: '#' },
-    ],
-    image: '/images/book-r4pde.jpg',
-    imageAlt: 'R for Plant Disease Epidemiology',
+    title: 'เทคนิคการทดลองในแปลงนาข้าว',
+    titleLink: 'https://kanthjs.github.io/tech_rice_exp_book/',
+    description:
+      'คือหนังสืออนไลน์ ที่จัดทำขึ้นเพื่อเป็นแนวทางปฏิบัติที่ดีที่สุดสำหรับนักวิจัยข้าวที่ทำการทดลองภาคสนาม ไม่ว่าจะเป็นการทดลองเพื่อประเมินพันธุ์ข้าวใหม่ การทดสอบปุ๋ย หรือการศึกษาปัจจัยแวดล้อมต่าง ๆ ที่มีผลต่อการเจริญเติบโตและผลผลิตของข้าว',
+    image: '/public/tech_rice_exp_book_cover.jpg',
+    imageAlt: 'เทคนิคการทดลองในแปลงนาข้าว',
   },
 ];
 
@@ -36,89 +34,93 @@ const apps = [
 ---
 
 <PersonalLayout metadata={metadata}>
-  <section class="py-12 px-4 sm:px-6 lg:px-8 bg-neutral-900 min-h-screen">
+  <section class="py-12 px-4 sm:px-6 lg:px-8 bg-page min-h-screen">
     <div class="max-w-4xl mx-auto">
       <!-- Books Section -->
       <div class="mb-16">
-        <h2 class="text-2xl font-bold text-white mb-8 pb-2 border-b border-gray-600">
-          หนังสือ
-        </h2>
-        
+        <h2 class="text-2xl font-bold text-silk mb-8 pb-2 border-b border-gray-300">หนังสือ</h2>
+
         <div class="space-y-10">
-          {books.map((book) => (
-            <div class="flex gap-6 items-start">
-              <div class="flex-1 text-gray-300 leading-relaxed">
-                <p>
-                  <a href={book.titleLink} class="font-bold text-white underline decoration-gray-500 hover:decoration-white transition-colors">
-                    {book.title}
-                  </a>
-                  {book.year && <span class="text-gray-400"> ({book.year})</span>}
-                  {' '}{book.description}
-                  {book.links && book.links.map((link, idx) => (
-                    <>
-                      <a href={link.url} class="underline decoration-gray-500 hover:decoration-white transition-colors text-gray-300">
-                        {link.text}
-                      </a>
-                      {idx < book.links.length - 1 ? ', ' : ''}
-                    </>
-                  ))}
-                  {book.boldParts && (
-                    <>
-                      {' '}{book.descriptionEnd}
-                      {' '}I had the privilege to serve as one of the <strong class="text-white">{book.boldParts[0]}</strong> for this edition and I am the <strong class="text-white">{book.boldParts[1]}</strong> specifically focused on Plant Disease Epidemiology, including epidemic modeling, disease progress analysis, and warning systems.
-                    </>
-                  )}
-                </p>
-              </div>
-              <div class="w-32 flex-shrink-0">
-                <div class="aspect-[3/4] bg-gray-800 rounded overflow-hidden">
-                  {book.image ? (
-                    <img 
-                      src={book.image} 
-                      alt={book.imageAlt}
-                      class="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div class="w-full h-full flex items-center justify-center bg-gray-800">
-                      <Icon name="tabler:book" class="w-12 h-12 text-gray-600" />
-                    </div>
-                  )}
+          {
+            books.map((book) => (
+              <div class="flex gap-6 items-start">
+                <div class="flex-1 text-default leading-relaxed">
+                  <p>
+                    <a
+                      href={book.titleLink}
+                      class="font-bold text-silk underline decoration-accent hover:decoration-accent transition-colors"
+                    >
+                      {book.title}
+                    </a>
+                    {book.year && <span class="text-default"> ({book.year})</span>} {book.description}
+                    {book.links &&
+                      book.links.map((link, idx) => (
+                        <>
+                          <a
+                            href={link.url}
+                            class="underline decoration-accent hover:decoration-accent transition-colors text-default"
+                          >
+                            {link.text}
+                          </a>
+                          {idx < book.links.length - 1 ? ', ' : ''}
+                        </>
+                      ))}
+                    {book.boldParts && (
+                      <>
+                        {' '}
+                        {book.descriptionEnd} I had the privilege to serve as one of the{' '}
+                        <strong class="text-silk">{book.boldParts[0]}</strong> for this edition and I am the{' '}
+                        <strong class="text-silk">{book.boldParts[1]}</strong> specifically focused on Plant Disease
+                        Epidemiology, including epidemic modeling, disease progress analysis, and warning systems.
+                      </>
+                    )}
+                  </p>
+                </div>
+                <div class="w-32 flex-shrink-0">
+                  <div class="aspect-[3/4] bg-velvet rounded overflow-hidden">
+                    {book.image ? (
+                      <img src={book.image} alt={book.imageAlt} class="w-full h-full object-cover" />
+                    ) : (
+                      <div class="w-full h-full flex items-center justify-center bg-velvet">
+                        <Icon name="tabler:book" class="w-12 h-12 text-champagne" />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          }
         </div>
       </div>
 
       <!-- Apps Section -->
       <div>
-        <h2 class="text-2xl font-bold text-white mb-8 pb-2 border-b border-gray-600">
-          Apps
-        </h2>
-        
-        <p class="text-gray-300 mb-8 leading-relaxed">
-          I have developed, myself or in collaboration with students, web applications to support research and teaching. These are made with R + Shiny.
+        <h2 class="text-2xl font-bold text-silk mb-8 pb-2 border-b border-gray-300">Apps</h2>
+
+        <p class="text-default mb-8 leading-relaxed">
+          พัฒนาองค์ความรู้ เพื่อสนับสนุนการเรียนการสอนและการวิจัยโดยใช้ผลและข้อมูลงานวิจัย สร้างเป็น web applications
+          โดยใช้ R หรือ python + Shiny
         </p>
-        
+
         <div class="space-y-4">
-          {apps.map((app) => (
-            <a 
-              href={app.link}
-              class="flex items-start gap-4 p-3 rounded-lg hover:bg-white/5 transition-colors group"
-            >
-              <div class="w-12 h-12 flex-shrink-0 bg-gray-800 rounded flex items-center justify-center border border-gray-700 group-hover:border-gray-600 transition-colors">
-                <Icon name={app.icon} class="w-6 h-6 text-gray-400 group-hover:text-gray-300" />
-              </div>
-              <div class="flex-1 min-w-0">
-                <h3 class="font-semibold text-white underline decoration-gray-600 group-hover:decoration-gray-400 transition-colors">
-                  {app.title}
-                </h3>
-                <p class="text-sm text-gray-400 mt-1 underline decoration-gray-700 group-hover:decoration-gray-500 transition-colors">
-                  {app.description}
-                </p>
-              </div>
-            </a>
-          ))}
+          {
+            apps.map((app) => (
+              <a
+                href={app.link}
+                class="flex items-start gap-4 p-3 rounded-lg hover:bg-velvet/50 transition-colors group"
+              >
+                <div class="w-12 h-12 flex-shrink-0 bg-velvet rounded flex items-center justify-center border border-champagne/30 group-hover:border-champagne/60 transition-colors">
+                  <Icon name={app.icon} class="w-6 h-6 text-accent group-hover:text-accent" />
+                </div>
+                <div class="flex-1 min-w-0">
+                  <h3 class="font-semibold text-silk underline decoration-champagne/40 group-hover:decoration-champagne transition-colors">
+                    {app.title}
+                  </h3>
+                  <p class="text-sm text-default mt-1">{app.description}</p>
+                </div>
+              </a>
+            ))
+          }
         </div>
       </div>
     </div>
