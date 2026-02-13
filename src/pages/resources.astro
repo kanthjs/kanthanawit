@@ -1,0 +1,67 @@
+---
+import PersonalLayout from '~/layouts/PersonalLayout.astro';
+
+const metadata = {
+  title: 'Resources - กันต์ธณวิชญ์ ใจสงฆ์',
+};
+
+const resources = [
+  {
+    category: 'Research Tools',
+    items: [
+      { title: 'Tool 1', description: 'Description of tool 1', link: '#' },
+      { title: 'Tool 2', description: 'Description of tool 2', link: '#' },
+    ],
+  },
+  {
+    category: 'Learning Materials',
+    items: [
+      { title: 'Material 1', description: 'Description of material 1', link: '#' },
+      { title: 'Material 2', description: 'Description of material 2', link: '#' },
+    ],
+  },
+  {
+    category: 'Useful Links',
+    items: [
+      { title: 'Link 1', description: 'Description of link 1', link: '#' },
+      { title: 'Link 2', description: 'Description of link 2', link: '#' },
+    ],
+  },
+];
+---
+
+<PersonalLayout metadata={metadata}>
+  <section class="py-16 px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-900 min-h-screen">
+    <div class="max-w-4xl mx-auto">
+      <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">Resources</h1>
+      <p class="text-lg text-gray-600 dark:text-gray-300 mb-12">
+        A curated collection of tools, materials, and links that I find useful for my research and studies.
+      </p>
+      
+      <div class="space-y-12">
+        {
+          resources.map((section) => (
+            <div>
+              <h2 class="text-2xl font-semibold text-gray-900 dark:text-white mb-6 pb-2 border-b border-gray-200 dark:border-gray-700">
+                {section.category}
+              </h2>
+              <div class="grid gap-4 md:grid-cols-2">
+                {section.items.map((item) => (
+                  <a
+                    href={item.link}
+                    class="block p-6 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                      {item.title}
+                    </h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm">{item.description}</p>
+                  </a>
+                ))}
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+</PersonalLayout>

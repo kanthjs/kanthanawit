@@ -1,0 +1,40 @@
+---
+import PersonalLayout from '~/layouts/PersonalLayout.astro';
+
+const metadata = {
+  title: 'About - กันต์ธณวิชญ์ ใจสงฆ์',
+};
+---
+
+<PersonalLayout metadata={metadata}>
+  <section class="py-16 px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-900 min-h-screen">
+    <div class="max-w-4xl mx-auto">
+      <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-8">About Me</h1>
+      
+      <div class="prose dark:prose-invert max-w-none">
+        <p class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed mb-6">
+          I am กันต์ธณวิชญ์ ใจสงฆ์, a Graduate Student at Chiang Mai University.
+          My research interests include [your research areas here].
+        </p>
+        
+        <p class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed mb-6">
+          This page will contain more detailed information about my background,
+          education, research interests, and professional experience.
+        </p>
+        
+        <h2 class="text-2xl font-semibold text-gray-900 dark:text-white mt-8 mb-4">Education</h2>
+        <ul class="list-disc pl-6 text-gray-600 dark:text-gray-300">
+          <li>Graduate Student - Chiang Mai University</li>
+          <li>Previous Education...</li>
+        </ul>
+        
+        <h2 class="text-2xl font-semibold text-gray-900 dark:text-white mt-8 mb-4">Research Interests</h2>
+        <ul class="list-disc pl-6 text-gray-600 dark:text-gray-300">
+          <li>Research Area 1</li>
+          <li>Research Area 2</li>
+          <li>Research Area 3</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</PersonalLayout>

@@ -1,0 +1,41 @@
+---
+import { Icon } from 'astro-icon/components';
+
+const navItems = [
+  { name: 'Home', href: '/', icon: 'tabler:home' },
+  { name: 'About', href: '/about', icon: 'tabler:user' },
+  { name: 'Lab', href: '/lab', icon: 'tabler:flask' },
+  { name: 'Resources', href: '/resources', icon: 'tabler:book' },
+  { name: 'Posts', href: '/posts', icon: 'tabler:article' },
+];
+
+const currentPath = Astro.url.pathname;
+---
+
+<nav class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 z-50 shadow-lg">
+  <div class="max-w-7xl mx-auto px-4">
+    <ul class="flex justify-around items-center py-2">
+      {
+        navItems.map((item) => {
+          const isActive = currentPath === item.href || currentPath.startsWith(item.href + '/');
+          return (
+            <li>
+              <a
+                href={item.href}
+                class:list={[
+                  'flex flex-col items-center gap-1 px-3 py-1 rounded-lg transition-colors',
+                  isActive
+                    ? 'text-green-600 dark:text-green-400'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400',
+                ]}
+              >
+                <Icon name={item.icon} class="w-6 h-6" />
+                <span class="text-xs font-medium">{item.name}</span>
+              </a>
+            </li>
+          );
+        })
+      }
+    </ul>
+  </div>
+</nav>
