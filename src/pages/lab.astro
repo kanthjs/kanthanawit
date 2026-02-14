@@ -5,21 +5,41 @@ const metadata = {
   title: 'Lab - กันต์ธณวิชญ์ ใจสงฆ์',
 };
 ---
-
 <PersonalLayout metadata={metadata}>
   <section class="py-12 px-4 sm:px-6 lg:px-8 bg-page min-h-screen">
     <div class="max-w-4xl mx-auto">
       <!-- Our Research -->
-      <div class="mb-12">
-        <h2 class="text-2xl font-bold text-silk mb-6 pb-2 border-b border-gray-300">การวิจัย</h2>
+      <h1 class="text-2xl font-bold text-silk mb-8 pb-2 border-b border-gray-300">
+        การวิจัย
+      </h1>
 
-        <div class="space-y-6 text-default leading-relaxed">
-          <p>ตอนนี้มีผมอยู่คนเดียว 555</p>
-
-          <p>
-            งาน <strong class="text-silk">modeling work</strong> เป็นงานที่ผมสนใจ
+      <div class="space-y-10">
+        <!-- Section 1 -->
+        <section>
+          <h2 class="text-xl font-semibold text-silk mb-4">
+            การพยากรณ์การระบาดของศัตรูข้าว
+          </h2>
+          <p class="text-default leading-relaxed">
+            การศึกษาติดตามการเปลี่ยนแปลงสถานการณ์การระบาดของศัตรูข้าวในแปลงนาเกษตรกร 
+            ครอบคลุมระบบนิเวศน์หลากหลายรูปแบบ เพื่อทำความเข้าใจพลวัตการระบาดของศัตรูข้าวที่เกิดขึ้นภายใต้
+            สภาพแวดล้อมและการจัดการนาที่แตกต่างกัน อันจะนำไปสู่การสร้างฐานข้อมูลสำหรับวางแผนเฝ้าระวังและ
+            เตือนภัยการระบาดในอนาคต
           </p>
-        </div>
+        </section>
+
+        <!-- Section 2 -->
+        <section>
+          <h2 class="text-xl font-semibold text-silk mb-4">
+            การพัมนาแบบจำลองความเสียหายของโรคข้าว
+          </h2>
+          <p class="text-default leading-relaxed">
+            การประเมินความเสียหายของผลผลิตข้าวที่เกิดจากการทำลายของโรคข้าวที่สำคัญ 
+            ได้แก่ โรคไหม้ (rice blast) โรคใบจุดสีน้ำตาล (brown spot) และโรคขอบใบแห้ง 
+            (bacterial leaf blight) โดยมุ่งเน้นการประเมินเชิงปริมาณเพื่อให้ได้ข้อมูลที่สะท้อน
+            ผลกระทบที่แท้จริงของโรคเหล่านี้ต่อผลผลิตข้าว ซึ่งจะเป็นประโยชน์ต่อการกำหนด
+            แนวทางการป้องกันและลดความสูญเสียทางเศรษฐกิจของเกษตรกร
+          </p>
+        </section>
       </div>
     </div>
   </section>
