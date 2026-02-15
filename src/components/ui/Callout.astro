@@ -1,0 +1,111 @@
+---
+import { Icon } from 'astro-icon/components';
+
+interface Props {
+  title?: string;
+  type?: 'info' | 'tip' | 'warning' | 'error' | 'resource';
+  collapsible?: boolean;
+  open?: boolean;
+}
+
+const { title, type = 'resource', collapsible = true, open = true } = Astro.props;
+
+const styles = {
+  tip: {
+    bg: 'bg-emerald-50 dark:bg-emerald-950/20',
+    border: 'border-emerald-600',
+    text: 'text-emerald-900 dark:text-emerald-100',
+    icon: 'tabler:bulb',
+    iconColor: 'text-emerald-600',
+    titleDefault: 'Tip',
+  },
+  resource: {
+    bg: 'bg-green-50/50 dark:bg-green-900/10',
+    border: 'border-green-600',
+    text: 'text-slate-800 dark:text-slate-200',
+    icon: 'tabler:bulb',
+    iconColor: 'text-green-600',
+    titleDefault: 'Additional Resources',
+  },
+  info: {
+    bg: 'bg-blue-50 dark:bg-blue-900/20',
+    border: 'border-blue-600',
+    text: 'text-blue-900 dark:text-blue-100',
+    icon: 'tabler:info-circle',
+    iconColor: 'text-blue-600',
+    titleDefault: 'Information',
+  },
+  warning: {
+    bg: 'bg-amber-50 dark:bg-amber-950/20',
+    border: 'border-amber-600',
+    text: 'text-amber-900 dark:text-amber-100',
+    icon: 'tabler:alert-triangle',
+    iconColor: 'text-amber-600',
+    titleDefault: 'Warning',
+  },
+  error: {
+    bg: 'bg-red-50 dark:bg-red-950/20',
+    border: 'border-red-600',
+    text: 'text-red-900 dark:text-red-100',
+    icon: 'tabler:alert-circle',
+    iconColor: 'text-red-600',
+    titleDefault: 'Error',
+  },
+};
+
+const currentStyle = styles[type] || styles.resource;
+const displayTitle = title || currentStyle.titleDefault;
+---
+
+<div
+  class={`callout-container shadow-sm my-8 rounded-lg ${currentStyle.bg} border-l-[6px] ${currentStyle.border} overflow-hidden transition-all duration-300 border border-slate-200 dark:border-slate-800`}
+>
+  {
+    collapsible ? (
+      <details class="group" open={open}>
+        <summary class="flex items-center justify-between cursor-pointer p-4 list-none select-none hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+          <div class="flex items-center gap-3">
+            <div class={`p-1 rounded-md ${currentStyle.bg} shadow-sm border border-black/5 dark:border-white/5`}>
+              <Icon name={currentStyle.icon} class={`w-5 h-5 ${currentStyle.iconColor}`} />
+            </div>
+            <span class="font-bold text-[17px] tracking-tight text-slate-700 dark:text-slate-200">{displayTitle}</span>
+          </div>
+          <div class="text-slate-400 group-open:rotate-180 transition-transform duration-300">
+            <Icon name="tabler:chevron-down" class="w-5 h-5" />
+          </div>
+        </summary>
+        <div class="px-6 pb-5 prose prose-sm dark:prose-invert max-w-none border-t border-slate-200/50 dark:border-slate-700/50 pt-5">
+          <slot />
+        </div>
+      </details>
+    ) : (
+      <div class="p-5">
+        <div class="flex items-center gap-3 mb-4">
+          <div class={`p-1 rounded-md ${currentStyle.bg} shadow-sm border border-black/5 dark:border-white/5`}>
+            <Icon name={currentStyle.icon} class={`w-5 h-5 ${currentStyle.iconColor}`} />
+          </div>
+          <span class="font-bold text-[17px] tracking-tight text-slate-700 dark:text-slate-200">{displayTitle}</span>
+        </div>
+        <div class="prose prose-sm dark:prose-invert max-w-none">
+          <slot />
+        </div>
+      </div>
+    )
+  }
+</div>
+
+<style>
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  .callout-container {
+    /* ensure links inside callout look good */
+  }
+  .callout-container :global(ul) {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+  .callout-container :global(a) {
+    @apply text-green-700 dark:text-green-400 font-medium no-underline hover:underline decoration-green-500/30 underline-offset-4;
+  }
+</style>

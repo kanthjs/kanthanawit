@@ -1,6 +1,7 @@
 ---
 import Layout from '~/layouts/Layout.astro';
 import BottomNav from '~/components/widgets/BottomNav.astro';
+import CopyCodeScript from '~/components/common/CopyCodeScript.astro';
 
 import type { MetaData } from '~/types';
 
@@ -16,4 +17,5 @@ const { metadata } = Astro.props;
     <slot />
   </main>
   <BottomNav />
+  <CopyCodeScript />
 </Layout>

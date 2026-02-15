@@ -5,21 +5,6 @@
 สร้างด้วย **[Astro 4.0](https://astro.build/) + [Tailwind CSS](https://tailwindcss.com/)**
 
 ---
-
-## โครงสร้างเว็บไซต์
-
-เว็บไซต์ประกอบด้วย 5 หน้าหลัก:
-
-| หน้า | รายละเอียด | ไฟล์ |
-|------|-----------|------|
-| **Home** | หน้าแรกแสดงชื่อและตำแหน่ง พร้อม hero image | `src/pages/index.astro` |
-| **About** | ประวัติและข้อมูลส่วนตัว | `src/pages/about.astro` |
-| **Lab** | ข้อมูลการวิจัย บุคลากร และนักศึกษา | `src/pages/lab.astro` |
-| **Resources** | หนังสือและแอปพลิเคชันที่พัฒนา | `src/pages/resources.astro` |
-| **Posts** | บทความและโพสต์ต่างๆ | `src/pages/posts.astro` |
-
----
-
 ## โครงสร้างโปรเจกต์ (Project Structure)
 
 ```
@@ -81,34 +66,6 @@ image: /images/thumbnail.jpg
 
 เนื้อหาบทความ...
 ```
-
-### แก้ไขหน้าต่างๆ
-
-- **Home**: แก้ไขที่ `src/pages/index.astro`
-- **About**: แก้ไขที่ `src/pages/about.astro`
-- **Lab**: แก้ไขที่ `src/pages/lab.astro`
-- **Resources**: แก้ไขที่ `src/pages/resources.astro`
-
----
-
-## Tech Stack
-
-- **Framework**: [Astro 4.0](https://astro.build/)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
-- **Content**: [Astro Content Collections](https://docs.astro.build/en/guides/content-collections/)
-- **Icons**: [Astro Icon](https://github.com/natemoo-re/astro-icon) + Tabler Icons
-
----
-
-## การ Deploy
-
-### Netlify
-
-[![Netlify Deploy](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/kanthjs/kanthanawit)
-
-### Vercel
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/kanthjs/kanthanawit)
 
 ---
 
