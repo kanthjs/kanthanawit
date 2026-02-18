@@ -22,12 +22,14 @@ const apps = [
     title: 'Rice Pest Risk Map App',
     description: 'shiny app แสดงแผนที่ความเสี่ยงจากศัตรูข้าว',
     icon: 'tabler:chart-bar',
-    link: 'https://t4qmqq-kanthanawit0jaisong.shinyapps.io/ricepest-risk-map-app/',
+    image: '/pest_risk_map.jpg',
+    link: 'https://019c7053-50f5-df71-f17a-8aff60e3fe9f.share.connect.posit.cloud/',
   },
   {
     title: 'Rice Pest Warning App',
     description: 'shiny app แสดงข้อมูลการเตือนภัยศัตรูข้าว',
     icon: 'tabler:database',
+    image: '/pest_warning_app.jpg',
     link: 'https://019c661b-3539-7d06-0829-41c5c53c7250.share.connect.posit.cloud/',
   },
 ];
@@ -102,21 +104,43 @@ const apps = [
           โดยใช้ R หรือ python + Shiny
         </p>
 
-        <div class="space-y-4">
+        <div class="grid grid-cols-1 gap-6">
           {
             apps.map((app) => (
               <a
                 href={app.link}
-                class="flex items-start gap-4 p-3 rounded-lg hover:bg-velvet/50 transition-colors group"
+                class="flex flex-col sm:flex-row items-center gap-6 p-4 rounded-xl hover:bg-velvet/50 transition-all group border border-transparent hover:border-champagne/20 shadow-sm hover:shadow-md bg-page"
               >
-                <div class="w-12 h-12 flex-shrink-0 bg-velvet rounded flex items-center justify-center border border-champagne/30 group-hover:border-champagne/60 transition-colors">
-                  <Icon name={app.icon} class="w-6 h-6 text-accent group-hover:text-accent" />
+                <div class="w-full sm:w-48 h-32 flex-shrink-0 bg-velvet rounded-lg overflow-hidden border border-champagne/30 group-hover:border-champagne/60 transition-colors">
+                  {app.image ? (
+                    <img
+                      src={app.image}
+                      alt={app.title}
+                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  ) : (
+                    <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-velvet to-black">
+                      <Icon
+                        name={app.icon}
+                        class="w-12 h-12 text-accent group-hover:scale-110 transition-transform duration-500"
+                      />
+                    </div>
+                  )}
                 </div>
-                <div class="flex-1 min-w-0">
-                  <h3 class="font-semibold text-silk underline decoration-champagne/40 group-hover:decoration-champagne transition-colors">
+                <div class="flex-1 min-w-0 text-center sm:text-left">
+                  <h3 class="text-xl font-bold text-silk group-hover:text-accent transition-colors flex items-center justify-center sm:justify-start gap-2">
                     {app.title}
+                    <Icon
+                      name="tabler:external-link"
+                      class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity"
+                    />
                   </h3>
-                  <p class="text-sm text-default mt-1">{app.description}</p>
+                  <p class="text-default mt-2 line-clamp-3 leading-relaxed">{app.description}</p>
+                  <div class="mt-4 flex items-center justify-center sm:justify-start">
+                    <span class="text-xs font-medium px-2.5 py-0.5 rounded bg-accent/10 text-accent border border-accent/20 group-hover:bg-accent group-hover:text-white transition-colors">
+                      Open Application
+                    </span>
+                  </div>
                 </div>
               </a>
             ))
