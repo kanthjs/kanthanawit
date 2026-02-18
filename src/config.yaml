@@ -16,7 +16,7 @@ metadata:
     index: true
     follow: true
   openGraph:
-    site_name: ThaiUI - AstroWind
+    site_name: kanthanawit
     images:
       - url: '~/assets/images/default.png'
         width: 1200
