@@ -17,13 +17,13 @@
     "lint:eslint": "eslint ."
   },
   "dependencies": {
-    "@astrojs/rss": "^4.0.5",
-    "@astrojs/sitemap": "^3.1.4",
+    "@astrojs/rss": "^4.0.15",
+    "@astrojs/sitemap": "^3.7.0",
     "@astrolib/analytics": "^0.5.0",
     "@astrolib/seo": "^1.0.0-beta.5",
     "@fontsource-variable/anuphan": "^5.0.13",
     "@fontsource-variable/noto-sans-thai": "^5.0.14",
-    "astro": "^4.7.0",
+    "astro": "^5.17.3",
     "astro-embed": "^0.7.1",
     "astro-icon": "^1.1.0",
     "limax": "4.1.0",
@@ -31,9 +31,9 @@
     "unpic": "^3.18.0"
   },
   "devDependencies": {
-    "@astrojs/mdx": "^2.3.1",
-    "@astrojs/partytown": "^2.1.0",
-    "@astrojs/tailwind": "5.1.0",
+    "@astrojs/mdx": "^4.3.13",
+    "@astrojs/partytown": "^2.1.4",
+    "@astrojs/tailwind": "^6.0.2",
     "@eslint/js": "^9.1.1",
     "@iconify-json/flat-color-icons": "^1.1.10",
     "@iconify-json/tabler": "^1.1.110",
