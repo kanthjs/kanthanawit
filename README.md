@@ -5,9 +5,10 @@
 สร้างด้วย **[Astro 4.0](https://astro.build/) + [Tailwind CSS](https://tailwindcss.com/)**
 
 ---
+
 ## โครงสร้างโปรเจกต์ (Project Structure)
 
-```
+```text
 /
 ├── public/              # ไฟล์ Static (รูปภาพ, favicon)
 ├── src/
