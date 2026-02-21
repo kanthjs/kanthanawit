@@ -6,7 +6,19 @@ const metadata = {
   title: 'Resources - กันต์ธณวิชญ์ ใจสงฆ์',
 };
 
-const books = [
+interface BookItem {
+  title: string;
+  titleLink: string;
+  description: string;
+  image?: string;
+  imageAlt?: string;
+  year?: string;
+  links?: { text: string; url: string }[];
+  boldParts?: string[];
+  descriptionEnd?: string;
+}
+
+const books: BookItem[] = [
   {
     title: 'เทคนิคการทดลองในแปลงนาข้าว',
     titleLink: 'https://kanthjs.github.io/tech_rice_exp_book/',
@@ -17,7 +29,15 @@ const books = [
   },
 ];
 
-const apps = [
+interface AppItem {
+  title: string;
+  description: string;
+  icon: string;
+  image?: string;
+  link: string;
+}
+
+const apps: AppItem[] = [
   {
     title: 'Rice Pest Risk Map App',
     description: 'shiny app แสดงแผนที่ความเสี่ยงจากศัตรูข้าว',
@@ -31,6 +51,29 @@ const apps = [
     icon: 'tabler:database',
     image: '/pest_warning_app.jpg',
     link: 'https://019c661b-3539-7d06-0829-41c5c53c7250.share.connect.posit.cloud/',
+  },
+];
+
+interface GistItem {
+  title: string;
+  description: string;
+  icon?: string;
+  link: string;
+}
+
+const gists: GistItem[] = [
+  // เพิ่ม Gist ที่นี่ได้เลย
+  {
+    title: '2 factors in CRD: ANOVA and boxplots',
+    description: 'R functions สำหรับวิเคราะห์ 2 factors in CRD แบบ balanced แสดง ตาราง ANOVA และ boxplots',
+    icon: 'tabler:code',
+    link: 'https://gist.github.com/kanthjs/1287ff85497f9950e0c4f45d93414138',
+  },
+   {
+    title: '2 factors in CRD: ANOVA and boxplots',
+    description: 'R functions สำหรับวิเคราะห์ 2 factors in CRD แบบ balanced แสดง ตาราง ANOVA และ boxplots',
+    icon: 'tabler:code',
+    link: 'https://gist.github.com/kanthjs/1287ff85497f9950e0c4f45d93414138',
   },
 ];
 ---
@@ -56,7 +99,7 @@ const apps = [
                     </a>
                     {book.year && <span class="text-default"> ({book.year})</span>} {book.description}
                     {book.links &&
-                      book.links.map((link, idx) => (
+                      book.links.map((link, idx, arr) => (
                         <>
                           <a
                             href={link.url}
@@ -64,7 +107,7 @@ const apps = [
                           >
                             {link.text}
                           </a>
-                          {idx < book.links.length - 1 ? ', ' : ''}
+                          {idx < arr.length - 1 ? ', ' : ''}
                         </>
                       ))}
                     {book.boldParts && (
@@ -142,6 +185,40 @@ const apps = [
                     </span>
                   </div>
                 </div>
+              </a>
+            ))
+          }
+        </div>
+      </div>
+
+      <!-- Gists Section -->
+      <div class="mt-16">
+        <h2 class="text-2xl font-bold text-silk mb-8 pb-2 border-b border-gray-300">Gists (โค้ดและฟังก์ชัน)</h2>
+
+        <p class="text-default mb-8 leading-relaxed">รวบรวมฟังก์ชันและ Snippet โค้ดที่คิดว่ามีประโยชน์และใช้งานบ่อย</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {
+            gists.map((gist) => (
+              <a
+                href={gist.link}
+                target={gist.link !== '#' ? '_blank' : '_self'}
+                rel="noopener noreferrer"
+                class="flex flex-col p-6 rounded-xl hover:bg-velvet/50 transition-all group border border-transparent hover:border-champagne/20 shadow-sm hover:shadow-md bg-page"
+              >
+                <div class="flex items-center gap-4 mb-4">
+                  <div class="w-12 h-12 flex flex-shrink-0 items-center justify-center rounded-lg bg-velvet text-accent group-hover:bg-accent group-hover:text-white transition-colors">
+                    <Icon name={gist.icon || 'tabler:code'} class="w-6 h-6" />
+                  </div>
+                  <h3 class="text-lg font-bold text-silk group-hover:text-accent transition-colors flex-1 line-clamp-1">
+                    {gist.title}
+                  </h3>
+                  <Icon
+                    name="tabler:external-link"
+                    class="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity text-accent"
+                  />
+                </div>
+                <p class="text-default line-clamp-3 leading-relaxed text-sm flex-1">{gist.description}</p>
               </a>
             ))
           }
