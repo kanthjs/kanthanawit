@@ -1,75 +1,43 @@
-# กันต์ธณวิชญ์ ใจสงฆ์ - Personal Website
+# Astro Starter Kit: Minimal
 
-เว็บไซต์ส่วนตัวของ **กันต์ธณวิชญ์ ใจสงฆ์** (Kanthanawit Jaisong) - นักวิชาการเกษตร กรมการข้าว
+```sh
+npm create astro@latest -- --template minimal
+```
 
-สร้างด้วย **[Astro 4.0](https://astro.build/) + [Tailwind CSS](https://tailwindcss.com/)**
+> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
 
----
+## 🚀 Project Structure
 
-## โครงสร้างโปรเจกต์ (Project Structure)
+Inside of your Astro project, you'll see the following folders and files:
 
 ```text
 /
-├── public/              # ไฟล์ Static (รูปภาพ, favicon)
+├── public/
 ├── src/
-│   ├── assets/          # รูปภาพ, styles
-│   ├── components/      # ส่วนประกอบต่างๆ
-│   │   ├── blog/        # Components สำหรับ Blog
-│   │   ├── common/      # Components ทั่วไป
-│   │   ├── ui/          # UI Components
-│   │   └── widgets/     # Widgets (BottomNav, etc.)
-│   ├── content/
-│   │   └── post/        # บทความ Blog (.md, .mdx)
-│   ├── layouts/         # Layouts
-│   │   ├── Layout.astro         # Layout หลัก
-│   │   ├── PersonalLayout.astro # Layout สำหรับหน้าทั่วไป + BottomNav
-│   │   └── BlogPostLayout.astro # Layout สำหรับหน้า Blog post
-│   ├── pages/           # หน้าเว็บไซต์
-│   │   ├── index.astro      # หน้าแรก
-│   │   ├── about.astro      # หน้า About
-│   │   ├── lab.astro        # หน้า Lab
-│   │   ├── resources.astro  # หน้า Resources
-│   │   ├── posts.astro      # รายการ Posts
-│   │   └── [...blog]/       # หน้า Blog post แต่ละบทความ
-│   ├── utils/           # Utility functions
-│   └── content/config.ts # Content collection config
-├── astro.config.mjs
-├── tailwind.config.cjs
+│   └── pages/
+│       └── index.astro
 └── package.json
 ```
 
----
+Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
 
-## คำสั่งที่ใช้งาน (Commands)
+There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
 
-| คำสั่ง | ผลลัพธ์ |
-| :--- | :--- |
-| `npm install` | ติดตั้ง dependencies |
-| `npm run dev` | เริ่ม Development server (`localhost:3000`) |
-| `npm run build` | สร้างไฟล์ Production (./dist/) |
-| `npm run preview` | พรีวิวไฟล์ Build |
+Any static assets, like images, can be placed in the `public/` directory.
 
----
+## 🧞 Commands
 
-## การจัดการ Content
+All commands are run from the root of the project, from a terminal:
 
-### เพิ่มบทความใหม่
+| Command                   | Action                                           |
+| :------------------------ | :----------------------------------------------- |
+| `npm install`             | Installs dependencies                            |
+| `npm run dev`             | Starts local dev server at `localhost:4321`      |
+| `npm run build`           | Build your production site to `./dist/`          |
+| `npm run preview`         | Preview your build locally, before deploying     |
+| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
+| `npm run astro -- --help` | Get help using the Astro CLI                     |
 
-สร้างไฟล์ `.md` หรือ `.mdx` ใน `src/content/post/`:
+## 👀 Want to learn more?
 
-```md
----
-publishDate: 2025-02-13T00:00:00Z
-title: ชื่อบทความ
-excerpt: คำอธิบายสั้นๆ
-image: /images/thumbnail.jpg
----
-
-เนื้อหาบทความ...
-```
-
----
-
-## License
-
-MIT License — ดูรายละเอียดที่ [LICENSE](./LICENSE.md)
+Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).

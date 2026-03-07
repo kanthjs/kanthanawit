@@ -1,0 +1,214 @@
+---
+pubDate: 2026-02-15
+title: ANOVA type สำคัญ นะ ควรรู้ไว้
+excerpt: CRD
+image: https://www.appinio.com/hs-fs/hubfs/What%20is%20ANOVA%20Test%20Definition%20Types%20Examples.png?width=640&name=What%20is%20ANOVA%20Test%20Definition%20Types%20Examples.png
+tags:
+  - Rstats
+  - Biostatistics
+---
+
+<Callout title="ANOVA type" type="info" collapsible="fasle">
+ได้นำคำอธิบายกจาก [DSFAIR - Data Science for Agriculture in R](https://schmidtpaul.github.io/dsfair_quarto/ch/summaryarticles/anovatypes.html)
+</Callout>
+
+## ANOVA มีประเภทด้วยหรือ แล้วมีกี่ประเภท แตกต่างกันอย่างไร
+
+ในโลกของการวิเคราะห์สถิติ และถ้าไปเกี่ยวพันเข้ากับแบบจำลองเชิงเส้น การเข้าใจความแตกต่างของ ANOVA (Type I, II และ III) นั้นสำคัญมาก เพราะแต่ละประเภทจะแตกต่างกันที่ "วิธีการคำนวณค่า Sum of Squares (SS)" หรือการจัดสรรความแปรปรวนให้กับตัวแปรต่าง ๆ ในโมเดล โดยเฉพาะเมื่อบรบทของของข้อมูลที่ไม่สมดุล
+
+1. **Type I ANOVA (Sequential Sum of Squares)**
+
+หลักการ: เป็นการวิเคราะห์แบบ "ลำดับก่อนหลัง" (Sequential)
+
+การทำงาน: โปรแกรมจะคำนวณนัยสำคัญของตัวแปรตามลำดับที่คุณใส่ในโมเดล เช่น หากคุณใส่โมเดลเป็น Yield ~ A + B โปรแกรมจะทดสอบอิทธิพลของ A ก่อน จากนั้นจึงทดสอบ B โดยดูว่า B ช่วยอธิบายความแปรปรวนที่เหลือจาก A ได้มากน้อยแค่ไหน
+
+ข้อควรระวัง: ลำดับการใส่ตัวแปรมีผลมาก หากสลับที่กัน ค่าสถิติ (F-test และ p-value) อาจเปลี่ยนไปทันทีในกรณีที่ข้อมูลไม่สมดุล
+
+เหมาะสำหรับ: งานวิจัยที่มีลำดับความสำคัญชัดเจน เช่น ต้องคุมตัวแปรสภาพแวดล้อมก่อนดูผลของพันธุ์ข้าว
+
+2. **Type II ANOVA (Hierarchical Sum of Squares)**
+หลักการ: เป็นการวิเคราะห์แบบ "ลำดับชั้น" (Hierarchical) ที่ไม่ขึ้นกับลำดับการใส่ตัวแปร
+
+**การทำงาน**: ทดสอบอิทธิพลหลัก (Main Effect) แต่ละตัวโดยคำนึงถึงอิทธิพลหลักตัวอื่น ๆ ในโมเดล แต่จะ ไม่พิจารณาปฏิสัมพันธ์ (Interaction)
+
+**จุดเด่น**: ให้ผลลัพธ์ที่คงที่ไม่ว่าจะสลับลำดับตัวแปรอย่างไร เหมาะมากสำหรับโมเดลที่มีเฉพาะอิทธิพลหลัก (Main effects only)
+
+3. **Type III ANOVA (Marginal Sum of Squares)**
+
+หลักการ: เป็นการวิเคราะห์แบบ "ส่วนขอบ" (Marginal)
+
+**การทำงาน**: ทดสอบอิทธิพลหลักแต่ละตัวโดยคำนึงถึงตัวแปรอื่น ๆ ทั้งหมด ในโมเดล รวมถึงปฏิสัมพันธ์ (Interaction) ด้วย
+
+**จุดเด่น**: เป็นวิธีที่นิยมใช้ที่สุดเมื่อโมเดลมี Interaction (เช่น พันธุ์ x ปุ๋ย) และข้อมูลไม่สมดุล เพราะมีความทนทาน (Robust) ต่อลำดับของตัวแปรในโมเดล.
+
+## ผล ANOVA แตกต่างกัน เมื่อ
+เพื่อให้คุณเห็นภาพชัดเจนว่าทำไมเราถึงต้องเลือกใช้ประเภทของ ANOVA ให้ถูกกาลเทศะครับ
+
+ประเด็นสำคัญคือความแตกต่างของผลลัพธ์จะขึ้นอยู่กับ "ความสมดุลของข้อมูล" (Balance of Data) เป็นหลักครับ โดยสรุปได้ดังนี้:
+
+1. ข้อมูลที่สมดุล (Balanced Datasets)
+สถานการณ์: คือการทดลองที่ทุกกลุ่ม (Treatment) มีจำนวนซ้ำเท่ากัน เช่น พันธุ์ข้าว A มี 4 ซ้ำ พันธุ์ B ก็มี 4 ซ้ำ
+
+ผลลัพธ์: ในกรณีนี้ ANOVA ทั้ง 3 Type มักจะให้ผลลัพธ์ "เหมือนกัน" ดังนั้นคุณจะใช้คำสั่งไหนก็ได้ ผลสรุปงานวิจัยจะไม่ต่างกันครับ
+
+2. ข้อมูลที่ไม่สมดุล (Unbalanced Datasets)ความต่างจะปรากฏชัดเจนเมื่อข้อมูลไม่สมดุล (เช่น บางซ้ำในบางแปลงเสียหายไป หรือเก็บข้อมูลได้ไม่เท่ากัน)
+   * เรื่องลำดับของตัวแปร (Order of terms)
+    * Type I: ผลลัพธ์จะ "เปลี่ยนไปตามลำดับ" ของตัวแปรที่คุณใส่ในโมเดล เช่น ถ้าคุณใส่ พันธุ์ข้าว + ปุ๋ย ผลอาจต่างจาก ปุ๋ย + พันธุ์ข้าว
+    * Type II และ III: จะให้ผลลัพธ์ที่ "คงเดิมเสมอ" ไม่ว่าคุณจะสลับลำดับตัวแปรอย่างไร
+  
+  * เรื่องปฏิสัมพันธ์ (Interactions)
+    * Type III: จะทำการ "ปรับค่าอิทธิพลหลัก" (Adjust main effects) โดยคำนึงถึงอิทธิพลของปฏิสัมพันธ์ (Interaction) เข้าไปด้วย ทำให้ผลลัพธ์ของอิทธิพลหลัก (Main effect) มักจะต่างจาก Type II เมื่อโมเดลนั้นมีตัวแปรปฏิสัมพันธ์ (เช่น $พันธุ์ \times ปุ๋ย$) อยู่ด้วย
+    * Type II: จะทดสอบอิทธิพลหลักโดยไม่พิจารณาปฏิสัมพันธ์
+
+## ตัวอย่าง
+In this example, our model includes an interaction term between two factors, ‘N’ and ‘G’. As said before, Type III adjusts main effects for interactions, leading to different outcomes than Type II.
+
+```r
+mod1 <- lm(yield ~ gen + block, data = dat)
+mod2 <- lm(yield ~ block + gen, data = dat)
+```
+
+```r
+library(tidyverse)
+library(broom)
+library(car)
+
+dat <- data.frame(
+  gen = c(
+    "st", "14", "26", "ci", "17", "wa", "22", "13", "st", "ci", "04", "15", "30",
+    "03", "wa", "24", "st", "18", "27", "ci", "25", "28", "05", "wa", "st", "09",
+    "06", "ci", "wa", "20", "11", "23", "st", "02", "21", "wa", "ci", "10", "08",
+    "16", "st", "29", "07", "ci", "01", "wa", "12", "19"
+  ),
+  yield = c(
+    2972L, 2405L, 2855L, 2592L, 2572L, 2608L, 2705L, 2391L, 3122L,
+    3023L, 3018L, 2477L, 2955L, 3055L, 2477L, 2783L, 2260L, 2603L,
+    2857L, 2918L, 2825L, 1903L, 2065L, 3107L, 3348L, 2268L, 2148L,
+    2940L, 2850L, 2670L, 3380L, 2770L, 1315L, 1055L, 1688L, 1625L, 
+    1398L, 1293L, 1253L, 1495L, 3538L, 2915L, 3265L, 3483L, 3013L,
+    3400L, 2385L, 3643L),
+  block = rep(c("I", "II", "III", "IV", "V", "VI"), each = 8L),
+  row = c(
+    1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 1L, 2L, 3L, 4L, 5L, 6L, 7L,
+    8L, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L, 12L, 13L, 14L,
+    15L, 16L, 9L, 10L, 11L, 12L, 13L, 14L, 15L, 16L, 9L, 10L, 11L,
+    12L, 13L, 14L, 15L, 16L),
+  col = rep(rep(1:3, 2), each = 8L)
+)
+
+# Define models
+mod1 <- lm(yield ~ gen + block, data = dat)
+mod2 <- lm(yield ~ block + gen, data = dat)
+
+# Your get_p_values function
+get_p_values <- function(mymodel, myterm, mytype) {
+  if (mytype == "I") {
+    x <- broom::tidy(stats::anova(mymodel))
+  } else {
+    x <- broom::tidy(car::Anova(mymodel, type = mytype))
+  }
+  x %>% filter(term == myterm) %>% pull(p.value)
+}
+
+# Define terms and types
+terms <- c("gen", "block")
+types <- c("I", "II", "III")
+models <- list(mod1 = mod1, mod2 = mod2)
+
+# Creating the combined tibble
+crossing(model = names(models), term = terms, type = types) %>%
+  rowwise() %>%
+  mutate(
+    p = get_p_values(models[[model]], term, type)
+  ) %>%
+  ungroup() %>% 
+  pivot_wider(
+    names_from = term,
+    values_from = p
+  )
+```
+ผล
+```
+# A tibble: 6 × 4
+  model type       block     gen
+  <chr> <chr>      <dbl>   <dbl>
+1 mod1  I     0.000208   0.00911
+2 mod1  II    0.000208   0.293  
+3 mod1  III   0.000208   0.293  
+4 mod2  I     0.00000576 0.293  
+5 mod2  II    0.000208   0.293  
+6 mod2  III   0.000208   0.293  
+```
+
+ a Type I ANOVA there is a difference between the following two models, while for Type II and Type III it does not make a difference.
+
+ในเคสของ Interaction กัน
+In this example, our model includes an interaction term between two factors, ‘N’ and ‘G’. As said before, Type III adjusts main effects for interactions, leading to different outcomes than Type II.
+
+```r
+mod <- lm(yield ~ N + G + N:G, data = dat)
+```
+
+```r
+library(tidyverse)
+library(broom)
+library(car)
+
+dat <- data.frame(
+  N = c(
+    "Koopa", "Peach", "Yoshi", "Koopa", "Peach", "Toad", "Toad", "Koopa", "Yoshi",
+    "Goomba", "Toad", "Yoshi", "Yoshi", "Toad", "Koopa", "Peach", "Yoshi",
+    "Koopa", "Goomba", "Goomba", "Diddy", "Koopa", "Goomba", "Goomba", "Toad",
+    "Peach", "Yoshi", "Diddy", "Peach", "Diddy", "Peach", "Peach", "Koopa",
+    "Diddy", "Koopa", "Goomba", "Toad", "Toad", "Yoshi", "Yoshi", "Diddy",
+    "Yoshi", "Koopa", "Peach", "Diddy", "Diddy", "Diddy", "Goomba"
+  ),
+  G = c(
+    "Simba", "Nala", "Pumba", "Timon", "Nala", "Nala", "Simba", "Simba", "Nala",
+    "Nala", "Simba", "Simba", "Simba", "Pumba", "Nala", "Pumba", "Nala", "Nala",
+    "Nala", "Simba", "Simba", "Pumba", "Pumba", "Timon", "Timon", "Timon", "Nala",
+    "Nala", "Simba", "Pumba", "Timon", "Pumba", "Timon", "Timon", "Pumba",
+    "Simba", "Pumba", "Simba", "Pumba", "Timon", "Nala", "Timon", "Simba",
+    "Simba", "Timon", "Simba", "Simba", "Pumba"
+  ),
+  yield = c(
+    6162, 6318, 1690, 4948, 5736, 7072, 6192, 5598, 6666, 5044, 7146, 7578, 7642,
+    2504, 6682, 2338, 6324, 5316, 4034, 4030, 6600, 5372, 4216, 3554, 5970, 5684,
+    7862, 6732, 9012, 5924, 7302, 1560, 6094, 5904, 4694, 4520, 5126, 6860, 1594,
+    6392, 5738, 7260, 5256, 8548, 5974, 6794, 5806, 4212
+  )
+)
+
+mod <- lm(yield ~ N*G, data = dat)
+
+anova_type_I <- broom::tidy(stats::anova(mod)) %>%
+  select(term, typeI = p.value)
+
+anova_type_II <- broom::tidy(car::Anova(mod, type = "II")) %>% 
+  select(term, typeII = p.value)
+
+anova_type_III <- broom::tidy(car::Anova(mod, type = "III")) %>% 
+  select(term, typeIII = p.value)
+
+list(anova_type_I, anova_type_II, anova_type_III) %>% 
+  reduce(full_join, by = "term") %>% 
+  filter(term %in% c("N", "G", "N:G")) %>% 
+  mutate(across(starts_with("type"), ~insight::format_p(., name = NULL)))
+```
+ผล
+
+```
+# A tibble: 3 × 4
+  term  typeI  typeII typeIII
+  <chr> <chr>  <chr>  <chr>  
+1 N     < .001 0.001  0.019  
+2 G     < .001 < .001 0.872  
+3 N:G   < .001 < .001 < .001 
+```
+
+
+
+<Callout title="Additional Resources" type="resource" collapsible="true">
+- [Anova – Type I/II/III SS explained](https://schmidtpaul.github.io/dsfair_quarto/ch/summaryarticles/anovatypes.html)
+- StackExchange Discussion on [How to interpret type I, type II, and type III ANOVA and MANOVA?](https://stats.stackexchange.com/questions/204484/how-to-interpret-type-i-type-ii-and-type-iii-anova-and-manova)
+</Callout>
