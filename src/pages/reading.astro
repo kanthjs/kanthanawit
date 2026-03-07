@@ -11,8 +11,8 @@ const books = await getCollection('books');
 <Layout title="Kanth's Playbook | Reading">
   <Header />
   <main class="max-w-7xl mx-auto px-6 py-12">
-    <h1 class="font-serif text-5xl md:text-6xl lg:text-7xl text-gray-900 mb-6">อ่าน-ing</h1>
-    <p class="text-gray-500 text-lg font-body-serif max-w-2xl mb-16 leading-relaxed">
+    <h1 class="font-serif text-5xl md:text-6xl lg:text-7xl text-gray-900 dark:text-gray-100 mb-6">อ่าน-ing</h1>
+    <p class="text-gray-500 dark:text-gray-400 text-lg font-body-serif max-w-2xl mb-16 leading-relaxed">
       หนังสือผมกำลังอ่าน และอยากแนะนำให้อ่าน ถ้าอยากรู้ก็ คลิ้กอ่าน ที่สรุปย่อ ๆ ดูนะ
     </p>
 
@@ -22,7 +22,7 @@ const books = await getCollection('books');
           href={`/reading/${book.slug}`}
           class="group flex flex-col gap-3"
         >
-          <div class="relative overflow-hidden rounded-xl aspect-[2/3] bg-gray-50 border border-gray-100 shadow-sm group-hover:shadow-md transition-shadow duration-300">
+          <div class="relative overflow-hidden rounded-xl aspect-[2/3] bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm group-hover:shadow-md transition-shadow duration-300">
             <img
               src={book.data.image}
               alt={book.data.title}
@@ -36,11 +36,11 @@ const books = await getCollection('books');
             </div>
           </div>
           <div class="space-y-0.5">
-            <span class="text-xs font-medium uppercase tracking-wider text-gray-400">Reading · Books</span>
-            <h2 class="font-serif text-sm text-gray-900 leading-snug group-hover:underline decoration-gray-300 underline-offset-2 decoration-1 line-clamp-2">
+            <span class="text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">Reading · Books</span>
+            <h2 class="font-serif text-sm text-gray-900 dark:text-gray-100 leading-snug group-hover:underline decoration-gray-300 dark:decoration-gray-600 underline-offset-2 decoration-1 line-clamp-2">
               {book.data.title}
             </h2>
-            <p class="text-xs text-gray-400 font-body-serif">{book.data.author}</p>
+            <p class="text-xs text-gray-400 dark:text-gray-500 font-body-serif">{book.data.author}</p>
           </div>
         </a>
       ))}
