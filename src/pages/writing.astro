@@ -1,0 +1,76 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+const posts = (await getCollection('writing')).sort(
+  (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()
+);
+
+
+
+type BookItem = {
+  title: string;
+  titleLink: string;
+  description: string;
+  image: string;
+  imageAlt: string;
+};
+
+const writtenBooks: BookItem[] = [
+  {
+    title: 'เทคนิคการทดลองในแปลงนาข้าว',
+    titleLink: 'https://kanthjs.github.io/tech_rice_exp_book/',
+    description:
+      'คือหนังสืออนไลน์ ที่จัดทำขึ้นเพื่อเป็นแนวทางปฏิบัติที่ดีที่สุดสำหรับนักวิจัยข้าวที่ทำการทดลองภาคสนาม ไม่ว่าจะเป็นการทดลองเพื่อประเมินพันธุ์ข้าวใหม่ การทดสอบปุ๋ย หรือการศึกษาปัจจัยแวดล้อมต่าง ๆ ที่มีผลต่อการเจริญเติบโตและผลผลิตของข้าว',
+    image: 'https://kanthjs.github.io/tech_rice_exp_book/logo.png',
+    imageAlt: 'เทคนิคการทดลองในแปลงนาข้าว',
+  },
+];
+---
+
+<Layout title="Kanth's Playbook | Writing">
+  <Header />
+  <main class="max-w-7xl mx-auto px-6 py-12">
+    <h1 class="font-sans text-5xl md:text-6xl lg:text-7xl text-gray-900 mb-6">ขีดขีดเขียนเขียน</h1>
+    <p class="text-gray-500 text-lg font-body-serif max-w-2xl mb-16 leading-relaxed">
+      ขีด ขีด เขียน เขียน ที่อยากเขียน แต่ไม่รู้จะเขียนอะไร ฉันมีบล็อกที่ไม่ได้ยึดตามหัวข้อใดๆ ตั้งแต่บทความปรัชญาไปจนถึงการรีวิวหนังและความคิดในห้องน้ำ ซึ่งเป็นเหมือนทะเลป่าจริงๆ วันนี้ ฉันกำลังพยายามที่จะทวีตมากขึ้นแทน
+    </p>
+      <h2 class="font-sans text-3xl text-gray-900 mb-2">หนังสือ</h2>
+      <div class="space-y-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+      
+      {writtenBooks.map((book) => (
+        <a href={book.titleLink} target="_blank" rel="noopener noreferrer" class="group block border border-gray-100 rounded-xl overflow-hidden hover:shadow-md transition-shadow">
+          <img src={book.image} alt={book.imageAlt} class="w-full h-48 object-cover" />
+          <div class="p-4">
+            <h2 class="font-sans text-xl text-gray-900 group-hover:underline decoration-gray-300 underline-offset-4 decoration-1 mb-2">{book.title}</h2>
+            <p class="text-gray-500 font-body-serif text-sm leading-relaxed line-clamp-3">{book.description}</p>
+          </div>
+        </a>
+      ))}
+    </div>
+-----
+    <h2 class="font-sans text-3xl text-gray-900 mb-2">Posts</h2>
+    <div class="space-y-6">
+    <div class="divide-y divide-gray-100">
+      {posts.map((post) => (
+        <a href={`/writing/${post.slug}`} class="group block py-8 first:pt-0">
+          <article>
+            <div class="flex flex-col md:flex-row md:items-baseline md:justify-between gap-2 mb-3">
+              <h2 class="font-sans text-2xl text-gray-900 group-hover:underline decoration-gray-300 underline-offset-4 decoration-1 leading-snug">
+                {post.data.title}
+              </h2>
+              <time class="text-sm text-gray-400 font-body-serif shrink-0">
+                {post.data.pubDate.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}
+              </time>
+            </div>
+            <p class="text-gray-500 font-body-serif leading-relaxed text-base line-clamp-2">{post.data.excerpt}</p>
+          </article>
+        </a>
+      ))}
+    </div>
+  </main>
+  <Footer />
+</Layout>

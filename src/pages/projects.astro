@@ -1,0 +1,117 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+const allProjects = await getCollection('projects');
+
+const myapps   = allProjects.filter((p) => p.slug.startsWith('myapp/'));
+const academic = allProjects.filter((p) => p.slug.startsWith('academic/'));
+const mygists  = allProjects.filter((p) => p.slug.startsWith('mygists/'));
+
+
+---
+
+<Layout title="Kanth's Playbook | Projects">
+  <Header />
+  <main class="max-w-4xl mx-auto px-6 py-12 space-y-24">
+
+    <!-- Apps / ของ(ไม่)เล่น -->
+    <section>
+      <h1 class="font-sans text-5xl md:text-6xl lg:text-7xl text-gray-900 mb-6">ของ(ไม่)เล่น</h1>
+      <p class="text-gray-500 text-lg font-body-serif max-w-2xl mb-12 leading-relaxed">
+        พื้นที่แสดงของเล่นที่ทำจริงจังบ้าง ไม่จริงจังบ้าง บางอันก็แค่ความสนใจที่อยากลองทำดูครับ
+      </p>
+
+    <!-- Academic Research -->
+    <section>
+      <h2 class="font-sans text-3xl text-gray-900 mb-2">การวิจัย</h2>
+      <div class="w-12 h-px bg-gray-200 mb-4"></div>
+      <div class="space-y-6">
+        {academic.map((r) => (
+          <a
+            href={`/projects/${r.slug}`}
+            class="group flex gap-6 p-5 rounded-2xl border border-gray-100 bg-gray-50 hover:border-gray-200 hover:shadow-sm transition-all"
+          >
+            {r.data.image ? (
+              <div class="w-40 h-24 flex-shrink-0 rounded-xl overflow-hidden bg-gray-200 border border-gray-100">
+                <img src={r.data.image} alt={r.data.title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              </div>
+            ) : (
+              <div class="w-40 h-24 flex-shrink-0 rounded-xl bg-gray-100 border border-gray-100" />
+            )}
+            <div class="flex-1 min-w-0">
+              <h3 class="font-sans text-lg text-gray-900 leading-snug mb-2 group-hover:underline decoration-gray-300 underline-offset-4 decoration-1">
+                {r.data.title}
+              </h3>
+              {r.data.excerpt && (
+                <p class="text-sm text-gray-500 font-body-serif mt-1">{r.data.excerpt}</p>
+              )}
+            </div>
+            <svg class="self-center opacity-0 group-hover:opacity-100 transition-opacity shrink-0 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+          </a>
+        ))}
+      </div>
+    </section>
+
+      <h2 class="font-sans text-3xl text-gray-900 mb-2">APP</h2>
+            <div class="w-12 h-px bg-gray-200 mb-4"></div>
+      <div class="space-y-4">
+        {myapps.map((app) => (
+          <a
+            href={`/projects/${app.slug}`}
+            class="group flex gap-5 p-4 rounded-2xl border border-gray-100 bg-gray-50 hover:border-gray-200 hover:shadow-sm transition-all"
+          >
+            {app.data.image ? (
+              <div class="w-40 h-24 flex-shrink-0 rounded-xl overflow-hidden bg-gray-200 border border-gray-100">
+                <img src={app.data.image} alt={app.data.title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              </div>
+            ) : (
+              <div class="w-40 h-24 flex-shrink-0 rounded-xl bg-gray-100 border border-gray-100" />
+            )}
+            <div class="flex-1 min-w-0 flex flex-col justify-center">
+              <h2 class="font-sans text-lg text-gray-900 leading-snug group-hover:underline decoration-gray-300 underline-offset-4 decoration-1 flex items-center gap-1.5">
+                {app.data.title}
+                <svg class="opacity-0 group-hover:opacity-100 transition-opacity" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+              </h2>
+              {app.data.excerpt && (
+                <p class="text-sm text-gray-500 font-body-serif mt-1">{app.data.excerpt}</p>
+              )}
+            </div>
+          </a>
+        ))}
+      </div>
+    </section>
+
+
+    <!-- Gists -->
+    <section>
+      <h2 class="font-sans text-3xl text-gray-900 mb-2">Gists</h2>
+      <div class="w-12 h-px bg-gray-200 mb-4"></div>
+      <p class="text-gray-500 font-body-serif leading-relaxed mb-10">รวบรวมฟังก์ชันและ snippet โค้ดที่ใช้งานบ่อย</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {mygists.map((gist) => (
+          <a
+            href={gist.data.url ?? `/projects/${gist.slug}`}
+            target={gist.data.url ? '_blank' : undefined}
+            rel={gist.data.url ? 'noopener noreferrer' : undefined}
+            class="group flex flex-col gap-2 p-5 rounded-2xl border border-gray-100 bg-gray-50 hover:border-gray-200 hover:shadow-sm transition-all"
+          >
+            <h3 class="font-sans text-base text-gray-900 leading-snug group-hover:underline decoration-gray-300 underline-offset-4 decoration-1 flex items-center gap-1.5">
+              {gist.data.title}
+              <svg class="opacity-0 group-hover:opacity-100 transition-opacity shrink-0" xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+            </h3>
+            {gist.body && (
+              <p class="text-sm text-gray-500 font-body-serif leading-relaxed line-clamp-2">
+                {gist.body.trim().slice(0, 150)}
+              </p>
+            )}
+          </a>
+        ))}
+      </div>
+    </section>
+
+  </main>
+  <Footer />
+</Layout>
