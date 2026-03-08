@@ -46,4 +46,25 @@ const hobbies = defineCollection({
   }),
 });
 
-export const collections = { books, writing, projects, hobbies };
+const myapp = defineCollection({
+  type: 'content',
+  schema: z.object({
+    title: z.string(),
+    excerpt: z.string().optional(),
+    category: z.string(),
+    image: z.string().optional(),
+    url: z.string().url().optional(),
+  }),
+});
+
+const rpackages = defineCollection({
+  type: 'content',
+  schema: z.object({
+    title: z.string(),
+    excerpt: z.string().optional(),
+    image: z.string().optional(),
+    url: z.string().url().optional(),
+  }),
+});
+
+export const collections = { books, writing, projects, hobbies, myapp, rpackages };
