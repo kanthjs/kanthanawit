@@ -1,8 +1,8 @@
 ---
 import { getCollection } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
-import Header from '../components/Header.astro';
-import Footer from '../components/Footer.astro';
+import Header from '../components/layout/Header.astro';
+import Footer from '../components/layout/Footer.astro';
 
 const apps = await getCollection('myapp');
 ---
@@ -17,9 +17,7 @@ const apps = await getCollection('myapp');
     <div class="space-y-4">
       {apps.map((app) => (
         <a
-          href={app.data.url ?? `/apps/${app.slug}`}
-          target={app.data.url ? '_blank' : undefined}
-          rel={app.data.url ? 'noopener noreferrer' : undefined}
+          href={`/apps/${app.slug}`}
           class="group flex gap-5 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 hover:border-gray-200 dark:hover:border-gray-700 hover:shadow-sm transition-all"
         >
           {app.data.image ? (
