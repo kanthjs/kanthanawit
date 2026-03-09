@@ -17,6 +17,7 @@ const writing = defineCollection({
     title: z.string(),
     excerpt: z.string(),
     pubDate: z.date(),
+    image: z.string().optional(),
     tags: z.array(z.string()).optional(),
   }),
 });

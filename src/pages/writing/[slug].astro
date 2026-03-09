@@ -41,6 +41,16 @@ const { Content } = await post.render();
       </time>
     </header>
 
+    {post.data.image && (
+      <div class="mb-12 rounded-xl overflow-hidden shadow-lg border border-gray-100 dark:border-gray-800">
+        <img 
+          src={post.data.image} 
+          alt={post.data.title} 
+          class="w-full h-auto object-cover max-h-[500px]"
+        />
+      </div>
+    )}
+
     <div class="prose prose-gray dark:prose-invert prose-base max-w-none font-body-serif leading-relaxed prose-headings:font-serif prose-headings:text-gray-900 dark:prose-headings:text-gray-100 prose-a:text-gray-700 dark:prose-a:text-gray-300 prose-a:underline-offset-4 prose-p:text-gray-600 dark:prose-p:text-gray-400">
       <Content components={{ Callout }} />
     </div>
