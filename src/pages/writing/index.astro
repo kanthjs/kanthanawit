@@ -29,11 +29,15 @@ allPosts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
             class="group flex flex-col sm:flex-row gap-6 items-start"
           >
             <!-- Thumbnail Box -->
-            <div class="w-full sm:w-56 h-36 shrink-0 bg-[#f1f2f4] dark:bg-gray-800 rounded-xl flex items-center justify-center text-gray-900 dark:text-gray-100 group-hover:bg-[#e6e8eb] dark:group-hover:bg-gray-700 transition-colors">
-              <!-- Astro Logo SVG (as seen in the reference) -->
-              <svg class="w-12 h-12" viewBox="0 0 256 366" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid">
-                <path fill="currentColor" d="M213.922 288.751c-8.91 0-16.141 6.556-16.141 14.65v2.871l-15.652-32.96c-5.495-12.062-17.553-19.648-31.134-19.141h-.103c-23.774.898-46.721 10.375-68.51 28.239l-22.115-46.205C90.358 178.67 110.151 103.543 128 35c24.086 92.49 46.16 176.711 77.012 240.245l11.026 23.33v-9.824c0-8.094 7.23-14.65 16.14-14.65 8.91 0 16.142 6.556 16.142 14.653v31.428l7.669 16.161C238.115 304.582 231.294 288.75 213.922 288.75v.001zM118.068 280.932c18.57-19.789 40.54-30.824 64.912-32.551 6.526-.462 8.448 3.513 10.957 8.784l23.102 48.647h-11.455v15.016l-3.351.46c-17.768 2.45-31.22 17.072-31.22 35.158v9.423a238.381 238.381 0 0 1-35.302-31.066l18.318-20.945c4.787-5.494 4.205-13.811-1.302-18.614-5.506-4.801-13.864-4.22-18.653 1.272l-18.916 21.657a242.023 242.023 0 0 1-62.77-96l45.68 98.759z"/>
-              </svg>
+            <div class="w-full sm:w-56 h-36 shrink-0 bg-[#f1f2f4] dark:bg-gray-800 rounded-xl flex items-center justify-center text-gray-900 dark:text-gray-100 group-hover:bg-[#e6e8eb] dark:group-hover:bg-gray-700 transition-colors overflow-hidden">
+              {post.data.image ? (
+                <img src={post.data.image} alt={post.data.title} class="w-full h-full object-cover" />
+              ) : (
+                <!-- Astro Logo SVG (as seen in the reference) -->
+                <svg class="w-12 h-12" viewBox="0 0 256 366" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid">
+                  <path fill="currentColor" d="M213.922 288.751c-8.91 0-16.141 6.556-16.141 14.65v2.871l-15.652-32.96c-5.495-12.062-17.553-19.648-31.134-19.141h-.103c-23.774.898-46.721 10.375-68.51 28.239l-22.115-46.205C90.358 178.67 110.151 103.543 128 35c24.086 92.49 46.16 176.711 77.012 240.245l11.026 23.33v-9.824c0-8.094 7.23-14.65 16.14-14.65 8.91 0 16.142 6.556 16.142 14.653v31.428l7.669 16.161C238.115 304.582 231.294 288.75 213.922 288.75v.001zM118.068 280.932c18.57-19.789 40.54-30.824 64.912-32.551 6.526-.462 8.448 3.513 10.957 8.784l23.102 48.647h-11.455v15.016l-3.351.46c-17.768 2.45-31.22 17.072-31.22 35.158v9.423a238.381 238.381 0 0 1-35.302-31.066l18.318-20.945c4.787-5.494 4.205-13.811-1.302-18.614-5.506-4.801-13.864-4.22-18.653 1.272l-18.916 21.657a242.023 242.023 0 0 1-62.77-96l45.68 98.759z"/>
+                </svg>
+              )}
             </div>
 
             <!-- Content Area -->
