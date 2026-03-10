@@ -7,4 +7,7 @@ import sitemap from '@astrojs/sitemap';
 export default defineConfig({
   site: 'https://kanthanawit.in.th',
   integrations: [tailwind(), mdx(), sitemap()],
+  image: {
+    domains: ['lh3.googleusercontent.com', 'live.staticflickr.com', 'kanthjs.github.io', 'raw.githubusercontent.com'],
+  },
 });
