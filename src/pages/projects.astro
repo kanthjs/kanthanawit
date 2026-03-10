@@ -1,5 +1,6 @@
 ---
 import { getCollection } from "astro:content";
+import { Image } from "astro:assets";
 import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
@@ -107,9 +108,11 @@ const poster: posterItem[] = [
             >
               {r.data.image ? (
                 <div class="w-40 h-24 flex-shrink-0 rounded-xl overflow-hidden bg-gray-200 dark:bg-gray-700 border border-gray-100 dark:border-gray-700">
-                  <img
+                  <Image
                     src={r.data.image}
                     alt={r.data.title}
+                    width={800}
+                    height={600}
                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 </div>
@@ -164,10 +167,12 @@ const poster: posterItem[] = [
               rel="noopener noreferrer"
               class="group block border border-gray-100 dark:border-gray-800 rounded-xl overflow-hidden hover:shadow-md transition-shadow"
             >
-              <img
+              <Image
                 src={book.image}
                 alt={book.imageAlt}
-                class="w-full h-48 object-cover"
+                width={600}
+                height={800}
+                class="w-full h-full object-cover"
               />
               <div class="p-4">
                 <h3 class="font-sans text-xl text-gray-900 dark:text-gray-100 group-hover:underline decoration-gray-300 dark:decoration-gray-600 underline-offset-4 decoration-1 mb-2">
@@ -198,9 +203,11 @@ const poster: posterItem[] = [
               rel="noopener noreferrer"
               class="group block border border-gray-100 dark:border-gray-800 rounded-xl overflow-hidden hover:shadow-md transition-shadow bg-gray-50 dark:bg-gray-800/50 flex flex-col justify-center aspect-[3/4]"
             >
-              <img
+              <Image
                 src={poster.image}
                 alt={poster.imageAlt}
+                width={800}
+                height={1200}
                 class="w-full h-full object-contain p-2"
               />
             </a>
