@@ -1,6 +1,5 @@
 ---
 import { getCollection } from 'astro:content';
-import { Image } from 'astro:assets';
 
 // ดึงข้อเขียน (writing) เรียงตามวันล่าสุด (ใหม่ไปเก่า) และเอาอันแรกมาแสดง
 const allWritings = await getCollection('writing');
@@ -16,13 +15,10 @@ const featuredApp = allApps.find(app => app.slug === 'rice-pest-risk-map') || al
 
   <!-- Personal Image Card -->
   <div class="rounded-3xl overflow-hidden h-[300px] relative">
-    <Image
+    <img
       src="https://live.staticflickr.com/65535/55133833635_b60ceb26b2.jpg"
       alt="Personal photo"
-      width={600}
-      height={800}
       class="w-full h-full object-cover"
-      referrerpolicy="no-referrer"
     />
   </div>
 
@@ -35,13 +31,10 @@ const featuredApp = allApps.find(app => app.slug === 'rice-pest-risk-map') || al
       </svg>
     </div>
     <div class="flex-grow flex items-center justify-center bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 mt-2 p-4 overflow-hidden relative">
-      <Image
+      <img
         src={featuredApp?.data.image || "/images/pest_risk_map.jpg"}
         alt={featuredApp?.data.title || "Featured Project"}
-        width={800}
-        height={600}
         class="w-full h-full object-cover rounded-xl group-hover:scale-[1.03] transition-transform duration-500"
-        referrerpolicy="no-referrer"
       />
     </div>
   </a>
