@@ -5,41 +5,30 @@ import Footer from '../components/layout/Footer.astro';
 
 // You can easily update your CV data here in the future
 const cvData = {
-  name: "กันต์ธณวิชญ์",
-  title: "Data Analyst / R Developer",
-  email: "hello@example.com",
-  location: "Bangkok, Thailand",
-  about: "ผู้หลงใหลในการใช้ข้อมูลและสถิติเพื่อแก้ปัญหา โดยเฉพาะในสายงานเกษตรกรรมและวิทยาศาสตร์ มีประสบการณ์ในการพัฒนา R Packages และ Web Applications เพื่อช่วยให้ผู้คนเข้าถึงและวิเคราะห์ข้อมูลได้ง่ายขึ้น",
+  name: "กันต์",
+  title: "Agricluteral scienctist",
+  email: "[kanthanawit.j@rice.mail.go.th]",
+  location: "Pathum Thani, Thailand",
+  about: "นักวิชาการเกษตรโดยตำแหน่ง....",
   experience: [
-    {
-      role: "Data Analyst & R Developer",
-      company: "Self-Employed / Freelance",
-      period: "2020 - Present",
-      description: "พัฒนา R packages และระบบแจ้งเตือนโรคข้าว วิเคราะห์โมเดลทางสถิติและ Machine Learning นำเสนอข้อมูลในรูปแบบ Dashboard และ Web App"
-    },
     {
       role: "Researcher",
       company: "Agricultural Research Institute",
       period: "2016 - 2020",
-      description: "ทำวิจัยเกี่ยวกับการระบาดของแมลงศัตรูข้าว เก็บข้อมูลภาคสนาม และนำข้อมูลมาประมวลผลด้วยเทคนิคทางสถิติ (ANOVA, Regression)"
+      description: "พัฒนา R packages และระบบแจ้งเตือนโรคข้าว วิเคราะห์โมเดลทางสถิติและ Machine Learning นำเสนอข้อมูลในรูปแบบ Dashboard และ Web App"
     }
   ],
   education: [
     {
-      degree: "M.Sc. in Data Science (or related)",
-      institution: "University Name",
-      period: "2018 - 2020"
+      degree: "Ph.D. in Plant Pathology",
+      institution: "University of the Phlippine Los Baños",
+      period: "2014 - 2018"
     },
-    {
-      degree: "B.Sc. in Agriculture",
-      institution: "University Name",
-      period: "2012 - 2016"
-    }
   ],
   skills: [
-    "R Programming", "Data Visualization (ggplot2, Shiny)", 
-    "Machine Learning", "Statistical Modeling (ANOVA, CRD)", 
-    "Web Development (Astro, Tailwind, JS)"
+    "R Programming", 
+    "Machine Learning", "Statistical Modeling", 
+    "App Development"
   ]
 };
 ---
@@ -52,7 +41,7 @@ const cvData = {
     <header class="mb-16 border-b border-gray-200 dark:border-gray-800 pb-12 flex flex-col md:flex-row justify-between items-center md:items-start gap-8">
       <div class="flex-1 text-center md:text-left">
         <h1 class="font-serif text-4xl md:text-5xl lg:text-6xl text-gray-900 dark:text-gray-100 tracking-tight mb-4 font-bold">
-          Hello, I'm {cvData.name}.
+          {cvData.name}
         </h1>
         <p class="text-xl text-gray-600 dark:text-gray-400 font-body-serif mb-6 leading-relaxed">
           {cvData.title}
@@ -76,7 +65,7 @@ const cvData = {
         <span class="text-gray-400 dark:text-gray-500 text-sm font-medium z-0">รูปภาพโปรไฟล์</span>
         
         <!-- คุณสามารถเอา Comment ออกเมื่อมีรูปพร้อมใช้งาน -->
-        <!-- <img src="/images/your-profile-pic.jpg" alt={cvData.name} class="w-full h-full object-cover absolute inset-0 z-10" /> -->
+        <img src="/images/me.jpg" alt={cvData.name} class="w-full h-full object-cover absolute inset-0 z-10" />
       </div>
     </header>
 
@@ -167,19 +156,7 @@ const cvData = {
           ))}
         </div>
       </section>
-
     </div>
-
-    <!-- Download Button (Optional - you can link to a real PDF later) -->
-    <div class="mt-16 pt-12 border-t border-gray-200 dark:border-gray-800 text-center">
-      <p class="text-sm text-gray-500 font-body-serif italic mb-6">ต้องการข้อมูลฉบับเต็มหรือพูดคุยรายละเอียดเพิ่มเติม สามารถติดต่อได้เลยครับ</p>
-      <a href="mailto:hello@example.com" class="inline-flex items-center gap-2 px-6 py-3 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-xl font-medium hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors shadow-sm">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-        ติดต่อพูดคุย
-      </a>
-    </div>
-
   </main>
-
   <Footer />
 </Layout>
