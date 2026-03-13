@@ -332,7 +332,112 @@ Quarto มีข้อดีสำคัญเหนือ R Markdown สำห�
 
 ---
 
-## 🚀 7. สรุปคีย์ลัด (2026 Quick Reference)
+## 🌐 8. สร้างเว็บ Documentation ด้วย pkgdown
+
+ในปี 2026 **ไม่ให้ Package ใดไม่มี Documentation Website** `pkgdown` คือเครื่องมือมาตรฐานที่จะแปลง Roxygen comments, Vignettes และ README ของคุณให้กลายเป็นเว็บไซต์ที่สวยงาม เหมือนที่คุณเห็นใน Package ชั้นนำทุกตัวบน CRAN
+
+### ทำไมต้อง pkgdown?
+
+| ประเด็น | ไม่มี pkgdown | มี pkgdown |
+|---|---|---|
+| **การค้นหา** | ผู้ใช้ต้องรัน `?function()` บน R | Google แล้วเจอหน้าเว็บสวยๆ ทันที |
+| **ภาพรวม** | ต้องดีบักไฟล์ `.Rd` ที่ยาก | มี Function reference แบบค้นหาได้ |
+| **Tutorial** | Vignettes แยกกระจัดกระจาย | รวมหน้าเว็บเดียวจบ พร้อม Navbar |
+| **บำรุงรักษา** | ผู้ใช้ดู Help ยาก | Link มาจาก CRAN/GitHub อัตโนมัติ |
+
+### ติดตั้งและตั้งค่าพื้นฐาน
+
+```r
+# ติดตั้ง pkgdown
+pak::pkg_install("pkgdown")
+
+# สร้างไฟล์ตั้งค่าพื้นฐาน
+pkgdown::init()
+```
+
+คำสั่ง `pkgdown::init()` จะสร้างไฟล์ `_pkgdown.yml` ให้คุณ:
+
+```yaml
+url: https://yourusername.github.io/YourPackageName
+title: YourPackageName
+
+template:
+  bootstrap: 5
+
+reference:
+- title: "ฟังก์ชันหลัก"
+  contents:
+  - daily_mean
+  - my_cool_function
+
+articles:
+- title: "คู่มือ"
+  contents:
+  - getting-started
+```
+
+### Build เว็บทดสอบ
+
+```r
+# Build และ Preview เว็บบนเครื่อง
+pkgdown::build_site()
+```
+
+หลังจาก Build คุณจะได้โฟลเดอร์ `docs/` ซึ่งเป็นไฟล์ HTML ทั้งหมด สามารถเปิดดูได้ทันที
+
+### Deploy อัตโนมัติไป GitHub Pages
+
+วิธีที่ง่ายที่สุดคือใช้ GitHub Actions — push ครั้งเดียว เว็บ Deploy เอง:
+
+```r
+usethis::use_pkgdown_github_pages()
+```
+
+คำสั่งนี้จะ:
+1. สร้าง workflow ใน `.github/workflows/pkgdown.yaml`
+2. Set up GitHub Pages ให้ point ไปที่ `gh-pages` branch
+3. Deploy อัตโนมัติทุกครั้งที่คุณ push ไป branch `main` หรือ `master`
+
+### Custom Theme ให้เว็บสวยขึ้น
+
+ปี 2026 มี Theme Template สวยๆ ให้เลือกเยอะครับ แก้ใน `_pkgdown.yml`:
+
+```yaml
+template:
+  bootstrap: 5
+  bootswatch: flatly    # เลือก theme: cerulean, cosmo, flatly, journal, และอื่นๆ
+  bslib:
+    pkgdown-nav-height: 70px
+    primary: "#2c3e50"   # เปลี่ยนสีหลักตาม Brand ของคุณ
+```
+
+### เพิ่ม Search Functionality
+
+เว็บ pkgdown มี search engine ในตัว (ใช้ lunr.js) ทำให้ผู้ใช้ค้นหาฟังก์ชันได้ทันที ไม่ต้อง browse ทีละหน้า
+
+### เพิ่ม Logo และ Favicon
+
+```yaml
+home:
+  title: "YourPackageName"
+  description: |
+    คำอธิบายสั้นๆ ว่า Package นี้ทำอะไร
+  strip_header: true
+
+template:
+  logo: path/to/logo.png    # รูป logo (แนะนำ 200x200px)
+  favicon: path/to/favicon.ico
+```
+
+### ประโยชน์เพิ่มเติมของ pkgdown
+
+- **Auto-linking**: เวลาคุณเขียน `daily_mean()` ใน Quarto/Vignette pkgdown จะ link ไปหน้าฟังก์ชันให้อัตโนมัติ
+- **Versioning**: หากคุณมีหลาย version ของ Package บน CRAN, pkgdown สามารถแสดง docs ของแต่ละ version ได้
+- **Search Engine Optimization (SEO)**: เว็บ pkgdown ได้รับการ optimize ให้ค้นหาได้ง่ายบน Google
+
+---
+
+## 🚀 9. สรุปคีย์ลัด (2026 Quick Reference)
 
 เก็บตารางนี้ไว้เป็น Cheat Sheet ในการพัฒนา:
 
@@ -364,6 +469,8 @@ usethis::use_test() + devtools::test() # 6. เขียนและรัน Te
 devtools::check()               # 7. Check ก่อน Release
     ↓
 devtools::install() / pak::pkg_install() # 8. ติดตั้งใช้งานจริง
+    ↓
+pkgdown::build_site()           # 9. Build เว็บ documentation (เสร็จแล้ว Deploy อัตโนมัติ)
 ```
 
 ---
@@ -374,4 +481,5 @@ devtools::install() / pak::pkg_install() # 8. ติดตั้งใช้ง�
 - [pak documentation](https://pak.r-lib.org/) — Package manager ยุคใหม่
 - [Quarto Documentation](https://quarto.org/) — ระบบเอกสาร Next-gen
 - [usethis documentation](https://usethis.r-lib.org/) — เครื่องมือ Workflow automation
+- [pkgdown documentation](https://pkgdown.r-lib.org/) — สร้างเว็บ documentation ให้ Package
 </Callout>
