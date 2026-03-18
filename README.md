@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 # Kanth's Personal Website & Playbook
 
 Welcome to the source code of my personal website! This site serves as my digital playbook where I document and share my work, thoughts, and interests.
@@ -40,14 +41,43 @@ To run this project locally, simply follow these steps:
 
 4. Open your browser and navigate to `http://localhost:4321`.
 
+=======
+# Kanth's Playbook
+
+A modern, responsive personal playbook and portfolio website built with Astro and Tailwind CSS. The UI features a clean, engaging bento-box grid layout.
+
+## 🚀 Tech Stack
+
+- **Framework**: [Astro](https://astro.build/) - For fast, content-focused static generation.
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework for rapid UI development.
+- **Icons**: [Lucide React](https://lucide.dev/) - Beautiful and consistent iconography.
+- **MDX Support**: Embedded Markdown components for extended flexibility.
+
+## 📂 Project Structure
+
+```text
+/
+├── public/             # Static assets (images, fonts, etc.)
+├── src/
+│   ├── components/     # UI components (Header, Hero, BentoGrid, Footer, etc.)
+│   ├── layouts/        # Page layout templates
+│   └── pages/          # Astro pages and routing (index.astro)
+├── .vscode/            # Editor configurations
+├── package.json        # Dependencies and scripts
+├── astro.config.mjs    # Astro configuration
+└── tailwind.config.mjs # Tailwind configuration
+```
+
+>>>>>>> Stashed changes
 ## 🧞 Commands
 
-All commands are run from the root of the project, from a terminal:
+All scripts are defined in `package.json`. Run them from the project root:
 
 | Command                   | Action                                           |
 | :------------------------ | :----------------------------------------------- |
 | `npm install`             | Installs dependencies                            |
 | `npm run dev`             | Starts local dev server at `localhost:4321`      |
+<<<<<<< Updated upstream
 | `npm run build`           | Build your production site to `./dist/`          |
 | `npm run preview`         | Preview your build locally, before deploying     |
 | `npm run astro check`     | Run Astro diagnostics and type checking          |
@@ -55,3 +85,12 @@ All commands are run from the root of the project, from a terminal:
 ## 📄 License
 
 This repository is primarily for personal use. Content and writing are strictly mine, but feel free to refer to the code blocks or gists for your own use.
+=======
+| `npm run build`           | Builds the production site to `./dist/`          |
+| `npm run preview`         | Previews your build locally, before deploying    |
+| `npm run astro ...`       | Run Astro CLI commands                           |
+
+## 🎨 Design
+
+The website emphasizes a "Bento Grid" design pattern, keeping content modular, visually appealing, and well-organized on varied screen sizes. The main layout is composed of sections located in `src/pages/index.astro`.
+>>>>>>> Stashed changes
