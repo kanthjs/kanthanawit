@@ -28,6 +28,7 @@ const books = await getCollection('books');
               alt={book.data.title}
               class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               referrerpolicy="no-referrer"
+              loading="lazy"
             />
             <div class="absolute top-2 left-2">
               <span class={`text-[10px] font-semibold tracking-wider px-2 py-1 rounded-full ${statusColor[book.data.status]}`}>

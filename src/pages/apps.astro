@@ -22,7 +22,7 @@ const apps = await getCollection('myapp');
         >
           {app.data.image ? (
             <div class="w-40 h-24 flex-shrink-0 rounded-xl overflow-hidden bg-gray-200 dark:bg-gray-700 border border-gray-100 dark:border-gray-700">
-              <img src={app.data.image} alt={app.data.title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              <img src={app.data.image} alt={app.data.title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
             </div>
           ) : (
             <div class="w-40 h-24 flex-shrink-0 rounded-xl bg-gray-100 dark:bg-gray-800 border border-gray-100 dark:border-gray-700" />

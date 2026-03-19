@@ -19,6 +19,7 @@ const featuredApp = allApps.find(app => app.slug === 'rice-pest-risk-map') || al
       src="https://live.staticflickr.com/65535/55133833635_b60ceb26b2.jpg"
       alt="Personal photo"
       class="w-full h-full object-cover"
+      loading="lazy"
     />
   </div>
 
@@ -35,6 +36,7 @@ const featuredApp = allApps.find(app => app.slug === 'rice-pest-risk-map') || al
         src={featuredApp?.data.image || "/images/pest_risk_map.jpg"}
         alt={featuredApp?.data.title || "Featured Project"}
         class="w-full h-full object-cover rounded-xl group-hover:scale-[1.03] transition-transform duration-500"
+        loading="lazy"
       />
     </div>
   </a>

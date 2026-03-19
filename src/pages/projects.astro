@@ -111,6 +111,7 @@ const poster: posterItem[] = [
                     src={r.data.image}
                     alt={r.data.title}
                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
                   />
                 </div>
               ) : (
@@ -168,6 +169,7 @@ const poster: posterItem[] = [
                 src={book.image}
                 alt={book.imageAlt}
                 class="w-full h-full object-cover"
+                loading="lazy"
               />
               <div class="p-4">
                 <h3 class="font-sans text-xl text-gray-900 dark:text-gray-100 group-hover:underline decoration-gray-300 dark:decoration-gray-600 underline-offset-4 decoration-1 mb-2">
@@ -202,6 +204,7 @@ const poster: posterItem[] = [
                 src={poster.image}
                 alt={poster.imageAlt}
                 class="w-full h-full object-contain p-2"
+                loading="lazy"
               />
             </a>
           ))
