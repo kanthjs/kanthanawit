@@ -1,0 +1,7 @@
+[build]
+  publish = "_site"
+
+# Installs Quarto in the Netlify build image and runs `quarto render`.
+# No R is needed as long as posts contain no executable code chunks.
+[[plugins]]
+  package = "@quarto/netlify-plugin-quarto"

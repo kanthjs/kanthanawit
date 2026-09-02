@@ -1,0 +1,15 @@
+---
+title: "App"
+pagetitle: "กันต์ธณวิชญ์ — App"
+listing:
+  contents: "*/index.qmd"
+  sort: "title"
+  type: grid
+  categories: false
+  sort-ui: false
+  filter-ui: false
+  fields: [image, title, description]
+toc: false
+---
+
+Shiny และ Streamlit app ที่ทำไว้ใช้งานจริง

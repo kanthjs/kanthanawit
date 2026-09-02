@@ -1,0 +1,23 @@
+---
+pagetitle: "กันต์ธณวิชญ์ — สนามเด็กเล่น"
+page-layout: custom
+toc: false
+---
+
+::: {.home}
+
+::: {.home-left}
+# สวัสดีครับ, ผม กันต์ {.unnumbered}
+
+นักวิชาการเกษตร สนใจงานวิจัยข้าว สถิติการทดลอง และการเขียน R
+
+ผมชอบสร้างของเล็ก ๆ น้อย ๆ ดูได้ที่ [โปรเจค](projects/index.qmd) และ [R Packages](r-packages/index.qmd) เก็บของที่สนใจไว้ที่ [งานอดิเรก](hobbies/index.qmd)
+
+บางวันก็อ่าน [หนังสือ](reading/index.qmd) บางวันก็[เขียน](writing/index.qmd)
+:::
+
+::: {.home-right}
+![](images/me.jpg)
+:::
+
+:::

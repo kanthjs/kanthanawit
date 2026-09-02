@@ -1,0 +1,12 @@
+---
+title: Rice Pest Risk Map App
+description: Shiny app แสดงแผนที่ความเสี่ยงจากศัตรูข้าว
+image: /images/pest_risk_map.jpg
+categories:
+  - myapp
+link-out: https://019c7053-50f5-df71-f17a-8aff60e3fe9f.share.connect.posit.cloud/
+---
+
+[เปิดแอป](https://019c7053-50f5-df71-f17a-8aff60e3fe9f.share.connect.posit.cloud/){.btn-link-out target="_blank"}
+
+เขียนรายละเอียดเพิ่มเติมที่นี่ได้เลยครับ...

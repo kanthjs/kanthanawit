@@ -1,0 +1,72 @@
+---
+title: ทำไง เมื่อจะวิเคราะห์ Two-way (Factorial) แต่ Non-parametric
+description: เมื่อข้อมูลเป็น Non-normal แต่ต้องวิเคราะห์ Two-way Factorial Interaction ควรใช้ทางออกไหน? ระหว่าง Concatenation Strategy หรือ GLM สมัยใหม่ มาหาคำตอบในบทความนี้
+date: '2025-02-09'
+image: /images/two_way_nonparametric.png
+categories:
+  - Biostatistics
+  - Rstats
+---
+
+## Two-way Non-parametric ทำไมถึงเป็นปัญหา
+ 
+การวิเคราะห์ปฏิสัมพันธ์ (Interaction) ระหว่างปัจจัย เช่น "พันธุ์พืช" (Host Resistance) และ "ระดับการใส่ปุ๋ย" (Nutrient Level) คือหัวใจสำคัญของการเข้าใจระบาดวิทยา แต่ในทางปฏิบัติ ข้อมูลร้อยละการเกิดโรค มักจะมีลักษณะเบ้ (Skewed) หรือมีความแปรปรวนไม่คงที่ (Heteroscedasticity)
+
+เมื่อ ANOVA ใช้ไม่ได้ เรามักนึกถึง Scheirer-Ray-Hare test ซึ่งเป็นส่วนขยายของ Kruskal-Wallis สำหรับ Factorial Design แต่ปัญหาคือ
+ - Interpretation Complexity: ผลลัพธ์ที่ได้มักจะตีความยาก โดยเฉพาะเมื่อเกิด Interaction ที่มีนัยสำคัญ เนื่องจากพื้นฐานมาจากการเปรียบเทียบ Rank-sum
+- Power & Robustness: ในหลายกรณี มันให้ผลที่ไม่เสถียรเมื่อเทียบกับโมเดลสมัยใหม่อย่าง GLM (Generalized Linear Models) 
+
+### ทางออกเชิงปฏิบัติ: The "Concatenation" Strategy (Treatment Combination)
+หากคุณต้องการความเรียบง่าย ประสิทธิภาพ และการสื่อสารที่ตรงไปตรงมากับผู้ทบทวนบทความ (Reviewers) วิธีที่ได้รับความนิยมสูงในวงการระบาดวิทยาภาคสนามคือการยุบรวมปัจจัย (Factor levels) ให้กลายเป็น "Single Treatment Factor"
+ 
+::: {.callout-note}
+## Concatenation Strategy
+
+หลักการ: แทนที่จะมองเป็น $2 \times 2$ Factorial ให้เรามองเป็น 4 Treatments ในแผนการทดลองแบบ One-way (CRD หรือ RCBD) แล้วใช้ Kruskal-Wallis Test ตามด้วยการเปรียบเทียบเชิงซ้อน (Post-hoc)
+:::
+ 
+ วิธีนี้ช่วยให้เราหลีกเลี่ยงความยุ่งยากของ Non-parametric Interaction และมุ่งเน้นไปที่การเปรียบเทียบ "กลุ่มของปัจจัย" ที่ให้ผลดีที่สุดหรือแย่ที่สุดในทางระบาดวิทยาโดยตรง 
+ 
+ ตัวอย่างการเขียน R Code สำหรับ Workflow นี้สมมติเราทดลองเรื่อง 
+"ผลของสายพันธุ์พืช (A, B) และระดับความชื้น (High, Low) ต่อความรุนแรงของโรค"
+ 
+```r
+# 1. โหลด Library ที่จำเป็น
+
+library(tidyverse)
+library(agricolae) # สำหรับงานเกษตรโดยเฉพาะ
+
+# 2. จำลองข้อมูล (Data Simulation)
+set.seed(123)
+df <- data.frame(
+  Variety = rep(c("V1", "V2"), each = 10),
+  Moisture = rep(c("M1", "M2"), times = 10),
+  Severity = c(rbeta(10, 2, 5), rbeta(10, 5, 2)) * 100 # ข้อมูลเบ้ (Non-normal)
+)
+
+# 3. สร้าง Column ใหม่โดยการ Concatenate (หัวใจของวิธีนี้)
+df <- df %>%
+  mutate(Trt_Combo = paste(Variety, Moisture, sep = "_"))
+
+# 4. วิเคราะห์ด้วย Kruskal-Wallis (One-way approach)
+# เหมือนเราทำ CRD ปกติ
+k_test <- kruskal(df$Severity, df$Trt_Combo, alpha = 0.05, p.adj = "bonferroni", group = TRUE)
+
+# 5. ดูผลลัพธ์
+print(k_test$statistics) # ค่าสถิติภาพรวม
+print(k_test$groups)     # การจัดกลุ่มตัวอักษร (abc)
+```
+
+แม้ว่าวิธี Concatenation จะสะดวก แต่มีข้อแนะนำเพิ่มเติม 3 ประการ:
+
+- **Lose of Main Effects**: การรวมปัจจัยทำให้คุณเสียความสามารถในการแยกแยะ "Main Effect" ของแต่ละปัจจัยอย่างชัดเจน (เช่น จะบอกไม่ได้ว่าโดยภาพรวมแล้ว Variety A ดีกว่า B แค่ไหน ถ้าไม่ดู Moisture ประกอบ)
+
+- **When to use GLM**: หากข้อมูลของคุณเป็นสัดส่วน (Proportion/Percentage) ปัจจุบันวงการระบาดวิทยาสมัยใหม่ (เช่น งานของ Garrett หรือ Sparks) นิยมใช้ Beta Regression หรือ GLM with Logit Link ซึ่งรองรับ Factorial และข้อมูล Non-normal ได้ดีกว่าการใช้ Non-parametric แบบดั้งเดิม
+
+- **Visualization is Key**: การพล็อตข้อมูลจริง (Raw data) ซ้อนทับกับ Boxplot จะช่วยให้ Reviewer เห็นภาพการกระจายของโรคได้ชัดเจนกว่าค่า Rank เพียงอย่างเดียว
+
+::: {.callout-note}
+## Note
+
+หากต้องรีบ หรือ ต้องการวิเคราะห์ two facterial แต่ assumptions ชี้ ไป ว่า ืเป็น Non-normal หรือ Heteroscedasticity และ ต้องการวิเคราะห์แบบเร็ว ๆ  การใช้ Kruskal-Wallis บน Treatment Combination คือ "Practical Shortcut" ที่ power และลดข้อผิดพลาดในการตีความได้อย่างดี
+:::
