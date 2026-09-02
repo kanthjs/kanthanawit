@@ -1,0 +1,12 @@
+---
+title: APP เพื่อการวิเคราะห์ข้อมูลการทดลองทางการเกษตร (STAR-like APP)
+description: Shiny app แสดงแผนที่ความเสี่ยงจากศัตรูข้าว
+image: /images/STAR-like-app.png
+categories:
+  - academic
+link-out: https://star-th-scxrr8n7dntstyaeiqpgdy.streamlit.app/
+---
+
+[เปิดแอป](https://star-th-scxrr8n7dntstyaeiqpgdy.streamlit.app/){.btn-link-out target="_blank"}
+
+จากประสบการณ์พบว่าโปรแกรมสถิติที่ใช้อยู่นั้นบางอย่างมีลิขสิทธิ์ที่มีราคา จึงมีความคิดที่จะสร้างมาเป็น app เพื่อใช้ในการวิเคราะห์ข้อมูลการทดลองทางการเกษตรแบบออนไลน์ โดยพัฒนาด้วยภาษา R หรือ Python

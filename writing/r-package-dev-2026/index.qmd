@@ -1,0 +1,527 @@
+---
+title: คู่มือสร้าง R Package ฉบับ 2026
+description: อัปเดตครบจบในบทความเดียว! ตั้งแต่ Setup โครงสร้าง ไปจนถึง CI/CD ด้วย GitHub Actions พร้อมเครื่องมือยุคใหม่อย่าง Positron, pak และ Quarto ที่ช่วยให้การพัฒนา R Package เร็วและสนุกยิ่งขึ้น
+date: '2026-03-12'
+image: /images/r-package-dev-2026.png
+categories:
+  - Rstats
+  - R Package
+  - devtools
+---
+
+# คู่มือสร้าง R Package ฉบับ 2026
+
+การสร้าง R Package ในปี 2026 เน้นความเร็ว (Performance) และการทำงานร่วมกับ AI บทความนี้สรุปขั้นตอนจากวิดีโอของ [Pat Schloss (Riffomonas Project)](https://www.youtube.com/@Riffomonas) และปรับปรุงด้วยเครื่องมือสมัยใหม่อย่าง Positron, `pak`, และ Quarto
+
+::: {.callout-note collapse="true"}
+## ทำไมต้องสร้าง R Package?
+
+แม้แต่โค้ดที่ใช้งานส่วนตัว การจัด Package ช่วยให้คุณ:
+- **แชร์งาน** กับทีมหรือชุมชนนักวิจัยได้ง่าย
+- **จัดการ Dependencies** อย่างเป็นระบบ ไม่มีปัญหา "ใน PC ฉันรันได้นะ"
+- **เขียน Documentation** ที่ใช้จริงได้ผ่าน Roxygen2 และ Quarto
+- **ทดสอบโค้ดอัตโนมัติ** ด้วย `testthat` ก่อนที่คนอื่นจะเจอบัก
+:::
+
+---
+
+## 🛠️ 0. เตรียมกระเป๋าเครื่องมือ (2026 Essentials)
+
+ในปี 2026 เราเปลี่ยนมาใช้เครื่องมือที่เร็วและฉลาดกว่าเดิม ก่อนเริ่มควรติดตั้งสิ่งเหล่านี้ให้ครบ:
+
+| เครื่องมือ | หน้าที่ | ทำไมต้องใช้? |
+|---|---|---|
+| **Positron** หรือ RStudio | IDE สำหรับพัฒนา R | Positron เร็วกว่ามากสำหรับโปรเจกต์ใหญ่ |
+| **pak** | ติดตั้ง Package | เร็วกว่า `install.packages()` หลายเท่า รองรับ parallel install |
+| **devtools** | เครื่องมือพัฒนา Package | ครอบคลุมทุก Workflow หลัก |
+| **usethis** | สร้างโครงสร้างอัตโนมัติ | ลด Boilerplate ได้ 90% |
+| **testthat** | Unit Testing | ช่วยให้โค้ดเชื่อถือได้ |
+| **roxygen2** | สร้างเอกสารจากโค้ด | เขียนครั้งเดียว ได้ Help file อัตโนมัติ |
+| **AI Assistant** | ช่วยร่าง docs & tests | เพิ่มความเร็วในการพัฒนา |
+
+```r
+# ติดตั้ง pak ก่อนเป็นอันดับแรก
+install.packages("pak")
+
+# จากนั้นใช้ pak ติดตั้งทุกอย่างพร้อมกัน (เร็วมาก)
+pak::pkg_install(c("devtools", "usethis", "testthat", "roxygen2", "quarto"))
+```
+
+---
+
+## ⚙️ 0.5 ตั้งค่า `.Rprofile` เพื่อความสะดวกสูงสุด
+
+เพื่อให้ R **โหลดเครื่องมือพัฒนาโดยอัตโนมัติทุกครั้งที่เปิดโปรเจกต์** ให้ตั้งค่า `.Rprofile` ไว้ล่วงหน้าสักครั้ง แล้วจะไม่ต้องรัน `library(devtools)` เองอีกเลย
+
+**เปิดไฟล์ตั้งค่า:**
+
+```r
+usethis::edit_r_profile()
+```
+
+**เพิ่ม Code นี้ลงไป:**
+
+```r
+if (interactive()) {
+  suppressMessages(library(devtools))
+  suppressMessages(library(usethis))
+}
+```
+
+::: {.callout-note collapse="true"}
+## ทำไมต้องเช็ค interactive()?
+
+เงื่อนไข `if (interactive())` ป้องกันไม่ให้ `devtools` และ `usethis` ถูกโหลดเมื่อ R รันแบบอัตโนมัติ (เช่น ใน GitHub Actions หรือ Rscript จาก Terminal) ซึ่งเป็น Best practice สำคัญ — Package เหล่านี้ควรโหลดเฉพาะในเซสชัน interactive ของนักพัฒนาเท่านั้น ไม่ควรรันในสภาพแวดล้อม production
+:::
+
+**ผลที่ได้:** คุณสามารถใช้คีย์ลัดอย่าง `Ctrl + Shift + L` ได้ทันทีทุกครั้งที่เปิด RStudio หรือ Positron โดยไม่ต้องรัน `library()` เองก่อน
+
+---
+
+## 🏗️ 1. ก่อสร้างโครงสร้างพื้นฐาน (Setup)
+
+### สร้าง Package ใหม่
+
+คำสั่งเดียวจบ — `usethis` จะสร้างโฟลเดอร์และไฟล์พื้นฐานทั้งหมดให้อัตโนมัติ:
+
+```r
+usethis::create_package("path/to/YourPackageName")
+```
+
+หลังรันคำสั่งนี้ คุณจะได้โครงสร้างเริ่มต้นแบบนี้:
+
+```
+YourPackageName/
+├── DESCRIPTION      # ข้อมูล Package (ชื่อ, เวอร์ชัน, Dependencies)
+├── NAMESPACE        # ควบคุมว่าฟังก์ชันไหนเป็น Public/Private
+├── R/               # 📁 โฟลเดอร์สำหรับวางโค้ด R ทุกไฟล์
+└── YourPackageName.Rproj
+```
+
+### เชื่อมต่อกับ Git & GitHub
+
+ในปี 2026 เราไม่แค่ใช้ Git แต่เราตั้ง CI/CD ให้ทำงานอัตโนมัติทันทีตั้งแต่วันแรก:
+
+```r
+usethis::use_git()                              # เริ่มต้น Git repository
+usethis::use_github()                           # Push ขึ้น GitHub
+usethis::use_github_action_check_standard()    # ตั้ง CI: ตรวจโค้ดอัตโนมัติทุกครั้งที่ Push
+```
+
+::: {.callout-note collapse="true"}
+## GitHub Actions คืออะไร?
+
+GitHub Actions จะรัน `R CMD check` บนเซิร์ฟเวอร์ของ GitHub ทุกครั้งที่คุณ Push โค้ดขึ้นไป ช่วยให้คุณรู้ทันทีว่าโค้ดของคุณผ่านมาตรฐาน CRAN หรือไม่ โดยไม่ต้องรอทดสอบเองบนเครื่อง
+:::
+
+### ใส่ใบอนุญาต (License)
+
+```r
+usethis::use_mit_license("Your Name")   # MIT เป็น License ที่นิยมมากสำหรับ Open-source
+```
+
+---
+
+## 🔄 2. วงจรการพัฒนา (The Modern Dev Loop)
+
+หัวใจสำคัญของการพัฒนา R Package คือ **"The Golden Cycle"** ซึ่งในปี 2026 ทำได้ลื่นไหลและเร็วขึ้น:
+
+```
+Edit code → Load All → Test in Console → Repeat
+```
+
+### ขั้นตอนที่ 1: สร้างฟังก์ชันใหม่
+
+ใช้ `usethis` สร้างไฟล์ใน `R/` โฟลเดอร์ให้อัตโนมัติ (พร้อมตั้งชื่อไฟล์ให้ถูกต้อง):
+
+```r
+usethis::use_r("my_cool_function")
+```
+
+### ขั้นตอนที่ 2: โหลดโค้ดเพื่อทดสอบ (`load_all`)
+
+นี่คือคำสั่งที่คุณจะใช้บ่อยที่สุดตลอดการพัฒนา มันจำลองการ `library()` ทั้ง Package แต่จากโค้ดในเครื่องของคุณโดยตรง:
+
+```r
+devtools::load_all()
+
+# หรือใช้ Shortcut ที่เร็วกว่า:
+# Windows: Ctrl + Shift + L
+# Mac:     Cmd  + Shift + L
+```
+
+ใน 2026 `load_all()` ทำงานได้ฉลาดขึ้น — มันจะ "Incremental load" คือโหลดเฉพาะส่วนที่เปลี่ยนแปลงไป ไม่โหลดซ้ำทั้งหมด ทำให้เร็วขึ้นมากสำหรับ Package ขนาดใหญ่
+
+---
+
+## 📝 3. การทำคู่มือ (AI-Assisted Documentation)
+
+เรายังคงใช้ **Roxygen2** เป็น standard แต่ในปี 2026 AI ช่วยร่างได้เบื้องต้น เหลือแค่ให้เราตรวจสอบและเติมรายละเอียดสำคัญ
+
+### โครงสร้าง Roxygen2 ของฟังก์ชัน
+
+```r
+#' คำนวณค่าเฉลี่ยรายวัน
+#'
+#' ฟังก์ชันนี้รับ Vector ตัวเลขและคืนค่าเฉลี่ย โดยสามารถเลือก
+#' กำจัด NA ออกก่อนคำนวณได้
+#'
+#' @param x Numeric vector ที่ต้องการคำนวณ
+#' @param na.rm Logical ถ้าเป็น TRUE (ค่าเริ่มต้น) จะกำจัด NA ก่อนคำนวณ
+#'
+#' @return ค่าเฉลี่ยของ Vector ที่รับเข้ามา (Numeric scalar)
+#'
+#' @export
+#'
+#' @examples
+#' daily_mean(c(10, 20, 30))
+#' daily_mean(c(10, NA, 30), na.rm = TRUE)
+daily_mean <- function(x, na.rm = TRUE) {
+  mean(x, na.rm = na.rm)
+}
+```
+
+Tags ที่สำคัญต้องรู้:
+
+| Tag | ความหมาย |
+|---|---|
+| `@param` | อธิบาย argument แต่ละตัว |
+| `@return` | อธิบายสิ่งที่ฟังก์ชันส่งกลับ |
+| `@export` | ทำให้ผู้ใช้เรียกฟังก์ชันนี้ได้จากภายนอก |
+| `@examples` | ใส่โค้ดตัวอย่าง — **สำคัญมาก** ถ้าส่ง CRAN |
+| `@import` | ระบุ Package อื่นที่ฟังก์ชันนี้ต้องการทั้ง Package |
+| `@importFrom` | ระบุเฉพาะฟังก์ชันที่ต้องการจาก Package อื่น |
+
+### สร้างไฟล์ Help (`.Rd` files)
+
+หลังเขียน Roxygen comment แล้ว รันคำสั่งนี้เพื่อสร้างไฟล์ Help จริงๆ:
+
+```r
+devtools::document()
+
+# Shortcut: Ctrl + Shift + D (Windows) / Cmd + Shift + D (Mac)
+```
+
+---
+
+## 📦 4. การจัดการ Dependencies (Fast Path)
+
+### กฎทองที่ต้องจำ: ห้ามใช้ `library()` ในโค้ด Package เด็ดขาด!
+
+เหตุผลที่ห้ามใช้ `library()` ในโค้ดของ Package คือมันจะ **บังคับโหลด Package เข้า Search path ของผู้ใช้** ซึ่งอาจทับฟังก์ชันชื่อเดียวกันที่ผู้ใช้กำลังใช้งานอยู่ได้
+
+**วิธีที่ถูกต้อง:**
+
+**ขั้นตอนที่ 1:** ลงทะเบียน Dependency ใน `DESCRIPTION` file
+
+```r
+# ลงทะเบียนว่า Package ของคุณต้องการ dplyr
+usethis::use_package("dplyr")
+```
+
+**ขั้นตอนที่ 2:** เรียกใช้ฟังก์ชันด้วยการระบุ Namespace ชัดเจน
+
+```r
+# ✅ วิธีที่ถูกต้อง — ระบุ Package ที่มาอย่างชัดเจน
+my_function <- function(df) {
+  dplyr::mutate(df, new_col = value * 2)
+}
+```
+
+::: {.callout-note}
+## 💡 Tip: ใช้ `use_import_from` เพื่อความเร็ว
+
+หากคุณเรียกใช้ฟังก์ชันเดิมซ้ำๆ หลายร้อยครั้งในโค้ด สามารถ import เข้ามาตรงๆ เพื่อเพิ่มความเร็วและลดการพิมพ์ได้:
+
+```r
+usethis::use_import_from("dplyr", "mutate")
+```
+
+การทำแบบนี้จะเพิ่ม `@importFrom dplyr mutate` เข้า NAMESPACE ซึ่งถือว่าเป็น Best practice สำหรับฟังก์ชันที่ใช้บ่อยมากๆ ครับ
+:::
+
+---
+
+## ✅ 5. การตรวจสอบคุณภาพ (The Final Boss)
+
+### เขียน Unit Test (ยุคใหม่)
+
+ปี 2026 เน้น **Test-Driven Development (TDD)** — หมายความว่าเขียน Test ก่อน แล้วค่อยเขียน Code ให้ผ่าน Test
+
+**ขั้นตอนที่ 1:** สร้างไฟล์ Test
+
+```r
+usethis::use_test("my_cool_function")
+# จะสร้างไฟล์ tests/testthat/test-my_cool_function.R
+```
+
+**ขั้นตอนที่ 2:** เขียน Test ด้วย `testthat`
+
+```r
+# ไฟล์: tests/testthat/test-daily_mean.R
+
+test_that("daily_mean คำนวณค่าเฉลี่ยได้ถูกต้อง", {
+  expect_equal(daily_mean(c(10, 20, 30)), 20)
+})
+
+test_that("daily_mean จัดการ NA ได้", {
+  expect_equal(daily_mean(c(10, NA, 30), na.rm = TRUE), 20)
+  expect_true(is.na(daily_mean(c(10, NA, 30), na.rm = FALSE)))
+})
+
+test_that("daily_mean รับได้เฉพาะตัวเลข", {
+  expect_error(daily_mean("ข้อความ"))
+})
+```
+
+**ขั้นตอนที่ 3:** รัน Test ทั้งหมด
+
+```r
+devtools::test()
+
+# Shortcut: Ctrl + Shift + T (Windows) / Cmd + Shift + T (Mac)
+```
+
+::: {.callout-note}
+## ใช้ AI ช่วยหา Edge Case
+
+วิธีง่ายๆ คือวางโค้ดฟังก์ชันของคุณให้ AI แล้วถามว่า _"ช่วยหา Edge cases และเขียน testthat tests ให้หน่อยได้ไหม?"_ AI มักจะนึกถึงกรณีที่เรามักมองข้ามได้ดี เช่น ค่าว่าง (`NULL`), vector ความยาวเป็น 0, หรือค่าติดลบ
+:::
+
+### การตรวจสอบสุดท้าย (The Full Check)
+
+นี่คือขั้นตอนสำคัญที่สุดก่อน Release — `devtools::check()` จะรันกระบวนการทดสอบทั้งหมด (`R CMD check`) เหมือนกับที่ CRAN ใช้จริงๆ:
+
+```r
+devtools::check()
+
+# Shortcut: Ctrl + Shift + E (Windows) / Cmd + Shift + E (Mac)
+```
+
+**เป้าหมาย:** ต้องให้ได้ผลลัพธ์นี้ก่อนปล่อย Version ใหม่ทุกครั้ง:
+
+```
+── R CMD check results ─────────────────────────────────
+Duration: 23.4s
+
+0 errors ✔ | 0 warnings ✔ | 0 notes ✔
+
+R CMD check succeeded
+```
+
+ปัญหาที่พบอยู่จากประสบการณ์ เมื่อมีการติดตั้งหรือมีภาษาไทย ใน package และ เมื่อ upload แล้ว
+```
+.github/workflows/R-CMD-check.yaml
+```
+จะเป็นการ R CMD check ในระบบ CI/CD ของ GitHub ซึ่งจะช่วยให้เราสามารถตรวจสอบ package ของเราได้ว่ามีปัญหาอะไรบ้าง
+
+- ERROR: Examples รันพลาด (Missing value where TRUE/FALSE needed)
+สาเหตุ: * โค้ดพังตอนดึง API หน้า 2: ในตัวอย่างการใช้งานฟังก์ชัน `get_production_index_month()` ระบบพยายามดึงข้อมูลหน้าที่ 2 แต่ฝั่ง API น่าจะส่งข้อมูลกลับมาผิดปกติ (หรือว่างเปล่า) ทำให้ตัวแปรที่เช็คในเงื่อนไข if กลายเป็นค่า NA (R เลยฟ้องว่าต้องการค่า TRUE/FALSE แต่ดันได้ค่า NA หรือ missing value แทน)
+- รันนานเกินไป (Elapsed time > 5s): ใน Log แจ้งเตือนเรื่องเวลาด้วยครับว่าตัวอย่าง `get_daily_prices` ใช้เวลารันไป 11.11 วินาที ซึ่งตามกฎของ R CMD check (และ CRAN) โค้ดตัวอย่างห้ามใช้เวลารันเกิน 5 วินาทีครับ
+
+วิธีแก้สำหรับการทำ Package ให้ผ่าน:
+แนะนำให้เอา \donttest{} ไปครอบตัวอย่างของฟังก์ชัน `get_production_index_month()` และ ทุกฟังก์ชันที่มีการเรียกใช้ API จริงๆ เพื่อไม่ให้ระบบต้องมารอโหลด API ตอนตรวจแพ็กเกจครับ
+
+```
+#' @examples
+#' \donttest{
+#' get_production_index_month(year_th = 2568, month = 12)
+#' }
+```
+
+- ซ่อนโฟลเดอร์ เมื่อระบบเจอ โฟลเดอร์ซ่อน เช่น `.claude.md`
+(ซึ่งน่าจะเป็นโฟลเดอร์คอนฟิกหรือแชทชั่วคราวของ AI ที่คุณใช้) ปะปนอยู่ในโปรเจค ซึ่งตามกฎแล้วไฟล์พวกนี้ห้ามแพ็กรวมเข้าไปในไฟล์ติดตั้งของ R Package ครับ
+
+วิธีแก้:
+เราต้องบอกระบบว่าให้ข้ามโฟลเดอร์นี้ไปตอนสร้างแพ็กเกจ พิมพ์คำสั่งนี้ใน R Console ได้เลยครับ:
+
+```
+usethis::use_build_ignore(".claude")
+```
+(คำสั่งนี้จะไปเติมชื่อโฟลเดอร์ลงในไฟล์ .Rbuildignore ให้อัตโนมัติครับ)
+---
+
+## 📄 6. README และ Vignettes ด้วย Quarto
+
+ในปี 2026 **Quarto (`.qmd`)** ได้เข้ามาแทนที่ R Markdown อย่างเต็มตัวใน Workflow การพัฒนา Package:
+
+### สร้าง README
+
+```r
+# สร้าง README.qmd (แนะนำ) หรือ README.Rmd แบบเก่า
+usethis::use_readme_qmd()
+```
+
+README ที่ดีควรมีส่วนเหล่านี้:
+- **ชื่อ Package + คำอธิบายสั้นๆ** ว่า Package ทำอะไร
+- **Installation instructions** (ทั้ง CRAN และ GitHub version)
+- **Quick Start Example** — ตัวอย่างใช้งานพื้นฐาน 10 บรรทัด
+- **Badge** สถานะ CI จาก GitHub Actions แสดงผล pass/fail อัตโนมัติ
+
+### สร้าง Vignette (คู่มือเจาะลึก)
+
+```r
+usethis::use_vignette("getting-started")
+# จะสร้างไฟล์ vignettes/getting-started.qmd
+```
+
+Quarto มีข้อดีสำคัญเหนือ R Markdown สำหรับ Package documentation:
+- รองรับทั้ง **R และ Python** ในเอกสารเดียวกันได้
+- Export ได้หลากหลายรูปแบบ: HTML, PDF, Word, Presentation
+- ทำงานร่วมกับ **Positron** ได้ดีกว่า
+
+---
+
+## 🌐 8. สร้างเว็บ Documentation ด้วย pkgdown
+
+ในปี 2026 **ไม่ให้ Package ใดไม่มี Documentation Website** `pkgdown` คือเครื่องมือมาตรฐานที่จะแปลง Roxygen comments, Vignettes และ README ของคุณให้กลายเป็นเว็บไซต์ที่สวยงาม เหมือนที่คุณเห็นใน Package ชั้นนำทุกตัวบน CRAN
+
+### ทำไมต้อง pkgdown?
+
+| ประเด็น | ไม่มี pkgdown | มี pkgdown |
+|---|---|---|
+| **การค้นหา** | ผู้ใช้ต้องรัน `?function()` บน R | Google แล้วเจอหน้าเว็บสวยๆ ทันที |
+| **ภาพรวม** | ต้องดีบักไฟล์ `.Rd` ที่ยาก | มี Function reference แบบค้นหาได้ |
+| **Tutorial** | Vignettes แยกกระจัดกระจาย | รวมหน้าเว็บเดียวจบ พร้อม Navbar |
+| **บำรุงรักษา** | ผู้ใช้ดู Help ยาก | Link มาจาก CRAN/GitHub อัตโนมัติ |
+
+### ติดตั้งและตั้งค่าพื้นฐาน
+
+```r
+# ติดตั้ง pkgdown
+pak::pkg_install("pkgdown")
+
+# สร้างไฟล์ตั้งค่าพื้นฐาน
+pkgdown::init()
+```
+
+คำสั่ง `pkgdown::init()` จะสร้างไฟล์ `_pkgdown.yml` ให้คุณ:
+
+```yaml
+url: https://yourusername.github.io/YourPackageName
+title: YourPackageName
+
+template:
+  bootstrap: 5
+
+reference:
+- title: "ฟังก์ชันหลัก"
+  contents:
+  - daily_mean
+  - my_cool_function
+
+articles:
+- title: "คู่มือ"
+  contents:
+  - getting-started
+```
+
+### Build เว็บทดสอบ
+
+```r
+# Build และ Preview เว็บบนเครื่อง
+pkgdown::build_site()
+```
+
+หลังจาก Build คุณจะได้โฟลเดอร์ `docs/` ซึ่งเป็นไฟล์ HTML ทั้งหมด สามารถเปิดดูได้ทันที
+
+### Deploy อัตโนมัติไป GitHub Pages
+
+วิธีที่ง่ายที่สุดคือใช้ GitHub Actions — push ครั้งเดียว เว็บ Deploy เอง:
+
+```r
+usethis::use_pkgdown_github_pages()
+```
+
+คำสั่งนี้จะ:
+1. สร้าง workflow ใน `.github/workflows/pkgdown.yaml`
+2. Set up GitHub Pages ให้ point ไปที่ `gh-pages` branch
+3. Deploy อัตโนมัติทุกครั้งที่คุณ push ไป branch `main` หรือ `master`
+
+### Custom Theme ให้เว็บสวยขึ้น
+
+ปี 2026 มี Theme Template สวยๆ ให้เลือกเยอะครับ แก้ใน `_pkgdown.yml`:
+
+```yaml
+template:
+  bootstrap: 5
+  bootswatch: flatly    # เลือก theme: cerulean, cosmo, flatly, journal, และอื่นๆ
+  bslib:
+    pkgdown-nav-height: 70px
+    primary: "#2c3e50"   # เปลี่ยนสีหลักตาม Brand ของคุณ
+```
+
+### เพิ่ม Search Functionality
+
+เว็บ pkgdown มี search engine ในตัว (ใช้ lunr.js) ทำให้ผู้ใช้ค้นหาฟังก์ชันได้ทันที ไม่ต้อง browse ทีละหน้า
+
+### เพิ่ม Logo และ Favicon
+
+```yaml
+home:
+  title: "YourPackageName"
+  description: |
+    คำอธิบายสั้นๆ ว่า Package นี้ทำอะไร
+  strip_header: true
+
+template:
+  logo: path/to/logo.png    # รูป logo (แนะนำ 200x200px)
+  favicon: path/to/favicon.ico
+```
+
+### ประโยชน์เพิ่มเติมของ pkgdown
+
+- **Auto-linking**: เวลาคุณเขียน `daily_mean()` ใน Quarto/Vignette pkgdown จะ link ไปหน้าฟังก์ชันให้อัตโนมัติ
+- **Versioning**: หากคุณมีหลาย version ของ Package บน CRAN, pkgdown สามารถแสดง docs ของแต่ละ version ได้
+- **Search Engine Optimization (SEO)**: เว็บ pkgdown ได้รับการ optimize ให้ค้นหาได้ง่ายบน Google
+
+---
+
+## 🚀 9. สรุปคีย์ลัด (2026 Quick Reference)
+
+เก็บตารางนี้ไว้เป็น Cheat Sheet ในการพัฒนา:
+
+| งานที่ต้องทำ | Shortcut (Windows) | Shortcut (Mac) | คำสั่ง R |
+|---|---|---|---|
+| โหลดโค้ดใหม่ | `Ctrl + Shift + L` | `Cmd + Shift + L` | `devtools::load_all()` |
+| อัปเดตคู่มือ | `Ctrl + Shift + D` | `Cmd + Shift + D` | `devtools::document()` |
+| รัน Tests | `Ctrl + Shift + T` | `Cmd + Shift + T` | `devtools::test()` |
+| Check มาตรฐาน | `Ctrl + Shift + E` | `Cmd + Shift + E` | `devtools::check()` |
+| Build & Install | `Ctrl + Shift + B` | `Cmd + Shift + B` | `devtools::install()` |
+
+---
+
+## 🗺️ สรุปภาพรวม Workflow
+
+```
+usethis::create_package()       # 1. สร้าง Package
+    ↓
+usethis::use_git() + use_github() # 2. เชื่อม Git & GitHub
+    ↓
+usethis::use_r("func_name")     # 3. สร้างไฟล์ฟังก์ชัน
+    ↓
+devtools::load_all()  ←──────── # 4. (วนซ้ำ) โหลด → แก้ไข → โหลด
+    ↓
+roxygen2 + devtools::document() # 5. เขียนและสร้างคู่มือ
+    ↓
+usethis::use_test() + devtools::test() # 6. เขียนและรัน Tests
+    ↓
+devtools::check()               # 7. Check ก่อน Release
+    ↓
+devtools::install() / pak::pkg_install() # 8. ติดตั้งใช้งานจริง
+    ↓
+pkgdown::build_site()           # 9. Build เว็บ documentation (เสร็จแล้ว Deploy อัตโนมัติ)
+```
+
+---
+
+::: {.callout-note collapse="true"}
+## อ้างอิง
+
+- [Riffomonas Project](https://www.youtube.com/@Riffomonas) — วิดีโอสอนสร้าง R Package โดย Pat Schloss
+- [R Packages (2e)](https://r-pkgs.org/) — หนังสืออ้างอิงหลักโดย Hadley Wickham & Jenny Bryan
+- [pak documentation](https://pak.r-lib.org/) — Package manager ยุคใหม่
+- [Quarto Documentation](https://quarto.org/) — ระบบเอกสาร Next-gen
+- [usethis documentation](https://usethis.r-lib.org/) — เครื่องมือ Workflow automation
+- [pkgdown documentation](https://pkgdown.r-lib.org/) — สร้างเว็บ documentation ให้ Package
+:::

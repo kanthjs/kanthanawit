@@ -1,0 +1,13 @@
+---
+title: "R Packages"
+pagetitle: "กันต์ธณวิชญ์ — R Packages"
+listing:
+  contents: "*/index.qmd"
+  sort: "title"
+  type: grid
+  categories: false
+  sort-ui: false
+  filter-ui: false
+  fields: [image, title, description]
+toc: false
+---

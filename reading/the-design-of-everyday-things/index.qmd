@@ -1,0 +1,12 @@
+---
+title: The Design of Everyday Things
+image: https://ghepxtexbwweoynirspy.supabase.co/storage/v1/object/public/content/reading/the-design-of-everyday-things.jpg
+categories:
+  - READING
+author: Donald A. Norman
+link-out: https://www.goodreads.com/book/show/840.The_Design_of_Everyday_Things
+---
+
+[ดูบน Goodreads](https://www.goodreads.com/book/show/840.The_Design_of_Everyday_Things){.btn-link-out target="_blank"}
+
+เขียนบทวิจารณ์หรือ notes ของคุณที่นี่ได้เลยครับ

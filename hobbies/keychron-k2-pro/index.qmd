@@ -1,0 +1,11 @@
+---
+title: Keychron K2 Pro
+description: Mechanical Keyboard
+categories:
+  - work-gear
+link-out: https://www.keychron.com
+---
+
+[เปิดลิงก์](https://www.keychron.com){.btn-link-out target="_blank"}
+
+เขียนรายละเอียดเพิ่มเติมที่นี่ได้เลยครับ...

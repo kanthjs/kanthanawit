@@ -1,0 +1,12 @@
+---
+title: Rice Pest Warning App
+description: Shiny app แสดงข้อมูลการเตือนภัยศัตรูข้าว
+image: /images/pest_warning_app.jpg
+categories:
+  - myapp
+link-out: https://019c661b-3539-7d06-0829-41c5c53c7250.share.connect.posit.cloud/
+---
+
+[เปิดแอป](https://019c661b-3539-7d06-0829-41c5c53c7250.share.connect.posit.cloud/){.btn-link-out target="_blank"}
+
+เขียนรายละเอียดเพิ่มเติมที่นี่ได้เลยครับ...

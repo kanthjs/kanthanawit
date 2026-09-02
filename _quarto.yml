@@ -1,0 +1,63 @@
+project:
+  type: website
+  output-dir: _site
+  render:
+    - "index.qmd"
+    - "cv/index.qmd"
+    - "writing/**/*.qmd"
+    - "projects/**/*.qmd"
+    - "apps/**/*.qmd"
+    - "r-packages/**/*.qmd"
+    - "reading/**/*.qmd"
+    - "hobbies/**/*.qmd"
+  resources:
+    - "images/**"
+    - "robots.txt"
+
+execute:
+  freeze: auto
+
+website:
+  title: "กันต์ธณวิชญ์"
+  site-url: "https://kanthanawit.in.th"
+  description: "สนามเด็กเล่นของกันต์ — งานวิจัยข้าว, R packages, สถิติการเกษตร และของเล็ก ๆ น้อย ๆ ที่สร้างไว้"
+  favicon: images/favicon.svg
+  open-graph: true
+
+  navbar:
+    right:
+      - text: "โปรเจค"
+        href: projects/index.qmd
+      - text: "R Packages"
+        href: r-packages/index.qmd
+      - text: "App"
+        href: apps/index.qmd
+      - text: "งานเขียน"
+        href: writing/index.qmd
+      - text: "หนังสือ"
+        href: reading/index.qmd
+      - text: "งานอดิเรก"
+        href: hobbies/index.qmd
+      - text: "CV"
+        href: cv/index.qmd
+      - icon: github
+        aria-label: "GitHub"
+        href: https://github.com/kanthjs
+      - icon: rss
+        aria-label: "RSS"
+        href: writing/index.xml
+
+  page-footer:
+    center: "© 2026 Kanth's Playbook"
+
+format:
+  html:
+    theme:
+      - styles.scss
+    include-in-header: header.html
+    toc: true
+    toc-title: "หัวข้อ"
+    grid:
+      body-width: 840px
+    html-math-method: plain
+    lang: th
