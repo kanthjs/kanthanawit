@@ -96,10 +96,17 @@ ggplot(mtcars, aes(wt, mpg)) + geom_point()
 | `quarto render writing/foo` | Render a single page                              |
 | `quarto check`              | Diagnose the local Quarto/R installation          |
 
-There is no npm build script. Netlify runs no build command of its own: the
-render happens in the `onBuild` step of `@quarto/netlify-plugin-quarto`, which
-writes to `_site`. Setting a build command in the Netlify UI would override
-`netlify.toml` and pre-empt the plugin, so leave that field empty.
+`npm run build` is a deliberate no-op, and removing it breaks deploys.
+
+The Netlify UI holds a build command of `npm run build`, left over from when
+this was an Astro site. A build command set in the UI overrides `netlify.toml`
+and cannot be cancelled from the repo, so the script has to exist and exit
+cleanly. The real render happens afterwards, in the `onBuild` step of
+`@quarto/netlify-plugin-quarto`, which writes to `_site`.
+
+The script can only go away once the field at **Site configuration → Build &
+deploy → Build settings → Build command** is empty *and* a deploy log confirms
+`commandOrigin` is no longer `ui`. Until then, leave it alone.
 
 ## 🎨 Design
 
