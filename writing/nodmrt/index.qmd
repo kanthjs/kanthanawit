@@ -4,7 +4,7 @@ description: ทำไมยังนิยมใช้ DMRT นี่คือ 
 date: '2024-08-09'
 image: /images/dmrt_stat_warning.png
 categories:
-  - stat
+  - Statistics
 ---
 
 แม้ วงการสถิติได้พยายามลดการใช้ Duncan's Multiple Range Test (DMRT) มานานหลายสิบปีแล้ว แต่ที่ในไทย (และหลายประเทศในเอเชีย) ยังเป็นที่นิยมอย่างมาก มีเหตุผลหลัก 2 ข้อ:

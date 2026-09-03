@@ -4,8 +4,8 @@ description: เมื่อข้อมูลเป็น Non-normal แต่�
 date: '2025-02-09'
 image: /images/two_way_nonparametric.png
 categories:
-  - Biostatistics
-  - Rstats
+  - Statistics
+  - R
 ---
 
 ## Two-way Non-parametric ทำไมถึงเป็นปัญหา

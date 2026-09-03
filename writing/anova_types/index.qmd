@@ -3,8 +3,8 @@ title: ANOVA type สำคัญ นะ ควรรู้ไว้
 description: เลือกใช้ ANOVA (Type I, II หรือ III) คือการตัดสินใจว่าจะจัดการกับความแปรปรวนอย่างไร โดยเฉพาะในข้อมูลที่ไม่สมดุล (Unbalanced Data) ซึ่ง Type I จะเปลี่ยนไปตามลำดับการใส่ตัวแปร, Type II เหมาะสำหรับรุ่นที่มีเฉพาะอิทธิพลหลัก, และ Type III เป็นมาตรฐานสากลที่ทนทานที่สุดเมื่อมีปฏิสัมพันธ์ (Interaction) ระหว่างตัวแปรเข้ามาเกี่ยวข้อง
 date: '2026-02-15'
 categories:
-  - Rstats
-  - Biostatistics
+  - R
+  - Statistics
 ---
 
 ::: {.callout-note}

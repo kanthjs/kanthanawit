@@ -4,9 +4,8 @@ description: อัปเดตครบจบในบทความเดี�
 date: '2026-03-12'
 image: /images/r-package-dev-2026.png
 categories:
-  - Rstats
+  - R
   - R Package
-  - devtools
 ---
 
 # คู่มือสร้าง R Package ฉบับ 2026
