@@ -8,8 +8,7 @@ project:
     - "projects/**/*.qmd"
     - "apps/**/*.qmd"
     - "r-packages/**/*.qmd"
-    - "reading/**/*.qmd"
-    - "hobbies/**/*.qmd"
+    - "talks/**/*.qmd"
   resources:
     - "images/**"
     - "robots.txt"
@@ -18,28 +17,22 @@ execute:
   freeze: auto
 
 website:
-  title: "กันต์ธณวิชญ์"
+  title: "Kanthanawit"
   site-url: "https://kanthanawit.in.th"
-  description: "สนามเด็กเล่นของกันต์ — งานวิจัยข้าว, R packages, สถิติการเกษตร และของเล็ก ๆ น้อย ๆ ที่สร้างไว้"
+  description: "Kanthanawit's playground — rice research, R packages, agricultural statistics, and other small things built along the way"
   favicon: images/favicon.svg
   open-graph: true
 
   navbar:
     right:
-      - text: "โปรเจค"
-        href: projects/index.qmd
-      - text: "R Packages"
-        href: r-packages/index.qmd
-      - text: "App"
-        href: apps/index.qmd
-      - text: "งานเขียน"
-        href: writing/index.qmd
-      - text: "หนังสือ"
-        href: reading/index.qmd
-      - text: "งานอดิเรก"
-        href: hobbies/index.qmd
-      - text: "CV"
+      - text: "About"
         href: cv/index.qmd
+      - text: "Blog"
+        href: writing/index.qmd
+      - text: "Project"
+        href: projects/index.qmd
+      - text: "Talks"
+        href: talks/index.qmd
       - icon: github
         aria-label: "GitHub"
         href: https://github.com/kanthjs
@@ -56,7 +49,7 @@ format:
       - styles.scss
     include-in-header: header.html
     toc: true
-    toc-title: "หัวข้อ"
+    toc-title: "Topic"
     grid:
       body-width: 840px
     html-math-method: plain

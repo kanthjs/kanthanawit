@@ -1,8 +1,8 @@
 ---
-title: การพยากรณ์การระบาดของศัตรูข้าว
-description: Shiny app แสดงแผนที่ความเสี่ยงจากศัตรูข้าว
+title: Forecasting Rice Pest Outbreaks
+description: A Shiny app displaying rice pest risk maps
 categories:
   - academic
 ---
 
-การศึกษาติดตามการเปลี่ยนแปลงสถานการณ์การระบาดของศัตรูข้าวในแปลงนาเกษตรกร ครอบคลุมระบบนิเวศน์หลากหลายรูปแบบ เพื่อทำความเข้าใจพลวัตการระบาดของศัตรูข้าวที่เกิดขึ้นภายใต้สภาพแวดล้อมและการจัดการนาที่แตกต่างกัน อันจะนำไปสู่การสร้างฐานข้อมูลสำหรับวางแผนเฝ้าระวังและเตือนภัยการระบาดในอนาคต
+This study tracks changes in rice pest outbreak conditions across farmers' rice fields, covering a wide range of ecosystem types, in order to understand the dynamics of pest outbreaks under different environmental conditions and field management practices. The findings will help build a database for future outbreak surveillance and early-warning planning.

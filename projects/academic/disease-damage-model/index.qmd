@@ -1,6 +1,6 @@
 ---
-title: การพัฒนาแบบจำลองความเสียหายของโรคข้าว
-description: แบบจำลองที่พัฒนาขึ้นสามารถช่วยให้ประเมินความเสียหายจากความรุนแรงของโรคได้อย่างเชิงปริมาณ เพื่อลดความสูญเสียทางเศรษฐกิจของเกษตรกร
+title: Development of a Rice Disease Damage Model
+description: The developed model helps quantitatively assess yield damage from disease severity, reducing farmers' economic losses.
 date: '2024-01-01'
 categories:
   - Rice Disease
@@ -10,49 +10,49 @@ categories:
   - academic
 ---
 
-# การพัฒนาแบบจำลองความเสียหายของโรคข้าว
+# Development of a Rice Disease Damage Model
 
-## ภาพรวมโปรเจกต์
+## Project Overview
 
-โปรเจกต์นี้เป็นส่วนหนึ่งของงานวิจัยด้านการอารักขาข้าวของกรมการข้าว โดยมีวัตถุประสงค์หลักเพื่อพัฒนาแบบจำลองที่สามารถประเมินความเสียหายของผลผลิตข้าวที่เกิดจากโรคสำคัญได้อย่างเชิงปริมาณ
+This project is part of the Rice Department's rice protection research, with the main objective of developing a model that can quantitatively assess rice yield damage caused by major diseases.
 
-## วัตถุประสงค์
+## Objectives
 
-1. **ยืนยันความสำคัญของโรคข้าว** ต่อผลผลิตข้าว
-2. **พัฒนาแบบจำลองความเสียหาย** ที่สามารถเชื่อมโยงความรุนแรงของโรคกับการสูญเสียผลผลิต
-3. **สนับสนุนการตัดสินใจ** ในการกำหนดแนวทางการป้องกันโรค
+1. **Confirm the significance of rice diseases** on rice yield
+2. **Develop a damage model** that links disease severity to yield loss
+3. **Support decision-making** in establishing disease prevention guidelines
 
-## โรคที่ศึกษา
+## Diseases Studied
 
-| โรค | ชื่อภาษาอังกฤษ | ลักษณะความเสียหาย |
+| Disease | English Name | Damage Characteristics |
 |---|---|---|
-| **โรคไหม้** | Rice Blast (*Magnaporthe oryzae*) | ทำลายใบ ลำต้น และข้าวกรอบ |
-| **โรคใบจุดสีน้ำตาล** | Brown Spot (*Bipolaris oryzae*) | ทำให้ใบมีจุดสีน้ำตาลและแห้ง |
-| **โรคขอบใบแห้ง** | Bacterial Leaf Blight (*Xanthomonas oryzae*) | ทำให้ใบแห้งจากขอบเข้ามา |
+| **Rice Blast** | Rice Blast (*Magnaporthe oryzae*) | Damages leaves, stems, and grain |
+| **Brown Spot** | Brown Spot (*Bipolaris oryzae*) | Causes brown spots on leaves and leaf drying |
+| **Bacterial Leaf Blight** | Bacterial Leaf Blight (*Xanthomonas oryzae*) | Causes leaves to dry from the edges inward |
 
-## วิธีการวิจัย
+## Research Methods
 
-1. **การเก็บข้อมูลภาคสนาม** ที่ศูนย์วิจัยข้าวในพื้นที่ต่างๆ
-2. **การประเมินความรุนแรงของโรค** ตามมาตรฐานที่กำหนด
-3. **การวิเคราะห์ข้อมูล** ด้วยสถิติและแบบจำลองคณิตศาสตร์
-4. **การพัฒนาแบบจำลอง** ความเสียหาย-ผลผลิต
+1. **Field data collection** at rice research centers in various areas
+2. **Disease severity assessment** according to established standards
+3. **Data analysis** using statistics and mathematical modeling
+4. **Model development** for damage-yield relationships
 
-## ผลลัพธ์ที่คาดหวัง
+## Expected Outcomes
 
-- แบบจำลองที่สามารถทำนายความเสียหายจากความรุนแรงของโรคได้
-- ข้อมูลที่สะท้อนผลกระทบที่แท้จริงของโรคเหล่านี้ต่อผลผลิตข้าว
-- แนวทางปฏิบัติสำหรับเกษตรกรในการตัดสินใจป้องกันโรค
+- A model capable of predicting damage from disease severity
+- Data reflecting the true impact of these diseases on rice yield
+- Practical guidelines for farmers in disease prevention decision-making
 
 ---
 
-## รายละเอียดการดำเนินงาน
+## Project Details
 
-### สถานที่วิจัย
+### Research Sites
 
-- **ศูนย์วิจัยข้าวปทุมธานี**
-- **ศูนย์วิจัยข้าวราชบุรี**
-- **ศูนย์วิจัยข้าวสกลนคร**
+- **Pathum Thani Rice Research Center**
+- **Ratchaburi Rice Research Center**
+- **Sakon Nakhon Rice Research Center**
 
-### ระยะเวลาดำเนินการ
+### Duration
 
-**2 ปี (พ.ศ. 2568 - 2569)**
+**2 years (B.E. 2568 - 2569 / 2025 - 2026)**

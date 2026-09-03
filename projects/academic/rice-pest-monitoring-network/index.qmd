@@ -1,51 +1,51 @@
 ---
-title: เครือข่ายเฝ้าระวังศัตรูข้าว
-description: เครือข่ายการติดตามการระบาดของศัตรูข้าวในแปลงนาเกษตร
+title: Rice Pest Monitoring Network
+description: A network for monitoring rice pest outbreaks in farmers' rice fields
 image: /images/pest-monitoring-network.jpg
 categories:
   - academic
 ---
 
-เครือข่าย มีจุดกำเนิดมาจากงานวิจัยเชิงลึกด้านการติดตามการเปลี่ยนแปลงการระบาดของศัตรูข้าวในแปลงนาเกษตร
+The network originated from in-depth research on monitoring changes in rice pest outbreaks in farmers' fields.
 
-จากการศึกษาพบความจริงที่สำคัญว่า การสร้างฐานข้อมูลการระบาดของศัตรูข้าวให้ครอบคลุมทั่วประเทศนั้น
+The research revealed an important truth: building a nationwide database of rice pest outbreaks requires more than one organization.
 
-> **"ลำพังเพียงหน่วยงานภาครัฐเพียงหน่วยงานเดียวอาจไม่เพียงพอ"**
-> ทั้งในแง่ของความต่อเนื่องของข้อมูล และความครอบคลุมของพื้นที่ที่มีอยู่อย่างมหาศาล
-
----
-
-## ทำไมเราถึงต้องมีเครือข่ายนี้?
-
-ปัญหาการระบาดของศัตรูข้าวเกิดขึ้นตลอดเวลาและเปลี่ยนแปลงอย่างรวดเร็ว
-TRPMN จึงได้คิดค้นและพัฒนาเทคโนโลยีที่เป็น **"ศูนย์กลางการรวบรวมข้อมูล"**
-และเป็น **"กระบอกเสียงในการแจ้งเตือน"**
-
-โดยเน้นการมีส่วนร่วมของสมาชิกในเครือข่าย ไม่ว่าจะเป็นเกษตรกรในพื้นที่
-หรือเจ้าหน้าที่จากภาคส่วนต่าง ๆ ที่ร่วมแรงร่วมใจกันแลกเปลี่ยนข้อมูลสถานการณ์จริงจากแปลงนา
+> **"A single government agency alone may not be enough"**
+> both in terms of data continuity and the sheer scale of area coverage involved.
 
 ---
 
-## ความเชื่อถือได้คือหัวใจหลัก
+## Why Do We Need This Network?
 
-เพื่อให้ข้อมูลที่ได้รับจากท้องนามีความแม่นยำและนำไปใช้งานได้จริง
-TRPMN จึงสร้างความร่วมมือกับ **"นักวิชาการและผู้เชี่ยวชาญ"**
-ที่มีความรู้ความชำนาญเฉพาะด้านในการวิเคราะห์รายงานข้อมูลศัตรูข้าว
+Rice pest outbreaks occur constantly and change rapidly.
+TRPMN has therefore invented and developed technology that serves as a **"central hub for data collection"**
+and a **"voice for early-warning alerts."**
 
-เพื่อตรวจสอบและยืนยันความถูกต้องก่อนส่งต่อความรู้และการแจ้งเตือนกลับไปยังสมาชิกในเครือข่าย
+It emphasizes the participation of network members, whether local farmers
+or officials from various sectors, who work together to share real-time information from the fields.
 
 ---
 
-## วัตถุประสงค์หลักของเรา
+## Reliability Is at the Core
 
-| วัตถุประสงค์ | รายละเอียด |
+To ensure that the information gathered from the fields is accurate and practically usable,
+TRPMN has built collaborations with **"academics and experts"**
+who have specialized knowledge in analyzing rice pest outbreak reports.
+
+This is to verify and confirm accuracy before relaying knowledge and alerts back to network members.
+
+---
+
+## Our Main Objectives
+
+| Objective | Details |
 |---|---|
-| 🔗 เป็นศูนย์กลางการเชื่อมโยง | สร้างเครือข่ายความร่วมมือระหว่างเกษตรกร เจ้าหน้าที่ และนักวิชาการ |
-| 🗄️ สร้างฐานข้อมูลที่ยั่งยืน | เก็บรวบรวมข้อมูลการระบาดอย่างต่อเนื่องและครอบคลุมทั่วประเทศด้วยเทคโนโลยีสมัยใหม่ |
-| 📢 แจ้งเตือนภัยศัตรูข้าว | เป็นช่องทางหลักในการกระจายข่าวสารการระบาด เพื่อให้สมาชิกเตรียมรับมือได้ทันท่วงที |
-| ✅ ยกระดับความถูกต้อง | กลั่นกรองข้อมูลโดยผู้เชี่ยวชาญ เพื่อให้ทุกรายงานนำไปสู่วิธีการแก้ปัญหาที่ตรงจุด |
+| 🔗 Serve as a connecting hub | Build a network of collaboration among farmers, officials, and academics |
+| 🗄️ Build a sustainable database | Continuously collect nationwide outbreak data using modern technology |
+| 📢 Alert on rice pest outbreaks | Serve as the main channel for spreading outbreak news, so members can prepare in time |
+| ✅ Improve accuracy | Have data vetted by experts, so every report leads to targeted solutions |
 
 ---
 
-> **TRPMN จึงไม่ใช่แค่ระบบคอมพิวเตอร์**
-> แต่คือเครือข่ายของ "กลุ่มคน" ที่ร่วมด้วยช่วยกันดูแลและปกป้องผลผลิตข้าวไทยให้ยั่งยืน"
+> **TRPMN is therefore not just a computer system**
+> but a network of "people" working together to sustainably care for and protect Thailand's rice production."

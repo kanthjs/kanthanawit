@@ -1,6 +1,6 @@
 ---
 title: "App"
-pagetitle: "กันต์ธณวิชญ์ — App"
+pagetitle: "Kanthanawit — App"
 listing:
   contents: "*/index.qmd"
   sort: "title"
@@ -12,4 +12,4 @@ listing:
 toc: false
 ---
 
-Shiny และ Streamlit app ที่ทำไว้ใช้งานจริง
+Shiny and Streamlit apps built for real-world use

@@ -1,10 +1,10 @@
 ---
 title: talatThaiR
-description: R Package ที่เหมือนคุณได้ไปตลาดไทยเพื่อถามราคาสินค้าทางการเกษตร จากศูนย์ข้อมูลเกษตรแห่งชาติ (National Agricultural Big Data Center - NABC)
+description: An R Package that feels like going to a Thai market to ask about agricultural product prices, from the National Agricultural Big Data Center (NABC)
 image: /images/talatThaiR-hexlogo.png
 link-out: https://kanthjs.github.io/talatThaiR/
 ---
 
-[เอกสารแพ็กเกจ](https://kanthjs.github.io/talatThaiR/){.btn-link-out target="_blank"}
+[Package documentation](https://kanthjs.github.io/talatThaiR/){.btn-link-out target="_blank"}
 
-talatThaiR เป็น R Package ที่ช่วยให้คุณสามารถหาข้อมูลสินค้าราคาทางการเกษตร เหมือนคุณได้เดินไปตลาดไทย จาก ศูนย์ข้อมูลเกษตรแห่งชาติ (National Agricultural Big Data Center - NABC) ได้อย่างง่าย สะดวก และไม่ต้องปวดหัว ฟังชันถูกออกแบบมาให้สามารถค้นหาข้อมูลได้ อย่างเป็นระบบ เข้าใจง่าย
+talatThaiR is an R Package that helps you find agricultural product price data, as if you walked into a Thai market, from the National Agricultural Big Data Center (NABC) — easily, conveniently, and without any headache. The functions are designed to let you search for data systematically and intuitively.

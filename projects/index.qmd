@@ -1,6 +1,6 @@
 ---
-title: "โปรเจค"
-pagetitle: "กันต์ธณวิชญ์ — โปรเจค"
+title: "Projects"
+pagetitle: "Kanthanawit — Projects"
 listing:
   contents: "*/*/index.qmd"
   sort: "title"

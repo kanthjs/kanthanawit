@@ -1,6 +1,6 @@
 ---
 title: "R Packages"
-pagetitle: "กันต์ธณวิชญ์ — R Packages"
+pagetitle: "Kanthanawit — R Packages"
 listing:
   contents: "*/index.qmd"
   sort: "title"
