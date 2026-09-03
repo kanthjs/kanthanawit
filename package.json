@@ -1,9 +1,6 @@
 {
   "name": "kanthanawit",
   "private": true,
-  "scripts": {
-    "build": "echo Rendering is handled by the Quarto Netlify plugin. See README."
-  },
   "devDependencies": {
     "@quarto/netlify-plugin-quarto": "^0.0.5"
   }
