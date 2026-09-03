@@ -4,7 +4,7 @@ description: เปรียบเทียบวิธีการทดลอ�
 date: '2026-03-12'
 image: /images/paired_test_cover.jpg
 categories:
-  - Rstats
+  - R
   - Statistics
 ---
 
