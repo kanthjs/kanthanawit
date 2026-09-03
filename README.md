@@ -9,8 +9,7 @@ This website is built to showcase and organize various aspects of my professiona
 - **Academic Research & Projects:** Detailed information about my research work, agricultural studies, and conference posters.
 - **My Gists:** A collection of short scripts, code snippets, and data analysis tools, primarily focusing on **R**.
 - **Writing:** Blog posts, articles, and notes on topics I'm currently exploring or working on.
-- **Library:** A reading list of books I'm currently reading or have finished, as well as books I have written (e.g., เทคนิคการทดลองในแปลงนาข้าว).
-- **Hobbies & Gear:** A look into my interests outside of work, including my plant collections and the work/personal gear I use daily.
+- **Talks:** Slides and recordings from talks I have given.
 - **Apps & Packages:** Software applications and R packages I have developed or contributed to.
 
 ## 🛠 Tech Stack
@@ -35,8 +34,7 @@ This website is built to showcase and organize various aspects of my professiona
 ├── projects/           # academic/ and mygists/ subgroups
 ├── apps/               # Shiny / Streamlit apps
 ├── r-packages/         # R package pages
-├── reading/            # Book notes
-├── hobbies/            # Plants, coffee, gear
+├── talks/              # Talks
 └── _site/              # Build output (git-ignored)
 ```
 
@@ -50,8 +48,7 @@ Every section is a directory holding a listing page (`index.qmd`) plus one direc
 | `projects/`   | `/projects/<group>/<slug>/` | list          | `title`, `description`, `categories`  |
 | `apps/`       | `/apps/<slug>/`             | grid          | `title`, `description`, `image`, `link-out` |
 | `r-packages/` | `/r-packages/<slug>/`       | grid          | `title`, `description`, `image`, `link-out` |
-| `reading/`    | `/reading/<slug>/`          | grid          | `title`, `author`, `image`, `categories` |
-| `hobbies/`    | `/hobbies/<slug>/`          | list          | `title`, `description`, `categories`  |
+| `talks/`      | `/talks/`                   | —             | `title`                               |
 
 To publish a new post:
 
