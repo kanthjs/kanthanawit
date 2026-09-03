@@ -1,31 +1,41 @@
 ---
-title: "กันต์"
+title: "Kanthanawit"
 subtitle: "Agricultural Scientist"
-pagetitle: "กันต์ธณวิชญ์ — CV"
+pagetitle: "Kanthanawit — CV"
 image: /images/me.jpg
 toc: true
-toc-title: "หัวข้อ"
+toc-title: "Contents"
 ---
 
 [kanthanawit.j@rice.mail.go.th](mailto:kanthanawit.j@rice.mail.go.th) · Pathum Thani, Thailand
+
+[Download CV (PDF)](kanthanawit-cv.pdf){.btn-link-out target="_blank"}
 
 ![](/images/me.jpg){width="240" style="border-radius:1.5rem;"}
 
 ## About
 
-นักวิชาการเกษตรโดยตำแหน่ง....
+Agricultural scientist by profession....
 
 ## Experience
 
 **Researcher** — Agricultural Research Institute · 2016–2020
 
-พัฒนา R packages และระบบแจ้งเตือนโรคข้าว วิเคราะห์โมเดลทางสถิติและ Machine Learning
-นำเสนอข้อมูลในรูปแบบ Dashboard และ Web App
+Developed R packages and a rice disease alert system. Analyzed statistical and Machine Learning models.
+Presented data through Dashboards and Web Apps.
 
 ## Education
 
 **Ph.D. in Plant Pathology** — University of the Philippines Los Baños · 2014–2018
 
+## Publications
+
+- Author, A. B. & Author, C. D. (Year). *Title of the paper*. Journal Name, Volume(Issue), pages.
+- Author, A. B. (Year). *Title of another paper*. Journal Name, Volume(Issue), pages.
+
 ## Skills
 
-R Programming · Machine Learning · Statistical Modeling · App Development
+- R Programming
+- Machine Learning
+- Statistical Modeling
+- App Development

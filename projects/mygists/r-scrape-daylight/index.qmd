@@ -1,39 +1,39 @@
 ---
 title: Scrape Daily Daylight (R)
-description: R Script สำหรับดึงข้อมูลเวลาดวงอาทิตย์ขึ้น-ตก และคำนวณช่วงแสงในแต่ละวันจากสมาคมดาราศาสตร์ไทย
+description: An R script for retrieving sunrise-sunset times and calculating daily daylight duration from the Thai Astronomical Society
 categories:
   - gist
 ---
 
-นี่คือโค้ด R ที่ใช้สำหรับดึงข้อมูลเวลาพระอาทิตย์ขึ้นและพระอาทิตย์ตกจากเว็บไซต์สมาคมดาราศาสตร์ไทย ([thaiastro.nectec.or.th](https://thaiastro.nectec.or.th)) จากนั้นนำข้อมูลมาคำนวณหาความยาวนานของแสงแดด (Daylight Hours) ในแต่ละวันสำหรับจังหวัดที่กำหนด
+This is R code used to retrieve sunrise and sunset times from the Thai Astronomical Society website ([thaiastro.nectec.or.th](https://thaiastro.nectec.or.th)), then use that data to calculate the length of Daylight Hours per day for a given province.
 
-การดึงข้อมูลชุดนี้มีประโยชน์มากสำหรับการวิจัยที่เกี่ยวข้องกับผลกระทบของสภาพแวดล้อมโดยเฉพาะเรื่องแสง ที่มีต่อการเจริญเติบโตของพืช หรือการศึกษาพฤติกรรมสัตว์
+This dataset is very useful for research related to the environmental impact of light on plant growth, or for studies of animal behavior.
 
-### 📦 ไลบรารีที่จำเป็นต้องใช้
-ก่อนใช้งานโค้ดนี้ ให้ทำการติดตั้งและโหลดไลบรารีเหล่านี้ให้เรียบร้อย:
+### 📦 Required Libraries
+Before using this code, install and load the following libraries:
 
 ```r
-library(rvest)     # สำหรับทำ Web Scraping อ่านโครงสร้าง HTML และดึงข้อมูล
-library(dplyr)     # สำหรับจัดการและทำความสะอาด dataframe
-library(stringr)   # สำหรับจัดการรูปแบบข้อความ (String manipulation)
-library(lubridate) # สำหรับจัดการและคำนวณวัน-เวลา
-library(purrr)     # สำหรับการวนลูปอ่านตารางแต่ละเดือน (Functional programming)
+library(rvest)     # For web scraping, reading HTML structure, and extracting data
+library(dplyr)     # For manipulating and cleaning data frames
+library(stringr)   # For string manipulation
+library(lubridate) # For handling and calculating dates and times
+library(purrr)     # For looping through each month's table (functional programming)
 ```
 
-### 💻 ฟังก์ชัน `get_daily_daylight`
-โค้ดเต็มสำหรับฟังก์ชันที่ใช้ดึงข้อมูล
+### 💻 The `get_daily_daylight` Function
+Full code for the data retrieval function
 
 ```r
 get_daily_daylight <- function(year, province_name) {
   
-  # 1. จัดการตัวเลขปี
+  # 1. Handle the year number
   year_ce <- ifelse(year > 2500, year - 543, year)
   index_url <- paste0("https://thaiastro.nectec.or.th/skyevnt/sunmoon/", year_ce, "/")
-  
-  # 2. ค้นหาลิงก์ของจังหวัดเป้าหมาย
+
+  # 2. Find the link for the target province
   index_page <- tryCatch(
     read_html(index_url, encoding = "UTF-8"),
-    error = function(e) { stop(paste("ไม่สามารถเข้าถึงข้อมูลสารบัญของปี", year_ce)) }
+    error = function(e) { stop(paste("Unable to access the index data for year", year_ce)) }
   )
   
   links <- index_page %>% html_nodes("a")
@@ -44,73 +44,73 @@ get_daily_daylight <- function(year, province_name) {
   )
   
   matched_row <- prov_df %>% filter(str_detect(province, province_name))
-  if (nrow(matched_row) == 0) stop(paste("ไม่พบข้อมูลของจังหวัด:", province_name))
-  
-  # 3. ดึงข้อมูลจากหน้าของจังหวัดนั้นๆ
+  if (nrow(matched_row) == 0) stop(paste("No data found for province:", province_name))
+
+  # 3. Retrieve data from that province's page
   target_url <- paste0("https://thaiastro.nectec.or.th/skyevnt/sunmoon/", year_ce, "/", matched_row$href[1])
   target_page <- read_html(target_url, encoding = "UTF-8")
-  
-  # ดึงตาราง "ทั้งหมด" ในหน้านั้น (เว็บนี้แยก 1 ตารางต่อ 1 เดือน)
+
+  # Extract "all" tables on that page (this site has 1 table per month)
   tables <- target_page %>% html_table(fill = TRUE)
-  
-  # กรองเอาเฉพาะตารางที่มี 11 คอลัมน์ (ตามโครงสร้างมาตรฐานของตารางเวลาเว็บนี้)
+
+  # Keep only tables with 11 columns (the standard structure of this site's schedule tables)
   valid_tables <- keep(tables, ~ ncol(.x) == 11)
-  
-  if (length(valid_tables) == 0) stop("ไม่พบตารางที่มีโครงสร้างถูกต้อง (11 คอลัมน์) ในหน้านี้")
-  
-  # 4. นำตารางทั้ง 12 เดือนมาต่อกัน (Bind rows)
+
+  if (length(valid_tables) == 0) stop("No table with the correct structure (11 columns) found on this page")
+
+  # 4. Bind all 12 months' tables together (bind rows)
   raw_df <- map_df(valid_tables, function(tbl) {
-    # เปลี่ยนชื่อคอลัมน์ชั่วคราวเพื่อให้ต่อกันได้
+    # Temporarily rename columns so they can be bound together
     colnames(tbl) <- paste0("V", 1:11)
-    # แปลงทุกคอลัมน์เป็นตัวอักษรเพื่อป้องกัน Error ชนิดข้อมูลชนกัน
+    # Convert every column to character to prevent data type mismatch errors
     mutate_all(tbl, as.character)
   })
-  
-  # ตั้งชื่อคอลัมน์ใหม่ตามโครงสร้างจริง
-  colnames(raw_df) <- c("DateStr", "Weekday", 
+
+  # Rename columns according to the actual structure
+  colnames(raw_df) <- c("DateStr", "Weekday",
                         "Sunrise", "Sunrise_Azimuth", 
                         "Sunset", "Sunset_Azimuth",
                         "Moon_Illum", 
                         "Moonrise", "Moonrise_Azimuth", 
                         "Moonset", "Moonset_Azimuth")
   
-  # 5. ทำความสะอาดและคำนวณช่วงแสง
+  # 5. Clean the data and calculate the daylight duration
   final_data <- raw_df %>%
-    # กรองเอาเฉพาะบรรทัดที่เป็นข้อมูลเวลาจริงๆ (สังเกตจากเครื่องหมาย :)
+    # Keep only rows that are actual time data (identified by the ":" character)
     filter(str_detect(Sunrise, ":") & str_detect(Sunset, ":")) %>%
     mutate(
       Year = year_ce,
       Province = province_name,
-      
-      # แยกวันที่และเดือนออกจากกัน (เช่น "1 ม.ค." -> Day=1, Month_Th="ม.ค.")
+
+      # Split the date and month apart (e.g., "1 ม.ค." -> Day=1, Month_Th="ม.ค.")
       Day = as.integer(str_extract(DateStr, "^\\d+")),
       Month_Th = str_replace(DateStr, "^\\d+\\s*", ""),
-      
-      # แปลงข้อความ "HH:MM" เป็นระยะเวลา (Period)
+
+      # Convert the "HH:MM" text into a Period
       rise_time = hm(Sunrise),
       set_time = hm(Sunset),
-      
-      # คำนวณช่วงแสงเป็นชั่วโมง (ทศนิยม)
+
+      # Calculate daylight duration in hours (decimal)
       Daylight_Hours = round(time_length(set_time - rise_time, unit = "hour"), 2)
     ) %>%
-    # จัดเรียงคอลัมน์ที่จำเป็นสำหรับนำไปใช้งานต่อ
+    # Arrange the columns needed for further use
     select(Year, Province, Month_Th, Day, Weekday, Sunrise, Sunset, Daylight_Hours)
-  
+
   return(final_data)
 }
 ```
 
-### 💡 ตัวอย่างการใช้งานจริง 
-ดูตัวอย่างฟังก์ชันการดึงข้อมูลความยาวแสงแต่ละวันในปี 2024 ในพื้นที่ต่างๆ
+### 💡 Real-World Usage Example
+See an example of using the function to retrieve daily daylight duration in 2024 for various locations
 
 ```r
-# ดึงข้อมูลของจังหวัดพัทลุง ในปี ค.ศ. 2024
+# Retrieve data for Phatthalung province in 2024
 phatthalung_daylight <- get_daily_daylight(2024, "พัทลุง")
 
-# ตรวจสอบ 5 บรรทัดแรกของตารางข้อมูล
+# Check the first 5 rows of the data table
 head(phatthalung_daylight)
 
-# ดึงข้อมูลของกรุงเทพมหานคร ในปี ค.ศ. 2025
+# Retrieve data for Bangkok in 2025
 bkk_daylight <- get_daily_daylight(2025, "กรุงเทพมหานคร")
 head(bkk_daylight)
 ```

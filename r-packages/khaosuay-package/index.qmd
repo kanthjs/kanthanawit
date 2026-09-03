@@ -1,10 +1,10 @@
 ---
 title: khaosuay
-description: R Package สำหรับวิเคราะห์ข้อมูลการทดลองทางเกษตรกรรมในบริบทของไทย เปลี่ยนข้อมูลดิบให้กลายเป็นรายงานสถิติที่พร้อมใช้งาน เหมือนข้าวสวยหุงสุกใหม่ที่พร้อมเสิร์ฟ
+description: An R package for analyzing agricultural experiment data in the Thai context. It turns raw data into ready-to-use statistical reports — like freshly cooked rice, ready to serve.
 image: /images/khaosuay-hexlogo.jpg
 link-out: https://kanthjs.github.io/khaosuay/
 ---
 
-[เอกสารแพ็กเกจ](https://kanthjs.github.io/khaosuay/){.btn-link-out target="_blank"}
+[Package documentation](https://kanthjs.github.io/khaosuay/){.btn-link-out target="_blank"}
 
-ข้าวสวย — R Package สำหรับวิเคราะห์ข้อมูลการทดลองทางเกษตรกรรมในบริบทของไทย เปลี่ยนข้อมูลดิบให้กลายเป็นรายงานสถิติที่พร้อมใช้งาน เหมือนข้าวสวยหุงสุกใหม่ที่พร้อมเสิร์ฟ
+Khaosuay ("cooked rice") — an R package for analyzing agricultural experiment data in the Thai context. It turns raw data into ready-to-use statistical reports — like freshly cooked rice, ready to serve.
