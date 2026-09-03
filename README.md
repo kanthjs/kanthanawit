@@ -99,6 +99,16 @@ ggplot(mtcars, aes(wt, mpg)) + geom_point()
 | `quarto render writing/foo` | Render a single page                              |
 | `quarto check`              | Diagnose the local Quarto/R installation          |
 
+`npm run build` is a deliberate no-op. The Netlify UI still carries a leftover
+build command of `npm run build` from the Astro days, and a build command set in
+the UI overrides `netlify.toml`, so the field has to resolve to something that
+exits cleanly. The actual render happens afterwards, in the `onBuild` step of
+`@quarto/netlify-plugin-quarto`, which writes to `_site`.
+
+Clearing **Site configuration → Build & deploy → Build settings → Build command**
+in the Netlify dashboard removes the need for the script; the plugin alone then
+builds the site.
+
 ## 🎨 Design
 
 Layout is deliberately plain: a narrow 840px reading column, a 20px root font size, and a three-colour palette. All three colours live at the top of `styles.scss` — change them and the whole site follows:
