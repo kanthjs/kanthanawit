@@ -1,17 +1,13 @@
 ---
-title: "ขีด ๆ เขียน ๆ"
-pagetitle: "กันต์ธณวิชญ์ — งานเขียน"
+title: "Blog"
+pagetitle: "Blog — Kanthanawit"
+description: "Notes on agricultural statistics, R, and the tools I use for research."
 listing:
   contents: "*/index.qmd"
   sort: "date desc"
   type: default
-  categories: true
-  sort-ui: false
-  filter-ui: false
-  fields: [image, date, title, description, categories]
-  image-align: left
-  image-height: "150px"
-  feed:
-    title: "งานเขียนของกันต์ธณวิชญ์"
-toc: false
+  fields: [date, title, description]
+  date-format: "MMMM D, YYYY"
 ---
+
+โน้ต ต่าง ๆ

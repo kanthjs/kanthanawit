@@ -6,14 +6,28 @@ toc: false
 
 ::: {.home}
 
-::: {.home-left}
-# Sawasde Krub, I am Kanthanawit {.unnumbered}
+<div class="home-text">
 
-Welcome to my blog
-:::
+# Kanthanawit {.unnumbered}
 
-::: {.home-right}
-![](images/me.jpg)
-:::
+<p class="home-tagline">Agricultural scientist · R · Statistics</p>
+
+<div class="home-social">
+<a href="https://github.com/kanthjs" aria-label="GitHub"><i class="bi bi-github"></i></a>
+<a href="https://orcid.org/0009-0002-3884-1107" aria-label="ORCID"><i class="bi bi-person-badge"></i></a>
+<a href="https://scholar.google.com/citations?user=XB4u66sAAAAJ&hl=en" aria-label="Google Scholar"><i class="bi bi-mortarboard"></i></a>
+</div>
+
+<p class="home-intro">I'm an agricultural scientist focusing on rice pests and diseases, and on turning field data into forecasts and statistical tools. I build R packages and small apps, and I like sharing what I learn along the way.</p>
+
+<p class="home-intro">ดีใจที่แวะเข้ามาเยี่ยมชม ผมชื่อกันต์นะครับ</p>
+
+<p class="home-more"><a href="writing/index.qmd">Read latest posts →</a></p>
+
+</div>
+
+<div class="home-photo">
+<img src="images/me-cartoon.svg" alt="Kanthanawit">
+</div>
 
 :::

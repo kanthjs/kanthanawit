@@ -1,0 +1,14 @@
+---
+title: "Post title"
+date: 2026-01-01
+description: "One or two sentences shown in the blog list."
+categories: [research]   # e.g. research, tutorial, notes
+# image: /images/writing/first-post.jpg
+draft: true              # remove this line to publish
+---
+
+Introduction paragraph.
+
+## Main section
+
+Body text.

@@ -1,0 +1,28 @@
+---
+title: "khaosuay"
+description: "ข้าวสวยพร้อมทาน package เพื่อ วิเคราะห์ข้อมูลวิจัยที่ได้ออกแบบการทดลอง"
+---
+
+An R package for analyzing agricultural experiment data in the Thai context. It turns raw data into ready-to-use statistical reports, like freshly cooked rice (ข้าวสวย) ready to serve.
+
+[Package documentation](https://kanthjs.github.io/khaosuay/){.btn-link-out target="_blank"} [GitHub](https://github.com/kanthjs/khaosuay){.btn-link-out target="_blank"}
+
+## Why khaosuay?
+
+Statistical analysis of field experiments (CRD, RCBD, split-plot) involves a lot of fiddly work: preparing data, checking assumptions, and drawing publication-ready charts. khaosuay wraps this into a short pipeline, supports Thai column names, and chooses between parametric and non-parametric tests automatically.
+
+## The four-step workflow
+
+| Step | Function | Metaphor | What it does |
+|:--|:--|:--|:--|
+| 1 | `wash_rice()` | Wash the rice | Clean data, detect outliers, check the design |
+| 2 | `taste_rice()` | Taste the rice | Check normality and equal variance |
+| 3 | `cook_crd()` / `cook_rcbd()` / `cook_split()` | Cook the rice | Run the analysis for the experimental design |
+| 4 | `plot_cooked()` | Serve the rice | Plot results with significance letters |
+
+## Install
+
+```r
+# install.packages("pak")
+pak::pak("kanthjs/khaosuay")
+```

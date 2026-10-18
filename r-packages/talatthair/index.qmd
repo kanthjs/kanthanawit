@@ -1,0 +1,33 @@
+---
+title: "talatThaiR"
+description: "ตลาดไท เพื่อดึงข้อมูลทางการเกษตรต่าง ๆ จากสำนักงานเศรษฐกิจการเกษตร (NABC)"
+---
+
+An R package for browsing Thai agricultural prices and indices from the National Agricultural Big Data Center (NABC) API, like a walk through a Thai market (ตลาด). It handles the HTTP requests and pagination for you and returns ready-to-use data frames.
+
+[Package documentation](https://kanthjs.github.io/talatThaiR/){.btn-link-out target="_blank"} [GitHub](https://github.com/kanthjs/talatThaiR){.btn-link-out target="_blank"}
+
+## Available data
+
+- Commodity prices: daily, weekly, monthly
+- Agricultural production index: monthly, quarterly, yearly
+- Agricultural price index: monthly, quarterly, yearly
+
+## Main functions
+
+| Function | Returns |
+|:--|:--|
+| `get_daily_prices()` | Daily commodity prices |
+| `get_weekly_prices()` | Weekly commodity prices |
+| `get_monthly_prices()` | Monthly commodity prices |
+| `get_production_index_month()` / `_quarter()` / `_year()` | Production index |
+| `get_price_index_month()` / `_quarter()` / `_year()` | Price index |
+
+Helper functions such as `show_daily_products()` and `show_index_groups()` list the valid product and category codes. Product names differ between the daily and weekly datasets, so check the list first.
+
+## Install
+
+```r
+# install.packages("remotes")
+remotes::install_github("kanthjs/talatThaiR")
+```

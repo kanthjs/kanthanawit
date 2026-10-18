@@ -1,0 +1,10 @@
+---
+# Copy this folder to talks/<slug>/index.qmd and fill in the fields.
+title: "Talk title"
+date: 2026-01-01
+event: "Conference name, City, Country"
+description: "Short abstract shown in the talk list."
+slides: https://example.com/slides   # optional, link to slides
+---
+
+Abstract or extra notes.

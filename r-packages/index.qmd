@@ -1,13 +1,11 @@
 ---
 title: "R Packages"
-pagetitle: "Kanthanawit — R Packages"
+pagetitle: "R Packages — Kanthanawit"
+description: "R packages for agricultural data and statistics."
 listing:
   contents: "*/index.qmd"
-  sort: "title"
   type: grid
-  categories: false
-  sort-ui: false
-  filter-ui: false
-  fields: [image, title, description]
-toc: false
+  fields: [title, description]
 ---
+
+R package ต่าง ๆ ที่ พัฒนาขึ้น
