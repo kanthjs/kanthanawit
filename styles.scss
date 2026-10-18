@@ -3,7 +3,7 @@
 // Theme colors ----------------------------------------------------------------
 // Swap these three and the whole site follows.
 
-$theme-paper:  #f5f4ed;  // warm off-white background
+$theme-paper:  #ffffff;  // clean white background
 $theme-ink:    #1f2a1c;  // deep green-black text
 $theme-green:  #5a7247;  // olive-leaf accent
 
@@ -16,8 +16,8 @@ $theme-green-shadow: rgba($theme-green, 0.18);
 // (the fonts on the site this design follows) do not, so they are swapped here.
 
 $font-size-root: 20px;
-$font-family-sans-serif: "IBM Plex Sans Thai", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-$font-family-serif: "Trirong", Georgia, serif;
+$font-family-sans-serif: "Kodchasan", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+$font-family-serif: "Kodchasan", Georgia, serif;
 $font-family-monospace: "Fira Code", "SFMono-Regular", Consolas, monospace;
 
 // Bootstrap / Quarto overrides ------------------------------------------------
@@ -74,6 +74,32 @@ blockquote {
 }
 
 .navbar .nav-link {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.8rem;
+}
+
+@media (min-width: 992px) {
+  .navbar-container {
+    flex-direction: column;
+    align-items: center;
+    padding-top: 0.5rem;
+  }
+
+  .navbar-brand-container {
+    margin: 0 !important;
+  }
+
+  .navbar-collapse {
+    justify-content: center;
+  }
+
+  .navbar-nav.ms-auto {
+    margin: 0 auto !important;
+  }
+}
+
+.navbar .nav-link {
   position: relative;
 
   &::after {
@@ -101,46 +127,151 @@ blockquote {
 
 .home {
   display: flex;
-  gap: 4rem;
+  gap: 3rem;
   align-items: center;
-  max-width: 1100px;
+  max-width: 1000px;
   margin: 4rem auto 5rem;
   padding: 0 2rem;
 
   @media (max-width: 900px) {
     flex-direction: column;
-    gap: 2.5rem;
+    gap: 2rem;
     margin-top: 2rem;
-    text-align: left;
   }
 }
 
-.home .home-left {
+.home-text {
   flex: 1 1 60%;
 
   h1 {
-    font-size: 2.6rem;
-    margin-bottom: 1.5rem;
+    font-size: 4rem;
+    font-weight: 300;
+    line-height: 1.15;
+    margin: 0 0 1.25rem;
 
     @media (max-width: 900px) {
-      font-size: 2rem;
+      font-size: 2.8rem;
     }
   }
+}
 
-  p {
+.home-tagline {
+  font-size: 0.95rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: $theme-ink;
+  margin: 0 0 1.5rem;
+}
+
+.home-social {
+  display: flex;
+  gap: 1rem;
+  font-size: 1.3rem;
+  margin-bottom: 2rem;
+
+  a {
+    color: $theme-green;
+    transition: color 0.15s ease-in;
+
+    &:hover {
+      color: $theme-ink;
+    }
+  }
+}
+
+.home-intro {
+  color: $theme-ink-soft;
+  font-size: 1.05rem;
+}
+
+.home-more {
+  margin-top: 2rem;
+
+  a {
+    margin-right: 1.5rem;
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: $theme-green;
+    text-decoration: none;
+
+    &:hover {
+      color: $theme-ink;
+    }
+  }
+}
+
+.home-photo {
+  flex: 0 1 280px;
+
+  @media (max-width: 900px) {
+    width: 200px;
+  }
+
+  img {
+    width: 100%;
+    border-radius: 50%;
+    box-shadow: 0 10px 30px $theme-green-shadow;
+  }
+}
+
+// =============================================================================
+// PAGE TITLES & ABOUT (centered, light, after juliasilge.com)
+// =============================================================================
+
+#title-block-header,
+.quarto-title-block {
+  text-align: center;
+  margin: 3rem 0 2.5rem;
+
+  h1.title {
+    font-size: 3.2rem;
+    font-weight: 300;
+    margin-bottom: 1rem;
+  }
+
+  .description,
+  .subtitle {
     color: $theme-ink-soft;
     font-size: 1.05rem;
   }
 }
 
-.home .home-right {
-  flex: 0 1 40%;
+.navbar .nav-link.active::after {
+  transform: scaleX(1);
+}
 
-  img {
-    width: 100%;
-    border-radius: 1.5rem;
-    box-shadow: 0 10px 30px $theme-green-shadow;
+.about-panel {
+  background: #f8f9fa;
+  text-align: center;
+  padding: 3rem 1.5rem 2.5rem;
+  margin: 2rem 0 3rem;
+
+  h1 {
+    font-size: 2.6rem;
+    font-weight: 300;
+    margin: 1.25rem 0 0.5rem;
   }
+
+  .about-photo {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: $theme-paper;
+  }
+
+  .about-subtitle {
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    margin: 0;
+  }
+}
+
+.listing-title a,
+a.no-external.listing-title {
+  text-decoration: underline;
 }
 
 // =============================================================================

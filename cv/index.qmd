@@ -1,41 +1,21 @@
 ---
-title: "Kanthanawit"
-subtitle: "Agricultural Scientist"
-pagetitle: "Kanthanawit — CV"
-image: /images/me.jpg
-toc: true
-toc-title: "Contents"
+pagetitle: "About — Kanthanawit"
+image: /images/me-cartoon.svg
+toc: false
 ---
+
+::: {.about-panel}
+![](/images/me-cartoon.svg){.about-photo}
+
+# Kanthanawit {.unnumbered}
+
+<p class="about-subtitle">นักวิชาการเกษตร</p>
+:::
 
 [kanthanawit.j@rice.mail.go.th](mailto:kanthanawit.j@rice.mail.go.th) · Pathum Thani, Thailand
 
-[Download CV (PDF)](kanthanawit-cv.pdf){.btn-link-out target="_blank"}
+[ORCID: 0009-0002-3884-1107](https://orcid.org/0009-0002-3884-1107){target="_blank" rel="me"} · [Google Scholar](https://scholar.google.com/citations?user=XB4u66sAAAAJ&hl=en){target="_blank" rel="me"}
 
-![](/images/me.jpg){width="240" style="border-radius:1.5rem;"}
-
-## About
-
-Agricultural scientist by profession....
-
-## Experience
-
-**Researcher** — Agricultural Research Institute · 2016–2020
-
-Developed R packages and a rice disease alert system. Analyzed statistical and Machine Learning models.
-Presented data through Dashboards and Web Apps.
-
-## Education
-
-**Ph.D. in Plant Pathology** — University of the Philippines Los Baños · 2014–2018
+สวัสดีครับ ผมกันต์ ทำงานเป็นนักวิจัย
 
 ## Publications
-
-- Author, A. B. & Author, C. D. (Year). *Title of the paper*. Journal Name, Volume(Issue), pages.
-- Author, A. B. (Year). *Title of another paper*. Journal Name, Volume(Issue), pages.
-
-## Skills
-
-- R Programming
-- Machine Learning
-- Statistical Modeling
-- App Development

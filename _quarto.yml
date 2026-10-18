@@ -4,10 +4,9 @@ project:
   render:
     - "index.qmd"
     - "cv/index.qmd"
-    - "writing/**/*.qmd"
-    - "projects/**/*.qmd"
-    - "apps/**/*.qmd"
+    - "talks/index.qmd"
     - "r-packages/**/*.qmd"
+    - "writing/**/*.qmd"
     - "talks/**/*.qmd"
   resources:
     - "images/**"
@@ -27,18 +26,15 @@ website:
     right:
       - text: "About"
         href: cv/index.qmd
-      - text: "Blog"
-        href: writing/index.qmd
-      - text: "Project"
-        href: projects/index.qmd
+      - text: "R Packages"
+        href: r-packages/index.qmd
       - text: "Talks"
         href: talks/index.qmd
+      - text: "Blog"
+        href: writing/index.qmd
       - icon: github
         aria-label: "GitHub"
         href: https://github.com/kanthjs
-      - icon: rss
-        aria-label: "RSS"
-        href: writing/index.xml
 
   page-footer:
     center: "© 2026 Kanth's Playbook"
