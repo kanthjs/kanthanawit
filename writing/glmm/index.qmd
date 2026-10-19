@@ -1,0 +1,73 @@
+---
+title: "GLMM"
+date: 2026-10-19
+description: "ทำความรู้จัก glmm กัน แบบงงๆ"
+categories: [glmm, r]
+draft: false
+---
+## GLMM คืออะไร
+
+Generalized linear mixed model (ขอให้จำแบบนี้ไปก่อน) คือแบบจำลองที่สามารถแปลงได้ ทั้งหมด ต่อไปนี้ ตั้งแต่ ANOVA, linear model (lm), linear mixed model (lmm), generalized linear model (glm) ทั้งหมดนี้ มีกรอบร่วมกันที่สามารถย้อนกลับไปถึง glmm ได้
+
+ถ้าพูดถึง glmm แล้ว จะพูดอยู่ด้วยกัน 3 อย่าง
+
+1. การแจกแจงของตัวแปรตอบสนอง (y)
+2. Link function (จำไปก่อน)
+3. Random effect (จำไปก่อน)
+
+อ้าวแล้ว มันจะเกี่ยวกับ lm lmm glm ได้อย่างไร
+เอาอย่างนี้
+linear model คือ
+
+1. การแจกแจงของตัวแปรตอบสนอง (y) = normal distribution
+2. link function = identity
+3. random effect = no (ไม่มี)
+
+```
+GLMM ─(Normal + identity)──────────→ LMM
+  │                                   │
+  │(ตัด random effect)                │(ตัด random effect)
+  ↓                                   ↓
+ GLM ──(Normal + identity)──────────→ LM / ANOVA
+```
+
+ดังนั้น เราควร มีความเข้าใจใน 3 ข้อ ข้างต้น เป็นพื้นฐาน
+
+ลองมาดู ตัวอย่าง
+```{r}
+library(glmmTMB)
+
+# ข้อมูลตัวอย่างที่มากับ R: น้ำหนักไก่ตามอาหารสูตรต่าง ๆ
+dat <- ChickWeight[ChickWeight$Time == 21, ]
+
+# 1) lm แบบปกติ
+m_lm <- lm(weight ~ Diet, data = dat)
+
+# 2) glm: ระบุ distribution และ link function ตรง ๆ
+m_glm <- glm(weight ~ Diet, data = dat,
+             family = gaussian(link = "identity"))
+
+# 3) glmm (glmmTMB): สูตรเดียวกัน ไม่ใส่ random effect
+m_glmm <- glmmTMB(weight ~ Diet, data = dat,
+                  family = gaussian(link = "identity"))
+
+# เทียบค่าสัมประสิทธิ์ ควรเท่ากัน (หรือเกือบเท่ากัน) ทั้ง 3 โมเดล
+cbind(lm   = coef(m_lm),
+      glm  = coef(m_glm),
+      glmm = fixef(m_glmm)$cond)
+
+```
+หรือว่า แม้แต่ ANOVA เองก็ตาม
+```{r}
+library(car)   # สำหรับ Anova() ใช้กับ glmmTMB ได้
+
+# ANOVA แบบดั้งเดิม
+anova(m_lm)
+
+#ใช้ Wald chi-square หรือ LRT ที่รองรับตรง ๆ
+Anova(m_glmm, type = "II")
+```
+
+จะเห็นว่า ทั้งสามแบบจำลองให้ค่าสัมประสิทธิ์เท่ากันเกือบทุกหลัก (`lm` กับ `glm` เท่ากันเป๊ะ ส่วน `glmmTMB` ต่างไปเล็กน้อยในทศนิยม เพราะหาค่าด้วยการหาค่าเหมาะที่สุดเชิงตัวเลข ไม่ได้ใช้สูตรตรง ๆ แบบ `lm`)
+
+ส่วนตาราง ANOVA ใช้สถิติทดสอบคนละตัว (`anova()` ใช้ F-test, `Anova()` ใช้ Wald chi-square) ค่า p จึงไม่เท่ากัน (0.0069 กับ 0.0016) แต่ข้อสรุปเหมือนกัน คือ Diet มีผลต่อน้ำหนักไก่
