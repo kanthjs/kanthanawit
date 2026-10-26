@@ -1,0 +1,37 @@
+---
+title: "Kanthanawit"
+pagetitle: "About — Kanthanawit"
+subtitle: "นักวิชาการเกษตร ระบาดวิทยาโรคพืช ภาษา R"
+image: ../images/profile.jpg
+image-alt: "Portrait of Kanthanawit"
+comments: false
+about:
+  template: trestles
+  image-width: 15em
+  image-shape: rectangle
+  id: hero-heading
+  links:
+    - icon: github
+      aria-label: GitHub
+      href: https://github.com/kanthjs
+    - icon: person-badge
+      aria-label: ORCID
+      href: https://orcid.org/0009-0002-3884-1107
+    - icon: mortarboard
+      aria-label: "Google Scholar"
+      href: https://scholar.google.com/citations?user=XB4u66sAAAAJ&hl=en
+    - icon: envelope
+      aria-label: Email
+      href: mailto:kanthanawit.j@rice.mail.go.th
+
+page-layout: full
+---
+
+<div class="quarto-title">
+<h1 class="title"> Hello! Sa-Wad-Di-Krub!</h1>
+</div>
+
+ผมชื่อ Kanthanawit (กันต์) เป็นนักวิชาการเกษตร หรือ นักวิจัยด้านการเกษตร ทำงานอยู่ที่ศูนย์วิจัยข้าวปทุมธานี
+
+ทำวิจัยโดยใช้ภาษา R และ พัฒนา [R packages](../r-packages/index.qmd) เพื่อการวิจัย และ ยินดีที่จะแชร์ สิ่งที่รู้ และ นี่คือ [GitHub](https://github.com/kanthjs) ของผม
+

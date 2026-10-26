@@ -4,8 +4,9 @@ node_modules/
 # quarto
 /_site/
 /.quarto/
-/_freeze/
 **/*.quarto_ipynb
+*.knit.md
+*.utf8.md
 
 # logs
 npm-debug.log*

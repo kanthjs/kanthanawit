@@ -18,7 +18,7 @@ Source of my personal website, rebuilt from scratch on Quarto and grown one page
 ├── header.html     # Google Fonts <link> tags
 ├── netlify.toml    # Deploy config (publish = _site)
 ├── index.qmd       # Home page
-├── cv/index.qmd    # CV
+├── about/index.qmd # About Me
 └── images/         # Static images
 ```
 

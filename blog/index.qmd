@@ -1,0 +1,12 @@
+---
+title: "Kanth with R"
+pagetitle: "Blog — Kanthanawit"
+description: "บันทึกต่าง ๆ ของผม กับ R"
+listing:
+  contents: "*/index.qmd"
+  sort: "date desc"
+  type: default
+  fields: [date, title, description, image]
+  image-align: right
+  date-format: "MMMM D, YYYY"
+---

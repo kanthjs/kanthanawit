@@ -1,289 +1,458 @@
 /*-- scss:defaults --*/
 
-// Theme colors ----------------------------------------------------------------
-// Swap these three and the whole site follows.
+// =============================================================================
+// SIMON P. COUCH THEME PALETTE (Warm Forest & Earth)
+// =============================================================================
 
-$theme-paper:  #ffffff;  // clean white background
-$theme-ink:    #1f2a1c;  // deep green-black text
-$theme-green:  #5a7247;  // olive-leaf accent
+$siteBgColorCustom:       #F5F4EE; // Warm sunlight paper / linen
+$sidebarBgColorCustom:    #FFFFFF;
+$textColorCustom:         #1B261D; // Deep botanical woodland ink
+$sidebarTextColorCustom:  #1E2E21;
 
-$theme-ink-soft:     rgba($theme-ink, 0.62);
-$theme-rule:         rgba($theme-ink, 0.12);
-$theme-green-shadow: rgba($theme-green, 0.18);
+$headlineColorCustom:     #2A4C39; // Deep moss
+$headingColorCustom:      #38664D; // Fresh foliage & Totoro leaf green
+$bodyLinkColorCustom:     #38664D;
+$navLinkColorCustom:      #38664D;
+$sidebarLinkColorCustom:  #38664D;
+$footerTextColorCustom:   #38664D;
+
+$buttonTextColorCustom:      #FAFAF5;
+$buttonHoverTextColorCustom: #FAF9F0;
+$buttonBgColorCustom:       #4D8065;
+$buttonHoverBgColorCustom:  #3E6A53;
+$borderColorCustom:         #DDDCD2;
+$cardBgColorCustom:         #FAF9F4;
 
 // Typography ------------------------------------------------------------------
-// Trirong / IBM Plex Sans Thai carry Thai glyphs; Fraunces and Commissioner
-// (the fonts on the site this design follows) do not, so they are swapped here.
-
-$font-size-root: 20px;
-$font-family-sans-serif: "Kodchasan", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-$font-family-serif: "Kodchasan", Georgia, serif;
+$font-size-root: 18px;
+$font-family-serif: "Fraunces", "Noto Serif Thai", Georgia, serif;
+$font-family-sans-serif: "Source Sans 3", "IBM Plex Sans Thai", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 $font-family-monospace: "Fira Code", "SFMono-Regular", Consolas, monospace;
 
 // Bootstrap / Quarto overrides ------------------------------------------------
+$body-bg: $siteBgColorCustom;
+$body-color: $textColorCustom;
+$link-color: $bodyLinkColorCustom;
+$link-hover-color: darken(saturate($bodyLinkColorCustom, 15%), 10%);
 
-$body-bg: $theme-paper;
-$body-color: $theme-ink;
-$link-color: $theme-green;
-$link-hover-color: darken(saturate($link-color, 25%), 12%);
-$code-color: #4758ab;
-$code-bg: rgba($theme-ink, 0.04);
-$navbar-bg: $theme-paper;
-$navbar-fg: $theme-green;
-$btn-code-copy-color-active: $theme-green;
+$input-bg: $buttonTextColorCustom;
+$popover-bg: $buttonTextColorCustom;
+$navbar-bg: $siteBgColorCustom;
+$navbar-fg: $navLinkColorCustom;
+$code-block-bg: $buttonTextColorCustom;
 
 /*-- scss:rules --*/
 
 // =============================================================================
-// BASE
+// BASE & TYPOGRAPHY
 // =============================================================================
 
-h1, h2, h3, h4 {
+body {
+  font-family: $font-family-sans-serif;
+  font-weight: 350;
+  line-height: 1.8;
+  color: $textColorCustom;
+  background-color: $siteBgColorCustom;
+}
+
+h1, h2, h3, h4, h5, h6,
+.title, .h1, .h2, .h3, .h4 {
   font-family: $font-family-serif;
+  color: $headingColorCustom;
+  font-weight: 300;
   letter-spacing: -0.01em;
 }
 
-h1 { line-height: 1.35; }
-h2, h3 { line-height: 1.45; }
+h1, .h1 {
+  font-size: 2.5rem;
+  line-height: 1.3;
+}
+
+h2, .h2 {
+  font-size: calc(1.45rem + 0.5vw);
+  margin-top: 2rem;
+  margin-bottom: 0.8rem;
+}
+
+h3, .h3 {
+  font-size: calc(1.25rem + 0.3vw);
+  margin-top: 1.5rem;
+  margin-bottom: 0.6rem;
+}
 
 p, li {
-  line-height: 1.85; // Thai needs more leading than Latin
+  font-size: 1.125rem;
+  font-weight: 350;
+  line-height: 1.85;
 }
 
-.sourceCode {
-  font-size: 0.92em;
+p strong, p b, li strong, li b {
+  font-weight: 600;
+  color: $headlineColorCustom;
 }
 
-blockquote {
-  border-left: 3px solid $theme-green;
-  padding-left: 1rem;
-  color: $theme-ink-soft;
+a {
+  color: $bodyLinkColorCustom;
+  transition: color 0.15s ease-in-out;
+}
+
+blockquote, .blockquote {
+  border-left: 3px solid $headingColorCustom;
+  padding-left: 1.25rem;
+  margin: 1.5rem 0;
+  color: #1F3329 !important;
+  font-style: italic;
+}
+
+hr {
+  border-color: $borderColorCustom;
+  opacity: 0.8;
+}
+
+// Code & Pre ------------------------------------------------------------------
+p code:not(.sourceCode), li code:not(.sourceCode), td code:not(.sourceCode) {
+  background-color: $buttonTextColorCustom !important;
+  color: #1F3329;
+  border: 1px solid rgba(221, 221, 207, 0.7);
+  padding: 0.15em 0.35em;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+pre code {
+  font-size: 0.9rem;
+  font-family: $font-family-monospace;
+}
+
+div.sourceCode {
+  background-color: $cardBgColorCustom !important;
+  border: 1px solid $borderColorCustom;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+div.cell-output pre {
+  background-color: $cardBgColorCustom !important;
+  border: 1px solid $borderColorCustom;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  padding: 1rem;
 }
 
 // =============================================================================
-// NAVIGATION
+// NAVBAR (Minimal, Clean Simon Couch Style)
 // =============================================================================
 
 .navbar {
-  border-bottom: 1px solid $theme-rule;
+  border-bottom: 1px solid $borderColorCustom;
+  background-color: $siteBgColorCustom !important;
+  padding-top: 0.85rem;
+  padding-bottom: 0.85rem;
 }
 
-.navbar-brand,
-.navbar .nav-link {
+.navbar-brand {
   font-family: $font-family-serif;
-}
+  color: $headingColorCustom !important;
+  font-weight: 400;
+  font-size: 1.25rem;
+  letter-spacing: -0.01em;
+  display: inline-flex;
+  align-items: center;
 
-.navbar .nav-link {
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-size: 0.8rem;
-}
-
-@media (min-width: 992px) {
-  .navbar-container {
-    flex-direction: column;
-    align-items: center;
-    padding-top: 0.5rem;
-  }
-
-  .navbar-brand-container {
-    margin: 0 !important;
-  }
-
-  .navbar-collapse {
-    justify-content: center;
-  }
-
-  .navbar-nav.ms-auto {
-    margin: 0 auto !important;
+  img,
+  .navbar-logo {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    margin-right: 0.45rem;
+    height: 1.65rem;
+    width: auto;
+    display: inline-block;
+    vertical-align: middle;
   }
 }
 
 .navbar .nav-link {
+  font-family: $font-family-sans-serif;
+  color: $navLinkColorCustom !important;
+  font-size: 0.95rem;
+  font-weight: 400;
+  padding: 0.4rem 0.8rem;
+  transition: color 0.15s ease-in-out;
   position: relative;
 
   &::after {
     content: "";
     position: absolute;
-    bottom: 0.35em;
-    left: 0.5rem;
-    right: 0.5rem;
-    height: 0.08em;
-    background-color: $theme-green;
+    bottom: 0.15em;
+    left: 0.8rem;
+    right: 0.8rem;
+    height: 1.5px;
+    background-color: $headingColorCustom;
     transform: scaleX(0);
     transform-origin: center;
-    transition: transform 250ms ease;
+    transition: transform 200ms ease;
   }
 
   &:hover::after,
-  &:focus::after {
+  &.active::after {
     transform: scaleX(1);
   }
 }
 
-// =============================================================================
-// HOME (index.qmd, page-layout: custom)
-// =============================================================================
-
-.home {
-  display: flex;
-  gap: 3rem;
-  align-items: center;
-  max-width: 1000px;
-  margin: 4rem auto 5rem;
-  padding: 0 2rem;
-
-  @media (max-width: 900px) {
-    flex-direction: column;
-    gap: 2rem;
-    margin-top: 2rem;
-  }
-}
-
-.home-text {
-  flex: 1 1 60%;
-
-  h1 {
-    font-size: 4rem;
-    font-weight: 300;
-    line-height: 1.15;
-    margin: 0 0 1.25rem;
-
-    @media (max-width: 900px) {
-      font-size: 2.8rem;
-    }
-  }
-}
-
-.home-tagline {
-  font-size: 0.95rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: $theme-ink;
-  margin: 0 0 1.5rem;
-}
-
-.home-social {
-  display: flex;
-  gap: 1rem;
-  font-size: 1.3rem;
-  margin-bottom: 2rem;
-
-  a {
-    color: $theme-green;
-    transition: color 0.15s ease-in;
-
-    &:hover {
-      color: $theme-ink;
-    }
-  }
-}
-
-.home-intro {
-  color: $theme-ink-soft;
-  font-size: 1.05rem;
-}
-
-.home-more {
-  margin-top: 2rem;
-
-  a {
-    margin-right: 1.5rem;
-    font-size: 0.85rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: $theme-green;
-    text-decoration: none;
-
-    &:hover {
-      color: $theme-ink;
-    }
-  }
-}
-
-.home-photo {
-  flex: 0 1 280px;
-
-  @media (max-width: 900px) {
-    width: 200px;
-  }
-
-  img {
-    width: 100%;
-    border-radius: 50%;
-    box-shadow: 0 10px 30px $theme-green-shadow;
-  }
+.quarto-navigation-tool {
+  color: $navLinkColorCustom !important;
+  font-size: 1.1rem;
 }
 
 // =============================================================================
-// PAGE TITLES & ABOUT (centered, light, after juliasilge.com)
+// QUARTO ABOUT JOLLA (Simon P. Couch Homepage Hero)
 // =============================================================================
 
-#title-block-header,
-.quarto-title-block {
+div.quarto-about-jolla {
+  padding-top: 1.5rem;
+  padding-bottom: 3rem;
   text-align: center;
-  margin: 3rem 0 2.5rem;
 
-  h1.title {
-    font-size: 3.2rem;
-    font-weight: 300;
-    margin-bottom: 1rem;
-  }
-
-  .description,
-  .subtitle {
-    color: $theme-ink-soft;
-    font-size: 1.05rem;
-  }
-}
-
-.navbar .nav-link.active::after {
-  transform: scaleX(1);
-}
-
-.about-panel {
-  background: #f8f9fa;
-  text-align: center;
-  padding: 3rem 1.5rem 2.5rem;
-  margin: 2rem 0 3rem;
-
-  h1 {
-    font-size: 2.6rem;
-    font-weight: 300;
-    margin: 1.25rem 0 0.5rem;
-  }
-
-  .about-photo {
-    width: 160px;
-    height: 160px;
-    border-radius: 50%;
+  // Circular Avatar Image
+  .about-image {
+    border-radius: 50% !important;
+    border: 4px solid #FFFFFF;
+    box-shadow: 0 8px 30px rgba(66, 112, 89, 0.18);
     object-fit: cover;
-    background: $theme-paper;
+    margin-bottom: 1.8rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+    &:hover {
+      transform: scale(1.02);
+      box-shadow: 0 12px 36px rgba(66, 112, 89, 0.24);
+    }
   }
 
-  .about-subtitle {
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    font-size: 0.9rem;
-    margin: 0;
+  // Name / Title
+  .quarto-title h1.title {
+    font-family: $font-family-serif;
+    font-weight: 200;
+    font-size: clamp(2.8rem, 6vw, 4.2rem);
+    color: $headingColorCustom;
+    line-height: 1.15;
+    margin-bottom: 0.35rem;
+  }
+
+  // Subtitle
+  .quarto-title p.subtitle,
+  .quarto-title .lead {
+    font-family: $font-family-sans-serif;
+    font-size: 1.25rem;
+    font-weight: 350;
+    color: $headlineColorCustom;
+    margin-top: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  // Body content (Bio / Intro text)
+  #quarto-document-content {
+    max-width: 680px;
+    margin: 0 auto;
+    font-size: 1.15rem;
+    line-height: 1.85;
+    color: $textColorCustom;
+
+    p {
+      margin-bottom: 1rem;
+    }
+  }
+
+  // Divider
+  hr.about-sep {
+    border: 0;
+    border-top: 1px solid $borderColorCustom;
+    width: 140px;
+    margin: 2rem auto;
+    opacity: 0.85;
+  }
+
+  // Social / Outbound Links
+  .about-links {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+
+    .about-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.5rem 1.15rem;
+      border: 1px solid $borderColorCustom;
+      border-radius: 9999px;
+      background-color: #FAFAF5;
+      color: $headingColorCustom;
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 400;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      transition: all 0.2s ease-in-out;
+
+      i {
+        font-size: 1.15rem;
+        line-height: 1;
+      }
+
+      &:hover {
+        background-color: $headingColorCustom;
+        border-color: $headingColorCustom;
+        color: #FAFAF5;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(66, 112, 89, 0.22);
+      }
+    }
   }
 }
 
-.listing-title a,
-a.no-external.listing-title {
-  text-decoration: underline;
+// =============================================================================
+// QUARTO ABOUT TRESTLES (Simon P. Couch About Page)
+// =============================================================================
+
+div.quarto-about-trestles {
+  margin-top: 1.5rem;
+  margin-bottom: 3.5rem;
+  display: grid;
+  grid-template-columns: minmax(260px, 320px) 1fr;
+  column-gap: 3.5rem;
+  row-gap: 2rem;
+  align-items: start;
+
+  @media (max-width: 820px) {
+    grid-template-columns: 1fr;
+  }
+
+  .about-entity {
+    text-align: center;
+
+    .about-image {
+      border-radius: 12px !important;
+      box-shadow: 0 8px 24px rgba(23, 38, 30, 0.12);
+      object-fit: cover;
+      margin-bottom: 1.25rem;
+      border: 3px solid #FFFFFF;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 28px rgba(23, 38, 30, 0.16);
+      }
+    }
+
+    h1.title,
+    h2.title,
+    .title {
+      font-family: $font-family-serif;
+      font-weight: 300;
+      font-size: 2.1rem;
+      color: $headingColorCustom;
+      margin-bottom: 0.25rem;
+      line-height: 1.2;
+    }
+
+    p.subtitle,
+    .lead {
+      font-family: $font-family-sans-serif;
+      font-size: 1.05rem;
+      font-weight: 350;
+      color: $headlineColorCustom;
+      margin-top: 0.35rem;
+      margin-bottom: 1.25rem;
+      line-height: 1.4;
+    }
+
+    .about-links {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+      margin-top: 1rem;
+
+      .about-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        padding: 0;
+        border: 1px solid $borderColorCustom;
+        border-radius: 6px;
+        background-color: #FAFAF5;
+        color: $headingColorCustom;
+        text-decoration: none;
+        font-size: 1.15rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        transition: all 0.2s ease-in-out;
+
+        i {
+          line-height: 1;
+        }
+
+        .about-link-text {
+          display: none; // icon only like Simon's screenshot
+        }
+
+        &:hover {
+          background-color: $headingColorCustom;
+          border-color: $headingColorCustom;
+          color: #FAFAF5;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 10px rgba(66, 112, 89, 0.22);
+        }
+      }
+    }
+  }
+
+  .about-contents {
+    h1.title,
+    .quarto-title h1.title,
+    h1:first-child {
+      font-family: $font-family-serif;
+      font-weight: 200;
+      font-size: clamp(2.2rem, 3.8vw, 3rem);
+      color: $headingColorCustom;
+      line-height: 1.2;
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+    }
+
+    p {
+      font-size: 1.15rem;
+      line-height: 1.85;
+      margin-bottom: 1.25rem;
+      color: $textColorCustom;
+    }
+  }
 }
 
 // =============================================================================
-// LISTINGS
+// LISTINGS & BLOG POSTS (Simon Couch Style)
 // =============================================================================
 
-.quarto-listing {
-  margin-top: 1rem;
+div.quarto-post .body h3.listing-title,
+div.quarto-post .body .listing-title.h3,
+div.quarto-post .body h3.listing-title a,
+div.quarto-post .body .listing-title.h3 a,
+.listing-title a {
+  font-family: $font-family-serif;
+  color: $headingColorCustom;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  font-weight: 300;
+
+  &:hover {
+    color: darken($headingColorCustom, 10%);
+  }
 }
 
 .quarto-listing-default .listing-item {
-  border-bottom: 1px solid $theme-rule;
+  border-bottom: 1px solid $borderColorCustom;
   padding: 1.75rem 0;
 
   &:last-child {
@@ -291,74 +460,73 @@ a.no-external.listing-title {
   }
 }
 
-.listing-title {
-  font-family: $font-family-serif;
-}
-
-.listing-description {
-  color: $theme-ink-soft;
-}
-
 .quarto-grid-item {
-  border: 1px solid $theme-rule !important;
-  border-radius: 1rem;
-  background-color: transparent;
+  border: 1px solid $borderColorCustom !important;
+  border-radius: 10px;
+  background-color: $cardBgColorCustom;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 
   &:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 18px $theme-green-shadow;
+    box-shadow: 0 8px 20px rgba(66, 112, 89, 0.15);
   }
 
   .card-img-top {
-    border-radius: 1rem 1rem 0 0;
+    border-radius: 10px 10px 0 0;
   }
 }
 
 .listing-category,
 .quarto-category {
-  background-color: rgba($theme-green, 0.1) !important;
+  background-color: rgba($headingColorCustom, 0.1) !important;
   border-color: transparent !important;
-  color: $theme-green !important;
+  color: $headingColorCustom !important;
+  border-radius: 4px;
   text-transform: none;
-  font-size: 0.72em;
+  font-size: 0.75rem;
+  font-weight: 400;
+  padding: 0.2em 0.55em;
 }
 
-// =============================================================================
-// POST PAGES
-// =============================================================================
+// Page Titles for inner pages
+#title-block-header,
+.quarto-title-block,
+#title-block-header.quarto-title-block.default {
+  text-align: center;
+  margin: 2.5rem auto 2.5rem;
 
-.quarto-title-block .quarto-title-banner {
-  background-color: transparent;
-  color: $theme-ink;
-}
-
-#title-block-header .description {
-  color: $theme-ink-soft;
-  font-size: 1.05rem;
-}
-
-.quarto-title-meta {
-  color: $theme-ink-soft;
-}
-
-// External link button used on app / package / book pages ---------------------
-
-.btn-link-out {
-  display: inline-block;
-  margin: 0.5rem 0 1.5rem;
-  padding: 0.5rem 1rem;
-  border: 1px solid $theme-green;
-  border-radius: 0.4rem;
-  color: $theme-green;
-  text-decoration: none;
-  font-size: 0.85rem;
-  transition: background-color 0.15s ease-in, color 0.15s ease-in;
-
-  &:hover {
-    background-color: $theme-green;
-    color: $theme-paper;
+  .quarto-title {
+    text-align: center;
   }
+
+  h1.title {
+    font-family: $font-family-serif;
+    font-weight: 200;
+    color: $headingColorCustom;
+    font-size: clamp(2.4rem, 5vw, 3.4rem);
+    text-align: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .description,
+  div.description,
+  .subtitle,
+  p.subtitle,
+  p.description {
+    color: $headlineColorCustom;
+    font-size: 1.15rem;
+    font-weight: 350;
+    text-align: center;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+// Images throughout the site
+.figure-img, .img-fluid, img {
+  border-radius: 6px;
 }
 
 // =============================================================================
@@ -366,8 +534,19 @@ a.no-external.listing-title {
 // =============================================================================
 
 .nav-footer {
-  border-top: 1px solid $theme-rule;
-  color: $theme-ink-soft;
-  font-size: 0.8rem;
-  min-height: 4rem;
+  border-top: 1px solid $borderColorCustom;
+  color: $footerTextColorCustom;
+  background-color: $siteBgColorCustom;
+  font-size: 0.9rem;
+  padding: 2rem 0;
+  margin-top: 3rem;
+
+  a {
+    color: $footerTextColorCustom;
+    text-decoration: underline;
+
+    &:hover {
+      color: darken($footerTextColorCustom, 10%);
+    }
+  }
 }
