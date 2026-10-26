@@ -1,33 +1,28 @@
 ---
+title: "Kanthanawit"
 pagetitle: "Kanthanawit"
-page-layout: custom
+subtitle: "นักวิชาการเกษตร โรคและศัตรูข้าว ระบาดวิทยา และ ภาษา R"
+image: images/profile.jpg
+image-alt: "Kanthanawit"
+page-layout: article
 toc: false
+back-to-top-navigation: false
+
+about:
+  template: jolla
+  image-width: 18em
+  image-shape: round
+  links:
+    - icon: github
+      text: GitHub
+      aria-label: GitHub
+      href: https://github.com/kanthjs
+    - icon: mortarboard
+      text: Scholar
+      aria-label: "Google Scholar"
+      href: https://scholar.google.com/citations?user=XB4u66sAAAAJ&hl=en
+    - icon: envelope
+      text: Email
+      aria-label: Email
+      href: mailto:kanthanawit.j@rice.mail.go.th
 ---
-
-::: {.home}
-
-<div class="home-text">
-
-# Kanthanawit {.unnumbered}
-
-<p class="home-tagline">Agricultural scientist · R · Statistics</p>
-
-<div class="home-social">
-<a href="https://github.com/kanthjs" aria-label="GitHub"><i class="bi bi-github"></i></a>
-<a href="https://orcid.org/0009-0002-3884-1107" aria-label="ORCID"><i class="bi bi-person-badge"></i></a>
-<a href="https://scholar.google.com/citations?user=XB4u66sAAAAJ&hl=en" aria-label="Google Scholar"><i class="bi bi-mortarboard"></i></a>
-</div>
-
-<p class="home-intro">I'm an agricultural scientist focusing on rice pests and diseases, and on turning field data into forecasts and statistical tools. I build R packages and small apps, and I like sharing what I learn along the way.</p>
-
-<p class="home-intro">ดีใจที่แวะเข้ามาเยี่ยมชม ผมชื่อกันต์นะครับ</p>
-
-<p class="home-more"><a href="writing/index.qmd">Read latest posts →</a></p>
-
-</div>
-
-<div class="home-photo">
-<img src="images/me-cartoon.svg" alt="Kanthanawit">
-</div>
-
-:::

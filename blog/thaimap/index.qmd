@@ -1,0 +1,181 @@
+---
+title: "Map of Thailand with R"
+date: 2026-10-26
+description: "แผนที่ประเทศไทย ด้วย R"
+categories: [map, r]
+draft: false
+---
+
+การวาดแผนที่ประเทศไทยด้วย R นั้น ไม่ยากเลย
+เราจะใช้แพ็กเกจ `geodata` สำหรับดึงข้อมูลจาก GADM โดยตรงผ่าน R และใช้ `sf` ในการจัดการข้อมูลเชิงพื้นที่ นอกจากนี้ยังใช้ `ragg` เพื่อช่วยให้ `ggplot2` แสดงผลฟอนต์ภาษาไทยได้อย่างสวยงามไม่เกิดปัญหาสระลอย
+
+## เรียกใช้ package ที่เกี่ยวข้อง 
+```{r}
+#| label: setup
+
+# ติดตั้งแพ็กเกจที่จำเป็น (รันครั้งแรกครั้งเดียว)
+# install.packages(c("sf", "tidyverse", "geodata", "leaflet", "viridis", "ragg"))
+
+library(sf)
+library(tidyverse)
+library(geodata)
+library(leaflet)
+library(viridis)
+```
+
+## การดึงข้อมูลแผนที่
+
+### วิธีที่ 1: ดึงข้อมูลอัตโนมัติจาก GADM ด้วยแพ็กเกจ `geodata`
+วิธีนี้เหมาะมากสำหรับการเขียนโค้ดที่ต้องการให้ผู้อื่นนำไปรันซ้ำได้ทันที (Reproducible Research) โดยไม่ต้องส่งไฟล์ Shapefile แนบไปด้วย
+
+* `level = 1`: ระดับจังหวัด (77 จังหวัด)
+* `level = 2`: ระดับอำเภอ
+* `level = 3`: ระดับตำบล
+
+```{r}
+#| label: load-gadm
+
+# ดึงข้อมูลระดับจังหวัด (Level 1) และแปลงเป็น sf object ทันที
+th_prov_gadm <- gadm(country = "THA", level = 1, path = tempdir()) |>
+  st_as_sf()
+
+# ดึงข้อมูลระดับอำเภอ (Level 2)
+th_amphoe_gadm <- gadm(country = "THA", level = 2, path = tempdir()) |>
+  st_as_sf()
+
+# ตรวจสอบข้อมูล (NAME_1 คือชื่อจังหวัดภาษาอังกฤษ, NL_NAME_1 คือชื่อภาษาไทย)
+glimpse(th_prov_gadm |> select(GID_1, NAME_1, NL_NAME_1))
+```
+
+### วิธีที่ 2: การใช้ไฟล์ Shapefile มาตรฐานจาก UN OCHA (HDX) *(แนะนำสำหรับงานทางการ)*
+หากต้องการชื่อภาษาไทยและรหัส P-Code ที่อ้างอิงตามสำนักงานสถิติแห่งชาติและกรมการปกครอง 100% แนะนำให้ดาวน์โหลดไฟล์จากเว็บไซต์ **[Humanitarian Data Exchange (HDX) - Thailand Administrative Boundaries](https://data.humdata.org/dataset/cod-ab-tha)** 
+
+เมื่อดาวน์โหลดไฟล์ `.shp` หรือ `.gpkg` มาไว้ในโปรเจกต์แล้ว สามารถอ่านเข้าสู่ R ด้วย `st_read()` ได้เลย:
+```{r}
+#| label: load-hdx
+#| eval: false
+
+# ตัวอย่างการอ่านไฟล์ Shapefile ที่ดาวน์โหลดมาจาก HDX
+# th_prov_hdx <- st_read("data/tha_admbnda_adm1_rtsd_20220121.shp")
+
+# คอลัมน์สำคัญในไฟล์ HDX:
+# ADM1_EN = ชื่อจังหวัดภาษาอังกฤษ
+# ADM1_TH = ชื่อจังหวัดภาษาไทย
+# ADM1_PCODE = รหัสมาตรฐานจังหวัด (เช่น TH13 สำหรับปทุมธานี)
+```
+
+การสร้างแผนที่ระดับจังหวัด (Choropleth Map)
+
+ลองนำข้อมูลระดับจังหวัดที่ได้จาก GADM มาจำลองการเชื่อมข้อมูล (Join Data) และพล็อตกราฟด้วย `ggplot2`
+
+```{r}
+#| label: choropleth-province
+#| fig-cap: "แผนที่ประเทศไทยครบ 77 จังหวัดจากฐานข้อมูล GADM"
+#| fig-align: center
+#| dev: "ragg_png"
+
+# จำลองข้อมูลตัวเลขรายจังหวัด
+set.seed(2026)
+th_prov_data <- th_prov_gadm |>
+  mutate(
+    yield_index = round(runif(n(), min = 350, max = 850), 1)
+  )
+
+ggplot(data = th_prov_data) +
+  geom_sf(aes(fill = yield_index), color = "white", linewidth = 0.15) +
+  scale_fill_viridis_c(
+    option = "YlGn",
+    direction = -1,
+    name = "ดัชนีผลผลิต (กก./ไร่)"
+  ) +
+  labs(
+    title = "แผนที่แสดงดัชนีผลผลิตจำลองรายจังหวัด (77 จังหวัด)",
+    subtitle = "ขอบเขตการปกครองจากฐานข้อมูล GADM v4.1",
+    caption = "Source: GADM via geodata R package"
+  ) +
+  theme_void() +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    plot.subtitle = element_text(size = 11, color = "gray40"),
+    legend.position = "right"
+  )
+```
+
+เทคนิคลดขนาดไฟล์แผนที่ระดับอำเภอด้วย `rmapshaper` เพื่อให้เว็บโหลดเร็ว
+
+ข้อมูลแผนที่ระดับอำเภอของประเทศไทยมีความละเอียดของจุดพิกัด (Vertices) สูงมาก ถ้านำไปสร้าง Interactive Map ด้วย `leaflet` ทันที จะทำให้ไฟล์ HTML มีขนาดใหญ่และหน่วงเบราว์เซอร์ เราสามารถแก้ปัญหานี้ได้ด้วยฟังก์ชัน `ms_simplify()` จากแพ็กเกจ **`rmapshaper`**
+
+### เปรียบเทียบขนาดข้อมูลก่อนและหลังทำ Simplification
+
+พารามิเตอร์ที่สำคัญของ `ms_simplify()` คือ:
+* `keep`: สัดส่วนจุดพิกัดที่ต้องการเก็บไว้ (ค่าตั้งต้นคือ `0.05` หรือเก็บไว้เพียง 5% ซึ่งเพียงพอสำหรับการแสดงผลบนเว็บ)
+* `keep_shapes = TRUE`: ป้องกันไม่ให้อำเภอที่มีขนาดเล็กมากๆ (เช่น เขตในกรุงเทพฯ หรือเกาะเล็กๆ) ถูกลบหายไป
+
+```{r}
+#| label: simplify-map
+
+# ติดตั้งแพ็กเกจ (หากยังไม่มี)
+# install.packages("rmapshaper")
+
+library(rmapshaper)
+
+# 1. ดึงข้อมูลระดับอำเภอทั้งประเทศ (Level 2) จาก GADM
+th_amphoe_full <- gadm(country = "THA", level = 2, path = tempdir()) |>
+  st_as_sf()
+
+# 2. ลดขนาดด้วย ms_simplify (เก็บจุดพิกัดไว้ 5%)
+th_amphoe_sim <- ms_simplify(th_amphoe_full, keep = 0.05, keep_shapes = TRUE)
+
+# 3. เปรียบเทียบขนาด Object ในหน่วยความจำ (Memory Size)
+size_before <- format(object.size(th_amphoe_full), units = "MB")
+size_after <- format(object.size(th_amphoe_sim), units = "MB")
+
+tibble(
+  status = c("Original", "Simplified (5%)"),
+  districts_count = c(nrow(th_amphoe_full), nrow(th_amphoe_sim)),
+  memory_size = c(size_before, size_after)
+) |>
+  knitr::kable(
+    col.names = c("Status", "Number of Districts", "Memory Size (R)"),
+    align = c("l", "c", "c")
+  )
+```
+
+---
+
+### เปรียบเทียบความคมชัดของเส้นขอบเขต (Visual Comparison)
+
+ลองซูมดูพื้นที่จังหวัดปทุมธานีและพื้นที่ข้างเคียงเพื่อเปรียบเทียบว่า หลังจากลดจำนวนจุดพิกัดลงไปถึง 95% แล้ว รูปทรงของอำเภอยังคงเดิมและรอยต่อระหว่างอำเภอยังแนบสนิทกันหรือไม่
+
+```{r}
+#| label: compare-plot
+#| fig-cap: "เปรียบเทียบแผนที่ระดับอำเภอก่อนและหลังใช้ ms_simplify (แทบไม่เห็นความต่างในระดับสายตา)"
+#| fig-align: center
+#| fig-width: 10
+#| fig-height: 5
+#| dev: "ragg_png"
+
+library(patchwork) # สำหรับนำกราฟ 2 รูปมาวางคู่กัน
+
+p1 <- th_amphoe_full |>
+  filter(
+    NAME_1 %in% c("Pathum Thani", "Nonthaburi", "Phra Nakhon Si Ayutthaya")
+  ) |>
+  ggplot() +
+  geom_sf(fill = "#e5f5e0", color = "#006d2c", linewidth = 0.3) +
+  labs(title = paste("Original (ทั้งประเทศ:", size_before, ")")) +
+  theme_void() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5))
+
+p2 <- th_amphoe_sim |>
+  filter(
+    NAME_1 %in% c("Pathum Thani", "Nonthaburi", "Phra Nakhon Si Ayutthaya")
+  ) |>
+  ggplot() +
+  geom_sf(fill = "#e5f5e0", color = "#006d2c", linewidth = 0.3) +
+  labs(title = paste("Simplified keep = 0.05 (ทั้งประเทศ:", size_after, ")")) +
+  theme_void() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5))
+
+p1 + p2
+```

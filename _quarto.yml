@@ -3,10 +3,10 @@ project:
   output-dir: _site
   render:
     - "index.qmd"
-    - "cv/index.qmd"
+    - "about/index.qmd"
     - "talks/index.qmd"
     - "r-packages/**/*.qmd"
-    - "writing/**/*.qmd"
+    - "blog/**/*.qmd"
     - "talks/**/*.qmd"
   resources:
     - "images/**"
@@ -23,30 +23,31 @@ website:
   open-graph: true
 
   navbar:
-    right:
-      - text: "About"
-        href: cv/index.qmd
-      - text: "R Packages"
-        href: r-packages/index.qmd
-      - text: "Talks"
-        href: talks/index.qmd
-      - text: "Blog"
-        href: writing/index.qmd
+    logo: images/kjs.svg
+    tools:
       - icon: github
         aria-label: "GitHub"
         href: https://github.com/kanthjs
+    right:
+      - text: "About"
+        href: about/index.qmd
+      - text: "Blog"
+        href: blog/index.qmd
+      - text: "Software"
+        href: r-packages/index.qmd
 
   page-footer:
-    center: "© 2026 Kanth's Playbook"
+    left: "© 2026 Kanthanawit ∙ Made with [Quarto](https://quarto.org)"
 
 format:
   html:
     theme:
+      - cosmo
       - styles.scss
     include-in-header: header.html
     toc: true
     toc-title: "Topic"
     grid:
-      body-width: 840px
+      body-width: 860px
     html-math-method: plain
     lang: th

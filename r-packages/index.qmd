@@ -1,6 +1,6 @@
 ---
-title: "R Packages"
-pagetitle: "R Packages — Kanthanawit"
+title: "Software"
+pagetitle: "Software — Kanthanawit"
 description: "R packages for agricultural data and statistics."
 listing:
   contents: "*/index.qmd"
