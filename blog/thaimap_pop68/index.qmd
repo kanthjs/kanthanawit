@@ -1,0 +1,218 @@
+---
+title: "แผนที่ประเทศไทยแสดงจำนวนประชากรรายจังหวัด ปี 2568"
+date: 2026-10-29
+description: "สร้างแผนที่ประเทศไทย (Choropleth Map) แสดงสถิติจำนวนประชากรและบ้านรายจังหวัด ประจำปี 2568 จากข้อมูล Open Data ของกรมการปกครอง ด้วยภาษา R และ ggplot2"
+categories: [map, r]
+draft: false
+---
+
+บทความนี้เราจะลองนำข้อมูล **Open Data** จากภาครัฐที่ทุกคนสามารถเข้าถึงและดาวน์โหลดได้ฟรี มาสร้างเป็นแผนที่แสดงความหนาแน่นของประชากรรายจังหวัด (Choropleth Map) โดยใช้ข้อมูลสถิติจำนวนประชากรและบ้านประจำปี พ.ศ. 2568 จากสำนักบริหารการทะเบียน กรมการปกครอง (DOPA) และเชื่อมโยงเข้ากับข้อมูลขอบเขตแผนที่ประเทศไทยจาก GADM ครับ
+
+---
+
+## 1. เตรียมข้อมูลแผนที่ประเทศไทย (Spatial Data)
+
+เริ่มต้นด้วยการโหลดแพ็กเกจที่จำเป็นสำหรับการจัดการข้อมูลเชิงพื้นที่ (`sf`, `geodata`, `rmapshaper`) และชุดเครื่องมือจัดการข้อมูลทั่วไป (`tidyverse`)
+
+```{r}
+#| label: load-packages
+#| message: false
+#| warning: false
+
+library(tidyverse)
+library(sf)
+library(geodata)
+library(rmapshaper)
+library(scales)
+```
+
+เราจะดึงข้อมูลขอบเขตจังหวัดของประเทศไทย (Level 1) จาก GADM และใช้ `ms_simplify()` เพื่อลดขนาดพิกัด Geometry ลงเหลือ 10% ซึ่งช่วยให้ไฟล์มีขนาดเล็กลงมากและโหลดบนหน้าเว็บได้อย่างรวดเร็ว
+
+```{r}
+#| label: prep-map-data
+#| code-fold: true
+#| message: false
+#| warning: false
+
+# 1. ดาวน์โหลดข้อมูล Shapefile ระดับจังหวัดของไทย
+th_sf_raw <- gadm(country = "THA", level = 1, path = tempdir()) |>
+  st_as_sf()
+
+# 2. ลดความซับซ้อนของเส้นขอบเขตเพื่อลดขนาดไฟล์
+th_sf_simplified <- ms_simplify(th_sf_raw, keep = 0.10, keep_shapes = TRUE)
+
+# 3. เตรียมรหัสจังหวัด 2 หลัก (ดึงจาก ISO_1 และ CC_1) สำหรับใช้เป็น Key ในการ Merge
+th_map_ready <- th_sf_simplified |>
+  mutate(
+    # ตัวอย่าง: TH-50 -> "50" ส่วน กทม. ที่ ISO_1 เป็น NA จะดึงจาก CC_1 = "10"
+    province_code = if_else(is.na(ISO_1), CC_1, str_extract(ISO_1, "\\d+"))
+  ) |>
+  select(
+    province_code,
+    province_id = GID_1,
+    province_en = NAME_1
+  )
+```
+
+::: {.callout-note}
+## ทำไมจึงควร Join ด้วยรหัสจังหวัด (province_code)?
+ในฐานข้อมูล GADM คอลัมน์ชื่อภาษาไทย (`NL_NAME_1`) มีข้อผิดพลาดจากต้นทางบางจุด (เช่น กรุงเทพฯ ระบุเป็น *"เชียงใหม่"* หรือชัยภูมิระบุเป็น *"ชัยนาท"*) ดังนั้น การสกัดรหัสจังหวัด 2 หลักจาก `ISO_1` มาใช้เป็น Key จะตรงกับรหัสจังหวัดมาตรฐานของกระทรวงมหาดไทย 100% และไม่มีปัญหาข้อมูลตกหล่นครับ
+:::
+
+---
+
+## 2. ดึงและทำความสะอาดข้อมูลประชากรจากกรมการปกครอง (DOPA)
+
+ข้อมูลสถิติจำนวนประชากรและบ้านรายจังหวัด ประจำปี พ.ศ. 2568 เผยแพร่ผ่านทางเว็บไซต์ [สำนักบริหารการทะเบียน กรมการปกครอง](https://stat.bora.dopa.go.th/new_stat/webPage/statByYear.php) 
+
+ไฟล์ข้อมูลใช้เครื่องหมาย `|` (Pipe) เป็นตัวคั่น และในปัจจุบันไฟล์ถูกบันทึกด้วยการเข้ารหัสแบบ **`UTF-8`** เรียบร้อยแล้ว ทำให้เราสามารถใช้ `readr::read_delim()` อ่านตรงจาก URL ได้ทันที
+
+```{r}
+#| label: load-dopa-data
+#| message: false
+#| warning: false
+
+pop68_prov_dopa_url <- "https://stat.bora.dopa.go.th/new_stat/file/68/stat_c68.txt"
+
+# กำหนดชื่อคอลัมน์ตาม Schema มาตรฐานของกรมการปกครอง
+col_names <- c(
+  "yymm",
+  "cc_code",
+  "cc_desc",
+  "rcode_code",
+  "rcode_desc",
+  "ccaatt_code",
+  "ccaatt_desc",
+  "ccaattmm_code",
+  "ccaattmm_desc",
+  "male",
+  "female",
+  "total",
+  "house"
+)
+
+# อ่านข้อมูลตรงจาก URL
+raw_dopa <- read_delim(
+  pop68_prov_dopa_url,
+  delim = "|",
+  col_names = col_names,
+  col_types = cols(.default = col_character()),
+  trim_ws = TRUE
+)
+```
+
+จากนั้นเราจะกรองเอาเฉพาะแถวที่เป็น **ระดับจังหวัด (77 จังหวัด)** โดยตัดแถวยอดรวมระดับประเทศออก และแปลงตัวเลขประชากรเป็นตัวเลขจำนวนเต็ม (`numeric`):
+
+```{r}
+#| label: clean-dopa-province
+#| message: false
+#| warning: false
+
+pop68_province <- raw_dopa |>
+  mutate(cc_desc = str_trim(cc_desc)) |>
+  # กรองแถวที่ไม่ใช่จังหวัดออก (เช่น ยอดรวมทั่วประเทศ)
+  filter(
+    !is.na(cc_desc) & cc_desc != "" & !str_detect(cc_desc, "ยอดรวม|ทั่วประเทศ")
+  ) |>
+  # กรองเฉพาะระดับจังหวัด (รหัสอำเภอและตำบลเป็นค่าว่างหรือ 0)
+  filter(
+    (is.na(ccaatt_code) | ccaatt_code == "" | str_detect(ccaatt_code, "^0+$")) &
+      (is.na(rcode_code) | rcode_code == "" | str_detect(rcode_code, "^0+$"))
+  ) |>
+  mutate(
+    male = parse_number(male),
+    female = parse_number(female),
+    total_population = parse_number(total),
+    total_households = parse_number(house),
+    province_clean = str_remove(cc_desc, "^จังหวัด") |> str_trim(),
+    people_per_household = round(total_population / total_households, 2)
+  ) |>
+  select(
+    province_code = cc_code,
+    province_name = cc_desc,
+    province_clean,
+    male,
+    female,
+    total_population,
+    total_households,
+    people_per_household
+  )
+
+# ตรวจสอบตัวอย่างข้อมูล 5 จังหวัดแรก
+pop68_province |>
+  select(province_code, province_name, total_population, total_households) |>
+  head(5)
+```
+
+---
+
+## 3. รวมข้อมูล (Join) และสร้างแผนที่ด้วย ggplot2
+
+เมื่อได้ทั้งข้อมูลแผนที่และข้อมูลประชากรที่มี Key `province_code` ตรงกันแล้ว เราสามารถสั่ง `left_join()` แล้ววาดแผนที่ด้วย `geom_sf()` ได้ทันที
+
+```{r}
+#| label: join-pop-map
+# ทำการ Left Join ข้อมูลประชากรเข้ากับ Shapefile แผนที่
+th_pop_map <- th_map_ready |>
+  left_join(pop68_province, by = "province_code")
+```
+
+```{r}
+#| label: plot-population-map
+#| fig-width: 7
+#| fig-height: 9
+#| fig-align: center
+#| message: false
+#| warning: false
+
+ggplot(th_pop_map) +
+  geom_sf(
+    aes(fill = total_population / 1e6),
+    color = "white",
+    linewidth = 0.25
+  ) +
+  scale_fill_viridis_c(
+    option = "plasma",
+    direction = -1,
+    labels = label_number(suffix = "M", accuracy = 0.5),
+    name = "ประชากร\n(ล้านคน)"
+  ) +
+  labs(
+    title = "จำนวนประชากรรายจังหวัดของประเทศไทย (พ.ศ. 2568)",
+    subtitle = "ข้อมูลสถิติจากสำนักบริหารการทะเบียน กรมการปกครอง",
+    caption = "แหล่งข้อมูล: สำนักบริหารการทะเบียน กรมการปกครอง (DOPA) | แผนที่: GADM"
+  ) +
+  theme_void() +
+  theme(
+    plot.title = element_text(
+      face = "bold",
+      size = 16,
+      hjust = 0.5,
+      margin = margin(b = 6)
+    ),
+    plot.subtitle = element_text(
+      size = 12,
+      color = "gray30",
+      hjust = 0.5,
+      margin = margin(b = 15)
+    ),
+    plot.caption = element_text(
+      size = 9,
+      color = "gray50",
+      hjust = 0.5,
+      margin = margin(t = 12)
+    ),
+    legend.position = "right",
+    legend.title = element_text(size = 11, face = "bold"),
+    legend.text = element_text(size = 10)
+  )
+```
+
+---
+
+## บทสรุป
+
+ด้วยการใช้พลังของ `tidyverse` ร่วมกับ `sf` และ `ggplot2`:
+1. เราสามารถดึงข้อมูลสถิติภาครัฐจาก **DOPA** มาคลีนได้ง่ายดายโดยตรงผ่าน URL
+2. จัดการกับโครงสร้างข้อมูลเชิงพื้นที่ และแก้ไขประเด็นเรื่อง Key Matching ได้อย่างแม่นยำผ่าน **รหัสจังหวัด (`province_code`)**
+3. สร้างแผนที่ Choropleth Map ที่สวยงาม แสดงภาพรวมการกระจายตัวของประชากรได้อย่างชัดเจน โดยมีกรุงเทพมหานครและหัวเมืองใหญ่ในแต่ละภูมิภาคเป็นศูนย์กลางประชากรที่หนาแน่นที่สุดครับ

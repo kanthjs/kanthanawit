@@ -1,6 +1,6 @@
 ---
 title: "Map of Thailand with R"
-date: 2026-10-26
+date: 2026-10-15
 description: "แผนที่ประเทศไทย ด้วย R"
 categories: [map, r]
 draft: false
