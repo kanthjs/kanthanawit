@@ -1,0 +1,86 @@
+---
+title: "Map of Thailand EP1"
+date: 2026-10-25
+description: "แผนที่ประเทศไทยแสดงข้อมูลผลผลิตข้าว"
+categories: [map, r]
+draft: true
+---
+
+การ plot แแผนที่ด้วย R นั้น ไม่ยากเลย และสวยงามมาก ๆ ไม่แพ้โปรแกรมไหน
+
+## เตรียมข้อมูลแผนที่
+ดึงแผนที่และลดขนาด Geometry ด้วย `rmapshaper` เราจะดึงข้อมูลแผนที่ประเทศไทยระดับจังหวัด (`level = 1`) และใช้ `ms_simplify()` เก็บจุดพิกัดไว้ที่ 10% ซึ่งช่วยลดขนาดไฟล์ลงกว่า 80% แต่ยังคงรูปทรงขอบเขตจังหวัดไว้ได้อย่างแม่นยำ
+
+### เรียก package ที่จะใช้
+```{r}
+#| label: prep-spatial-map
+library(tidyverse)
+library(sf)
+library(geodata)
+library(rmapshaper)
+```
+
+### ดึงข้อมูลแผนที่ประเทศไทย และ จัดมันเป็น shp file (อาจจะใช้เวลาสักนิด)
+```{r}
+# 1. ดึงแผนที่ขอบเขตจังหวัดของไทย (Level 1) จาก GADM
+th_sf_raw <- gadm(country = "THA", level = 1, path = tempdir()) |>
+  st_as_sf()
+```
+
+### ลดขนาดมันลง เพื่อการทำงานที่เร็วขึ้น 
+```{r}
+# 2. ลดขนาด Geometry เพื่อให้โหลดบนเว็บได้รวดเร็ว
+th_sf_simplified <- ms_simplify(th_sf_raw, keep = 0.10, keep_shapes = TRUE)
+```
+
+### ต่อไปเนสจะใช้ `object` ชื่อ `th_sf_simplified` เรียกใช้เพื่อจะมาเป็นแผหนที่ประเทศไทย
+```{r}
+# 3. จัดเตรียมคอลัมน์ชื่อจังหวัดภาษาไทยให้พร้อมสำหรับการ Join
+th_map_ready <- th_sf_simplified |>
+  select(
+    province_id = GID_1,
+    province_en = NAME_1,
+    province_th_raw = NL_NAME_1
+  ) |>
+  mutate(
+    # Clean ชื่อภาษาไทยใน Shapefile (ตัดช่องว่าง หรือคำนำหน้า)
+    province_clean = str_trim(province_th_raw)
+  )
+```
+
+## ดู มันหน่อยว่ามันหน้าตาเป็นยังไง
+```{r}
+dplyr::glimpse(th_map_ready)
+# ตรวจสอบระบบพิกัดอ้างอิง (CRS)
+st_crs(th_map_ready)$input
+```
+
+### สร้างแผนที่ ด้วย `ggplot`
+```{r}
+library(ggspatial)
+ggplot(data = th_map_ready) +
+  geom_sf(
+    fill = "#eef8f3", # สีพื้นหลังของแต่ละจังหวัด
+    color = "#2b8cbe", # สีเส้นแบ่งเขตจังหวัด
+    linewidth = 0.2 # ความหนาของเส้นขอบ
+  ) +
+  # 1. เพิ่มสเกลระยะทาง (Scale Bar) ไว้มุมซ้ายล่าง
+  annotation_scale(
+    location = "bl", # bl = bottom-left (ซ้ายล่าง)
+    width_hint = 0.3, # ความกว้างของสเกล
+    unit_category = "metric" # หน่วยเป็นกิโลเมตร/เมตร
+  ) +
+  # 2. เพิ่มสัญลักษณ์ทิศเหนือ (North Arrow) ไว้มุมขวาบน
+  annotation_north_arrow(
+    location = "tr", # tr = top-right (ขวาบน)
+    which_north = "true",
+    pad_x = unit(0.2, "in"),
+    pad_y = unit(0.2, "in") # รูปแบบสไตล์ลูกศร (เปลี่ยนได้ตามชอบ)
+  ) +
+  theme_void() + # ตัดแกนละติจูด/ลองจิจูดและตารางพื้นหลังออกให้ดูสะอาดตา
+  labs(
+    title = "Thailand",
+    caption = "ที่มาข้อมูล: GADM"
+  )
+```
+---

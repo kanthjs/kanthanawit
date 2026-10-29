@@ -6,7 +6,7 @@ Source of my personal website, rebuilt from scratch on Quarto and grown one page
 
 - **Framework**: [Quarto](https://quarto.org/)
 - **Styling**: `styles.scss` layered over Quarto's Bootstrap theme
-- **Fonts**: Trirong (headings), IBM Plex Sans Thai (body), Fira Code (code)
+- **Fonts**: Prompt (headings & body), Fira Code (code)
 - **Hosting**: Netlify, rendered with `@quarto/netlify-plugin-quarto` on every push
 
 ## Structure
