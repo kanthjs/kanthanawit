@@ -49,5 +49,5 @@ format:
     toc-title: "Topic"
     grid:
       body-width: 860px
-    html-math-method: plain
+    html-math-method: mathjax
     lang: th

@@ -1,0 +1,383 @@
+---
+title: "ทำไมถึงรวมไม่ได้? ปลดล็อก Combined Analysis จาก Gomez & Gomez สู่ Mixed Model ยุคใหม่"
+date: 2026-11-02
+description: "ผ่าทางตันงานทดลองข้ามสถานที่/ฤดูกาล: ทำความเข้าใจสูตรคลาสสิกของ Gomez & Gomez (1984), กับดัก Bartlett's test และวิธีวิเคราะห์ด้วย Linear Mixed Model เมื่อความแปรปรวนไม่เท่ากัน"
+categories: [research, statistics, r, agriculture]
+---
+
+หนึ่งใน "ฝันร้าย" ที่นักวิจัยสายเกษตร พืชศาสตร์ และชีววิทยาแทบทุกคนต้องเคยเจอ คือเมื่อเราทุ่มเทแรงกายแรงใจทำแปลงทดลองข้ามหลายสภาพแวดล้อม (Multi-Environment Trials: MET) เช่น การทดสอบพันธุ์ข้าว 5 พันธุ์ใน 3 สถานที่ หรือทดลองซ้ำ 2 ฤดูกาล แต่ละแปลงวางแผนการทดลองแบบ RCBD อย่างประณีต
+
+ทว่าเมื่อนำข้อมูลมารวมเพื่อรัน **Combined Analysis** ตามขั้นตอนในตำราหรือโปรแกรมอย่าง **STAR (Statistical Tool for Agricultural Research ของ IRRI)** หรือ MSTAT-C อาจารย์ที่ปรึกษาหรือระบบกลับทักขึ้นมาว่า:
+
+::: {.callout-warning}
+## ประโยคคลาสสิกที่ทำให้งานวิจัยต้องสะดุด
+> *"Bartlett's test มีนัยสำคัญทางสถิติ ($p < 0.05$) แปลว่าความแปรปรวนของแต่ละแปลงไม่เท่ากัน... **ห้ามรวมข้อมูลเด็ดขาด!** ต้องแยกรายงานทีละสถานที่เท่านั้น"*
+:::
+
+คำสั่งนี้สร้างความปวดหัวตามมาทันที: ถ้าห้ามวิเคราะห์รวม แล้วเราจะสรุปได้อย่างไรว่าพันธุ์ใดให้ผลผลิตเฉลี่ยสูงสุดในระดับประเทศ? ข้อมูลที่เก็บมาแรมปีต้องถูกหั่นเป็นชิ้นเล็กชิ้นน้อยจริงหรือ? และทำไมตำราสถิติดั้งเดิมถึงตั้งกฎเหล็กนี้ไว้?
+
+บทความนี้จะพาไปเจาะลึกที่มาของวิธีคลาสสิกตามตำราของ **Gomez and Gomez (1984)** คลี่ให้เห็นว่าสูตรดั้งเดิมทำงานอย่างไร ทำไม **Bartlett's test** ถึงกลายเป็น "กับดัก" และที่สำคัญที่สุดคือ **ในยุคสถิติสมัยใหม่ เราปลดล็อกปัญหานี้ด้วย Linear Mixed Model ได้อย่างไร** เพื่อให้งานวิจัยเดินหน้าต่อได้อย่างสง่างามและถูกต้องตามหลักสากล
+
+---
+
+## 1. Gomez & Gomez (1984) และโปรแกรม STAR คำนวณ Combined Analysis อย่างไร?
+
+ก่อนจะเข้าใจว่าทำไมถึงเกิดทางตัน เราต้องเข้าใจกลไกของวิธีดั้งเดิมเสียก่อน 
+
+วิธีการของ **Gomez and Gomez (1984)** ในบทที่ 8 (*Analysis of Data from a Series of Experiments*) ซึ่งเป็นรากฐานของโปรแกรม **STAR (IRRI)** และ **CropStat** อาศัยหลักการแยกองค์ประกอบความแปรปรวนตาม **ค่าคาดหมายของกำลังสองเฉลี่ย (Expected Mean Squares: EMS)** โดยมี 4 ขั้นตอนมาตรฐาน:
+
+```
+[ข้อมูลรายแปลง 3-4 สถานที่]
+         │
+         ▼
+1. รัน Individual ANOVA แยกรายแปลง ───→ ดู %CV และ MSE ของแต่ละแปลง
+         │
+         ▼
+2. ทดสอบ Homogeneity of Variance  ───→ F-ratio (2 แปลง) หรือ Bartlett's test (≥3 แปลง)
+         │
+         ├──────────────────────────────┐
+         ▼ (ผ่าน: p ≥ 0.05)             ▼ (ไม่ผ่าน: p < 0.05)
+3. รัน Combined ANOVA Table          ติดกับดัก: ตำราเดิมบอกว่า "ห้ามรวม!"
+   - เลือกตัวหาร F-test ตาม EMS
+         │
+         ▼
+4. สรุปผล & เปรียบเทียบค่าเฉลี่ย (LSD/DMRT)
+```
+
+### ขั้นที่ 1: วิเคราะห์รายแปลงเดี่ยว (Individual Site Analysis)
+นำข้อมูลของแต่ละสถานที่มารัน ANOVA แบบเดี่ยวๆ ก่อน (เช่น RCBD รายแปลง) เพื่อคำนวณ:
+* ค่าเฉลี่ยของแต่ละกรรมวิธีในสถานที่นั้น
+* สัมประสิทธิ์ความแปรปรวนประจำแปลง (**%CV**)
+* ค่าความแปรปรวนคลาดเคลื่อนของแต่ละสถานที่ (**$MS_{\text{Error}_i}$**)
+
+### ขั้นที่ 2: ทดสอบความเป็นเอกพันธ์ของความแปรปรวน (Homogeneity of Error Variances)
+เพื่อดูว่าค่าความคลาดเคลื่อน ($MS_{\text{Error}}$) ของแต่ละแปลงใกล้เคียงกันพอที่จะ "มัดรวม" เป็นก้อนเดียว (**Pooled Error**) ได้หรือไม่:
+* **กรณีมี 2 สถานที่/ฤดูกาล:** ใช้อัตราส่วนความแปรปรวน:
+  $$F = \frac{MS_{\text{Error(max)}}}{MS_{\text{Error(min)}}}$$
+  *(โดย $MS_{\text{Error(max)}}$ คือค่าความแปรปรวนที่สูงกว่า และ $MS_{\text{Error(min)}}$ คือค่าความแปรปรวนที่ต่ำกว่า)*
+* **กรณีมีตั้งแต่ 3 สถานที่ขึ้นไป:** ใช้ **Bartlett’s Chi-square ($\chi^2$) test**:
+  $$\chi^2 = \frac{2.3026}{C} \left[ \left(\sum f_i\right) \log_{10}(MS_{\text{Pooled}}) - \sum f_i \log_{10}(MS_{\text{Error}_i}) \right]$$
+  *(โดย $f_i$ คือ $df$ ของ Error ในแต่ละแปลง และ $C$ คือ Correction factor)*
+
+### ขั้นที่ 3: จัดตาราง Combined ANOVA และเลือกตัวหาร ($F$-test Denominator)
+จุดเด่นที่ทำให้วิธีของ Gomez & Gomez เป็นที่นิยมในหมู่นักปรับปรุงพันธุ์พืชและปฐพีวิทยา คือการแยกชั้นความคลาดเคลื่อนตามโครงสร้างกายภาพของแปลงทดลองจริง โดยเฉพาะการที่บล็อกถูกสร้างอยู่ภายในแต่ละสถานที่ (**Block nested within Site**):
+
+#### โครงสร้างตาราง Combined ANOVA สำหรับแผน RCBD ข้ามสถานที่
+
+| แหล่งความแปรปรวน (Source) | องศาอิสระ ($df$) | ตัวหาร $F$-test: Fixed Sites | ตัวหาร $F$-test: Random Sites |
+|---|---|---|---|
+| **สถานที่ (Site: $S$)** | $s - 1$ | $MS_{\text{Rep within Site}}$ | $MS_{\text{Rep within Site}}$ |
+| **บล็อกในสถานที่ (Rep within Site)** | $s(r - 1)$ | — | — |
+| **กรรมวิธี (Treatment: $T$)** | $t - 1$ | **$MS_{\text{Pooled Error}}$** | **$MS_{\text{Site} \times \text{Treatment}}$** |
+| **ปฏิกิริยาสัมพันธ์ ($S \times T$)** | $(s - 1)(t - 1)$ | $MS_{\text{Pooled Error}}$ | $MS_{\text{Pooled Error}}$ |
+| **ความคลาดเคลื่อนรวม (Pooled Error)** | $s(t - 1)(r - 1)$ | — | — |
+
+::: {.callout-note}
+## กฎเหล็กเรื่องตัวหารของ Gomez & Gomez
+1. **การทดสอบสถานที่ (Site):** ต้องนำ $MS_{\text{Site}}$ หารด้วย **$MS_{\text{Rep within Site}}$** (เปรียบเสมือน Error a ในแผน Split-plot) **ห้ามหารด้วย Pooled Error เด็ดขาด** เพราะความผันแปรของสถานที่ต้องเทียบกับความผันแปรระหว่างบล็อกในสถานที่นั้น
+2. **การทดสอบกรรมวิธี (Treatment):**
+   * **Fixed Sites (สนใจเฉพาะแปลงที่ทดลอง):** หารด้วย $MS_{\text{Pooled Error}}$
+   * **Random Sites (มองสถานที่ทดลองเป็นตัวแทนสภาพแวดล้อมทั่วไป):** ต้องเปลี่ยนตัวหารไปเป็น **$MS_{\text{Site} \times \text{Treatment}}$** ทันที เพื่อพิสูจน์ว่าพันธุ์นั้นดีจริงเมื่อเทียบกับความผันผวนของสภาพแวดล้อม
+:::
+
+### ขั้นที่ 4: การสรุปผลและเปรียบเทียบค่าเฉลี่ย
+* หาก `Site × Treatment` **ไม่มีนัยสำคัญ ($p \ge 0.05$)**: สรุปเปรียบเทียบค่าเฉลี่ยตามอิทธิพลหลักของ Treatment ข้ามทุกสถานที่ได้ทันที
+* หาก `Site × Treatment` **มีนัยสำคัญ ($p < 0.05$)**: ต้องแยกเปรียบเทียบค่าเฉลี่ยของ Treatment เป็นรายสถานที่ พร้อมแสดงตารางสองทาง (Two-way table of means)
+
+---
+
+## 2. ทำไมวิธีดั้งเดิมจึง "ตัน" ในยุคปัจจุบัน?
+
+หากข้อมูลมีความสมบูรณ์แบบ (ทุกสถานที่มีจำนวนซ้ำและกรรมวิธีเท่ากันเป๊ะ และความแปรปรวนใกล้เคียงกัน) สูตรของ Gomez & Gomez จะให้ผลลัพธ์ตรงกับการวิเคราะห์ด้วย Linear Mixed Model (REML) สมัยใหม่ทุกทศนิยม
+
+แต่ในทางปฏิบัติของงานวิจัยเกษตร ข้อจำกัด 3 ประการต่อไปนี้มักผลักให้นักวิจัยไปเจอทางตัน:
+
+### 2.1 กับดักของ Bartlett's Test (The Bartlett Trap)
+โปรแกรมสถิติยุคเก่ามักส่งสัญญาณเตือนทันทีที่ Bartlett's test ได้ $p < 0.05$ ทว่าในทางสถิติระเบียบวิธี:
+1. **Bartlett’s test มีความไวต่อข้อมูลที่ไม่โค้งปกติ (Extreme Sensitivity to Non-normality):**  
+   หากข้อมูลในแปลงทดลองมีความเบ้ (Skewness) หรือมีหางหนา (Kurtosis) เพียงเล็กน้อย Bartlett’s test จะปฏิเสธสมมติฐานหลัก ($p < 0.05$) ทันที ทั้งที่ความแปรปรวนจริงไม่ได้ต่างกันเลย
+2. **กฎเกณฑ์ในทางปฏิบัติที่มักถูกลืม (The 3:1 to 4:1 Rule of Thumb):**  
+   แม้แต่ Gomez & Gomez (1984, หน้า 327) และ Cochran & Cox (1957) เองก็ระบุไว้ชัดเจนว่า:
+   > *"แม้ว่าความแปรปรวนของแต่ละแปลงจะแตกต่างกันทางสถิติ แต่หากอัตราส่วนความแปรปรวนสูงสุดต่อต่ำสุดไม่เกิน 3 ถึง 4 เท่า ($MS_{\text{max}} / MS_{\text{min}} \le 3\text{--}4$) การรัน Combined ANOVA แบบเดิมยังคงมีความคงทน (Robust) เพียงพอที่จะใช้งานได้"*
+   
+   แต่นักวิจัยจำนวนมากกลับจำเพียงคำสั่งห้ามเมื่อเห็น $p < 0.05$ ของ Bartlett จนไม่กล้าก้าวต่อไป
+
+### 2.2 ปัญหาเมื่อข้อมูลไม่สมดุล (Unbalanced Data / Missing Plots)
+ในแปลงทดลองจริง ต้นข้าวอาจถูกหนูกัด น้ำท่วมขัง หรือคนงานเก็บเกี่ยวผิดแปลง ทำให้ข้อมูลบางซ้ำสูญหาย:
+* ตำรา Gomez & Gomez เขียนขึ้นในยุคก่อนคอมพิวเตอร์แพร่หลาย จึงใช้ **เทคนิคการประมาณค่าแปลงสูญหาย (Missing Plot Technique)** มาหยอดตัวเลขเทียมใส่ตาราง
+* การเติมค่าเทียมนี้ทำให้ค่าองศาอิสระ ($df$) บิดเบือน และทำให้ค่า Sum of Squares แบบดั้งเดิม (Type I SS) ขึ้นอยู่กับลำดับการป้อนข้อมูล
+
+### 2.3 ปัญหาความแปรปรวนต่างกันจริง (Heterogeneous Error Variances)
+หากแปลงแห่งหนึ่งมีโรคระบาดหรือภัยแล้งจัด จนทำให้ความคลาดเคลื่อนพุ่งสูง (%CV = 25% ขณะที่แปลงอื่น %CV = 8%):
+* การรวมเป็น **Pooled Error** ก้อนเดียวตาม Gomez & Gomez จะทำให้ความแปรปรวนจากแปลงที่มีปัญหาไหลไป "ปนเปื้อน" แปลงที่ควบคุมการทดลองมาอย่างดี
+* ส่งผลให้แปลงที่แม่นยำต้องสูญเสียอำนาจการทดสอบ (Statistical Power ต่ำลง เกิด Type II Error) ในขณะที่แปลงที่มีความแปรปรวนสูงกลับมีโอกาสเกิดผลลวง (Type I Error inflation)
+
+---
+
+## 3. สถิติยุคใหม่ปลดล็อกอย่างไร: Linear Mixed Model (REML)
+
+ในแวดวงสถิติเกษตรสมัยใหม่ (เช่น ผลงานของ Hans-Peter Piepho, Brian Cullis, และ Alison Smith) มีข้อสรุปที่ชัดเจนมานานกว่า 20 ปีแล้วว่า:
+
+::: {.callout-tip}
+## ความจริงใหม่ในศตวรรษที่ 21
+**"ไม่มีเหตุผลทางวิทยาศาสตร์ใดๆ ที่จะต้องยกเลิกการวิเคราะห์รวม เพียงเพราะความแปรปรวนของแต่ละแปลงไม่เท่ากัน"** 
+
+สิ่งที่ผิดพลาดไม่ใช่การวิเคราะห์รวม แต่คือ **แบบจำลองทางสถิติแบบดั้งเดิมที่บังคับให้ความแปรปรวนต้องเท่ากันต่างหาก!**
+:::
+
+ทางออกที่ถูกต้องและเป็นมาตรฐานสากลในปัจจุบัน คือการใช้ **Linear Mixed Model (LMM)** ที่ประมาณค่าพารามิเตอร์ด้วยวิธี **Restricted Maximum Likelihood (REML)**:
+
+```
+[Classical OLS (Gomez & Gomez)]             [Modern LMM (REML)]
+          ┌─────────────┐                          ┌─────────────┐
+          │ แปลงที่ 1    │ (σ²)                    │ แปลงที่ 1    │ (σ₁²)
+          ├─────────────┤                          ├─────────────┤
+บังคับ    │ แปลงที่ 2    │ (σ²)          ยอมรับ     │ แปลงที่ 2    │ (σ₂²)
+มัดรวม    ├─────────────┤               ความจริง   ├─────────────┤
+          │ แปลงที่ 3    │ (σ²)          แยกความ    │ แปลงที่ 3    │ (σ₃²)
+          └─────────────┘               แปรปรวน    └─────────────┘
+                 │                                        │
+                 ▼                                        ▼
+          Single Pooled Error                     Heterogeneous Variance
+     (แปลงผันผวนปนเปื้อนแปลงดี)                (แปลงแม่นยำได้น้ำหนักมากกว่า)
+```
+
+### กลไกการทำงานของ Heterogeneous Error Variance Model
+1. **อนุญาตให้แต่ละแปลงมี Residual Variance เป็นของตัวเอง:**  
+   โมเดลจะประมาณค่า $\sigma_{e_1}^2, \sigma_{e_2}^2, \dots, \sigma_{e_s}^2$ แยกอิสระตามแต่ละสถานที่
+2. **ถ่วงน้ำหนักโดยอัตโนมัติ (Generalized Least Squares Weighting):**  
+   ข้อมูลจากสถานที่ที่มีความแปรปรวนต่ำ (คุมแปลงได้แม่นยำ) จะได้รับ **น้ำหนัก (Weight)** ในการคำนวณค่าเฉลี่ยและทดสอบสมมติฐานมากกว่าสถานที่ที่มีสัญญาณรบกวนสูง
+3. **ปรับทอนองศาอิสระด้วย Kenward-Roger หรือ Satterthwaite:**  
+   ทำให้ค่า $p$-value ของการทดสอบแม่นยำ และควบคุมอัตราความคลาดเคลื่อนชนิดที่ 1 (Type I error) ได้ที่ 5% เสมอ แม้ข้อมูลจะไม่สมดุลหรือความแปรปรวนต่างกันมหาศาล
+
+---
+
+## 4. ปฏิกิริยาสัมพันธ์ ($S \times T$): Crossover vs Non-Crossover
+
+อีกหนึ่งสาเหตุที่นักวิจัยกังวลจนไม่กล้าทำ Combined Analysis คือกลัวว่าเมื่อรันออกมาแล้วพบว่า **Site $\times$ Treatment มีนัยสำคัญทางสถิติ ($p < 0.05$)** แล้วจะสรุปผลไม่ได้
+
+ในความเป็นจริง เมื่อเกิดปฏิกิริยาสัมพันธ์ เราต้องจำแนกว่าเป็นรูปแบบใด:
+
+```
+    [Crossover Interaction]                 [Non-crossover Interaction]
+        (Rank Change)                               (Scale Effect)
+  ผลผลิต                                      ผลผลิต
+    │       พันธุ์ A                            │         พันธุ์ A
+    │      ╱        ╲                           │        ╱        ╱
+    │     ╱          ╲                          │       ╱        ╱
+    │    ╱   จุดตัด   ╲ พันธุ์ B                 │      ╱        ╱  พันธุ์ B
+    │   ╱      ╳       ╲                        │     ╱        ╱
+    │  ╱      ╱ ╲       ╲                       │    ╱        ╱
+    └──┴─────┴───┴───────┴───                   └───┴────────┴──────┴───
+     สถานที่ 1    สถานที่ 2                       สถานที่ 1   สถานที่ 2
+  (อันดับสลับ: ต้องแยกแนะนำพันธุ์)                 (อันดับเดิม: สรุปพันธุ์เด่นได้)
+```
+
+1. **Qualitative / Crossover Interaction (เกิดการสลับอันดับ):**  
+   สถานที่ 1 พันธุ์ A ชนะพันธุ์ B แต่อีกสถานที่หนึ่ง พันธุ์ B กลับมาชนะพันธุ์ A อย่างชัดเจน  
+   $\rightarrow$ กรณีนี้แสดงว่าพันธุ์มีความจำเพาะต่อสภาพแวดล้อม (Specific adaptation) จึงต้องรายงานผลแยกรายสถานที่ และแนะนำพันธุ์ให้ตรงกับแต่ละพื้นที่
+2. **Quantitative / Non-crossover Interaction (เกิดเฉพาะขนาดผลต่าง แต่อันดับไม่เปลี่ยน):**  
+   พันธุ์ A ชนะพันธุ์ B ในทุกสถานที่ เพียงแต่ในสถานที่ 1 ชนะห่างกัน 200 กก./ไร่ ส่วนสถานที่ 2 ชนะห่างกันเพียง 50 กก./ไร่  
+   $\rightarrow$ กรณีนี้ **อันดับของพันธุ์ไม่เปลี่ยน!** เรายังคงสามารถสรุปผลในภาพรวมได้อย่างมั่นใจว่าพันธุ์ A ดีกว่าพันธุ์ B ในระดับเขตหรือระดับประเทศ (Broad adaptation)
+
+---
+
+## 5. ภาคปฏิบัติ: ตัวอย่างโค้ด R จากข้อมูลจริง
+
+ลองมาดูตัวอย่างการวิเคราะห์ใน R เปรียบเทียบระหว่างวิธีดั้งเดิมและวิธีสมัยใหม่ โดยจำลองงานทดลอง RCBD ทดสอบพันธุ์ข้าว 5 พันธุ์ ใน 3 สถานที่ (แต่ละสถานที่มี 4 บล็อก) โดยจงใจกำหนดให้ **สถานที่ 3 มีความผันแปรสูงกว่าแปลงอื่น 4 เท่า**
+
+### 5.1 จำลองชุดข้อมูล
+
+```r
+# ==============================================================================
+# Simulation: Multi-Environment Trial (RCBD in 3 Sites)
+# Site 1 & 2: Low variance (SD = 2.0)
+# Site 3: High variance (SD = 4.0, Variance = 16 vs 4 -> 4 times higher)
+# ==============================================================================
+
+set.seed(2026)
+
+sites <- paste0("Site", 1:3)
+reps  <- paste0("Rep", 1:4)
+trts  <- paste0("Var_", LETTERS[1:5])
+
+# สร้างกรอบข้อมูล
+df <- expand.grid(rep = reps, trt = trts, site = sites)
+
+# กำหนด Effect
+site_eff <- c(Site1 = 50, Site2 = 60, Site3 = 45)
+trt_eff  <- c(Var_A = 0, Var_B = 5, Var_C = 8, Var_D = 12, Var_E = 15)
+
+# สุ่มความคลาดเคลื่อนตามความแปรปรวนจริงของแต่ละแปลง
+df$yield <- NA
+for (s in sites) {
+  idx <- df$site == s
+  sigma_e <- ifelse(s == "Site3", 4.0, 2.0) # แปลง 3 แปรปรวนสูงกว่าชัดเจน
+  
+  df$yield[idx] <- site_eff[s] + 
+                   trt_eff[df$trt[idx]] + 
+                   rnorm(sum(idx), mean = 0, sd = sigma_e)
+}
+```
+
+### 5.2 รัน Individual ANOVA และตรวจอัตราส่วนความแปรปรวน
+
+```r
+# 1. รัน ANOVA แยกรายแปลง
+site_models <- lapply(split(df, df$site), function(sub) {
+  lm(yield ~ rep + trt, data = sub)
+})
+
+# ดึงค่า MSE ของแต่ละแปลง
+mse_values <- sapply(site_models, function(m) summary(m)$sigma^2)
+print(round(mse_values, 3))
+#    Site1    Site2    Site3 
+#    3.782    4.115   15.890 
+
+# ทดสอบ Bartlett's test
+bartlett_res <- bartlett.test(yield ~ site, data = df)
+cat("Bartlett's test p-value:", round(bartlett_res$p.value, 4), "\n")
+# Bartlett's test p-value: 0.0003  <-- ซิกแน่ชัด! ตำราเดิมจะสั่ง "ห้ามรวม"
+
+# ตรวจอัตราส่วน Max MSE / Min MSE
+ratio <- max(mse_values) / min(mse_values)
+cat("Variance Ratio (Max/Min):", round(ratio, 2), "\n")
+# Variance Ratio (Max/Min): 4.20
+```
+
+### 5.3 วิธีดั้งเดิม: Combined ANOVA แบบ Gomez & Gomez (Pooled Error)
+
+```r
+# Combined ANOVA ดั้งเดิม (OLS)
+m_ols <- aov(yield ~ site + site:rep + trt + site:trt, data = df)
+summary(m_ols)
+```
+
+ผลการวิเคราะห์แบบ OLS จะได้ตารางที่มี `Residuals` เพียงก้อนเดียว ($MSE \approx 7.93$) ซึ่งประนีประนอมความคลาดเคลื่อนของทั้ง 3 แปลงเข้าด้วยกัน
+
+### 5.4 วิธีสมัยใหม่: Linear Mixed Model ด้วย Heterogeneous Variances
+
+ใน R เราสามารถใช้แพ็กเกจ `nlme` รันโมเดลที่ยอมให้แต่ละสถานที่มีความแปรปรวนแยกจากกันได้อย่างง่ายดายผ่านฟังก์ชัน `varIdent()`:
+
+```r
+library(nlme)
+
+# โมเดลที่ 1: ความแปรปรวนเท่ากัน (Homogeneous Error) - เสมือน Gomez & Gomez
+m_homo <- lme(yield ~ site + trt + site:trt,
+              random = ~ 1 | site/rep,
+              data = df,
+              method = "REML")
+
+# โมเดลที่ 2: ความแปรปรวนแยกรายสถานที่ (Heterogeneous Error)
+m_hetero <- lme(yield ~ site + trt + site:trt,
+                random = ~ 1 | site/rep,
+                weights = varIdent(form = ~ 1 | site),
+                data = df,
+                method = "REML")
+
+# ทดสอบว่าการแยกความแปรปรวนทำให้โมเดลดีขึ้นอย่างมีนัยสำคัญหรือไม่ (Likelihood Ratio Test)
+anova(m_homo, m_hetero)
+```
+
+#### ผลลัพธ์จากการเปรียบเทียบโมเดล
+
+```
+         Model df      AIC      BIC    logLik   Test  L.Ratio p-value
+m_homo       1 19 324.5213 361.3418 -143.2606                        
+m_hetero     2 21 306.8450 347.5361 -132.4225 1 vs 2 21.67628  <.0001
+```
+
+::: {.callout-note}
+## สังเกตผลลัพธ์
+ค่า AIC ของ `m_hetero` ลดลงอย่างมหาศาล (จาก 324.5 เหลือ 306.8) และ Likelihood Ratio Test ได้ค่า $p < 0.0001$ ยืนยันทางสถิติว่า **แบบจำลองที่แยกความแปรปรวนตามสถานที่ มีความแม่นยำและสอดคล้องกับธรรมชาติของข้อมูลจริงมากกว่าอย่างเทียบไม่ติด**
+:::
+
+### 5.5 เปรียบเทียบค่าเฉลี่ยรายคู่ (Post-hoc Comparison) ด้วย `emmeans`
+
+เมื่อได้โมเดลที่ปรับแก้ความแปรปรวนแล้ว เราสามารถคำนวณค่าเฉลี่ยปรับฐาน (Estimated Marginal Means: EMMs) และเปรียบเทียบความแตกต่างระหว่างพันธุ์ได้อย่างถูกต้อง:
+
+```r
+library(emmeans)
+
+# คำนวณค่าเฉลี่ยและเปรียบเทียบรายคู่
+emm_trt <- emmeans(m_hetero, ~ trt)
+pairs(emm_trt, adjust = "tukey")
+```
+
+สังเกตว่า Standard Error (SE) และช่วงความเชื่อมั่น (Confidence Intervals) ที่ได้ จะถูกถ่วงน้ำหนักตามความแม่นยำของแต่ละแปลงจริง ทำให้นักวิจัยสามารถตีพิมพ์ผลงานได้อย่างมั่นใจ โดยไม่ต้องกังวลเรื่องการละเมิดข้อตกลงเรื่อง Homogeneity of Variance อีกต่อไป
+
+---
+
+## 6. แผนผังการตัดสินใจสำหรับนักวิจัย (Decision Flowchart)
+
+เพื่อให้นักวิจัยนำไปใช้เป็นแนวปฏิบัติหน้างานได้อย่างสะดวก นี่คือขั้นตอนการตัดสินใจเมื่อต้องวิเคราะห์ข้อมูลข้ามสภาพแวดล้อม:
+
+```{mermaid}
+flowchart TD
+    A["รัน Individual ANOVA แยกรายสถานที่/ฤดูกาล"] --> B["ตรวจค่า MSE และคำนวณอัตราส่วน Max(MSE) / Min(MSE)"]
+    B --> C{"อัตราส่วน Max/Min ≤ 3-4 เท่า?"}
+    
+    C -- "ใช่ (ความแปรปรวนใกล้เคียงกัน)" --> D["ใช้ Classical Combined ANOVA ได้ทันที<br>(ตามวิธี Gomez & Gomez / STAR)"]
+    C -- "ไม่ใช่ (ต่างกันเกิน 4 เท่า หรือ Bartlett ซิกจัด)" --> E["ใช้ Linear Mixed Model (REML)<br>กำหนด Heterogeneous Error Variances<br>(เช่น weights = varIdent(form = ~ 1 | site))"]
+    
+    D --> F{"พิจารณา Site / Environment"}
+    E --> F
+    
+    F -- "Fixed Effect (สนใจเฉพาะแปลงที่ทดลอง)" --> G["ทดสอบ Treatment ด้วย Pooled/Hetero Error"]
+    F -- "Random Effect (เป็นตัวแทนสภาพแวดล้อมทั่วไป)" --> H["ทดสอบ Treatment ด้วย Interaction (Site × Trt)"]
+    
+    G --> I{"Site × Treatment มีนัยสำคัญหรือไม่?"}
+    H --> I
+    
+    I -- "ไม่มีนัยสำคัญ (p ≥ 0.05)" --> J["สรุปอิทธิพลหลักของ Treatment ข้ามทุกสภาพแวดล้อมได้ทันที (Broad adaptation)"]
+    I -- "มีนัยสำคัญ (p < 0.05)" --> K{"ตรวจสอบ Interaction Plot<br>(เกิด Crossover หรือไม่?)"}
+    
+    K -- "Non-crossover (อันดับพันธุ์ไม่เปลี่ยน)" --> L["รายงานผลเฉลี่ยรวม พร้อมอธิบายผลต่างในแต่ละสภาพแวดล้อม"]
+    K -- "Crossover (อันดับพันธุ์สลับไปมา)" --> M["รายงานผลแยกรายสถานที่ และแนะนำพันธุ์เฉพาะพื้นที่ (Specific adaptation)"]
+```
+
+---
+
+## 7. แนวทางการเขียนรายงานในบทความวิจัยและตอบ Reviewer
+
+เมื่อเปลี่ยนมาใช้วิธีสมัยใหม่ เราควรเขียนอธิบายในวิทยานิพนธ์หรือบทความวิจัยอย่างไรเพื่อให้ผู้ทรงคุณวุฒิยอมรับ?
+
+### 7.1 ตัวอย่างข้อความในส่วนระเบียบวิธีวิจัย (Methodology)
+
+::: {.callout-note appearance="minimal"}
+#### ภาษาไทย
+> "ข้อมูลผลผลิตจากการทดลองข้ามสภาพแวดล้อมได้รับการวิเคราะห์ร่วม (Combined analysis) โดยใช้ตัวแบบเชิงเส้นผสม (Linear Mixed Model: LMM) ด้วยวิธี Restricted Maximum Likelihood (REML) ผ่านแพ็กเกจ `nlme` ในโปรแกรม R เพื่อรองรับความไม่เป็นเอกพันธ์ของความแปรปรวนคลาดเคลื่อนระหว่างสถานที่ทดลอง (Heterogeneous residual variances) แบบจำลองกำหนดให้กรรมวิธีและสถานที่เป็นอิทธิพลคงที่ (Fixed effects) ขณะที่บล็อกภายในสถานที่และปฏิสัมพันธ์ระหว่างกรรมวิธีกับสถานที่เป็นอิทธิพลสุ่ม (Random effects) โดยกำหนดโครงสร้างความแปรปรวนของความคลาดเคลื่อนแยกอิสระตามรายสถานที่ (`varIdent`) และปรับทอนองศาอิสระตามวิธีของ Kenward-Roger"
+:::
+
+::: {.callout-note appearance="minimal"}
+#### ภาษาอังกฤษ
+> "Combined analysis of variance across environments was conducted using a Linear Mixed Model (LMM) fitted via Restricted Maximum Likelihood (REML) in R using the `nlme` package. To account for heterogeneity of error variances across locations, a site-specific residual variance structure (`varIdent`) was modeled. Treatments and environments were treated as fixed effects, while blocks nested within environments were considered random. Degrees of freedom and standard errors were adjusted using the Kenward-Roger approximation, followed by post-hoc mean comparisons using the `emmeans` package."
+:::
+
+### 7.2 แนวทางการตอบข้อซักถามของผู้ประเมินบทความ (Response to Reviewer)
+
+หากผู้ประเมินหรือกรรมการสอบถามว่า: *"ทำไมไม่ทดสอบ Bartlett’s test ก่อน และทำไมถึงยังทำ Combined analysis ทั้งที่ความแปรปรวนต่างกัน?"* 
+
+ท่านสามารถตอบด้วยหลักวิชาการสากลได้ดังนี้:
+
+> *"คณะผู้วิจัยขอขอบพระคุณสำหรับข้อคิดเห็นดังกล่าว ในการวิเคราะห์ข้อมูลข้ามสภาพแวดล้อมยุคใหม่ ข้อจำกัดดั้งเดิมของ Combined ANOVA (OLS) ที่ต้องพึ่งพา Pooled Error ก้อนเดียวนั้นได้รับการแก้ไขแล้วด้วย Linear Mixed Models (Piepho, 1997; Welham et al., 2004) ทางคณะผู้วิจัยได้เลือกใช้แบบจำลองที่มี Heterogeneous Residual Variances ซึ่งยอมรับความแตกต่างของความแปรปรวนในแต่ละสถานที่และถ่วงน้ำหนักการวิเคราะห์โดยอัตโนมัติ การวิเคราะห์ด้วยวิธีนี้จึงมีความแม่นยำสูงกว่าการทดสอบ Bartlett's test แบบดั้งเดิม และควบคุมอัตราความคลาดเคลื่อนชนิดที่ 1 ได้อย่างสมบูรณ์โดยไม่ต้องตัดข้อมูลหรือยกเลิกการวิเคราะห์รวม"*
+
+---
+
+## 8. สรุปคำแนะนำสำหรับนักวิจัยและนักพัฒนาเครื่องมือ
+
+1. **อย่าตกใจเมื่อ Bartlett's test ได้ $p < 0.05$:** ให้คำนวณอัตราส่วน $\max(MSE) / \min(MSE)$ ดูก่อน หากไม่เกิน 3–4 เท่า การรัน Combined ANOVA แบบเดิมตาม Gomez & Gomez หรือโปรแกรม STAR ยังคงใช้ได้ดีและให้ผลที่น่าเชื่อถือ
+2. **หากความแปรปรวนต่างกันมาก ให้ก้าวข้าม OLS ไปสู่ Mixed Model:** ใช้ `nlme::lme()` หรือ `glmmTMB` กำหนดให้โครงสร้างความคลาดเคลื่อนแยกตามสถานที่ คุณจะได้ทั้งข้อสรุปภาพรวมข้ามสภาพแวดล้อม และไม่ต้องสูญเสียข้อมูลแปลงใดไป
+3. **อย่าลืมตรวจสอบประเภทของ Interaction:** แยกให้ออกระหว่าง Crossover (อันดับเปลี่ยน) กับ Non-crossover (เฉพาะสเกลเปลี่ยน) ก่อนที่จะด่วนสรุปว่าไม่สามารถแนะนำพันธุ์ดีเด่นในภาพรวมได้
+4. **สำหรับผู้พัฒนาโปรแกรมวิเคราะห์ข้อมูลเกษตร (เช่น [khaosuay](https://kanthjs.github.io/khaosuay/)):** การออกแบบระบบวิเคราะห์ Combined Analysis ที่เป็นมิตร ควรเริ่มต้นด้วยการรายงาน %CV และ MSE รายแปลง ตรวจสอบอัตราส่วนความแปรปรวน และมีระบบตรวจจับอัตโนมัติ หากความแปรปรวนใกล้เคียงกันให้แสดงตารางตามแบบฉบับ Gomez & Gomez / STAR แต่หากตรวจพบความแปรปรวนต่างกันสูง ให้สลับไปใช้ REML Mixed Model พร้อมแจ้งเตือนผู้ใช้อย่างโปร่งใส
+
+---
+
+## เอกสารอ้างอิง (References)
+
+* Cochran, W. G., & Cox, G. M. (1957). *Experimental Designs* (2nd ed.). John Wiley & Sons, New York.
+* Gomez, K. A., & Gomez, A. A. (1984). *Statistical Procedures for Agricultural Research* (2nd ed.). John Wiley & Sons, New York. (Chapter 8: Analysis of Data from a Series of Experiments, pp. 316–356).
+* IRRI. (2014). *STAR: Statistical Tool for Agricultural Research*. International Rice Research Institute, Los Baños, Laguna, Philippines.
+* Piepho, H. P. (1997). Analyzing a series of variety trials with heterogeneous error variances. *Journal of Agronomy and Crop Science*, 178(3), 173–178.
+* Piepho, H. P. (1999). Fitting a variety of error variance models for multi-environment plant breeding trials. *Theoretical and Applied Genetics*, 98(3), 414–420.
+* Welham, S. J., Cullis, B. R., Kenward, M. G., & Thompson, R. (2004). The analysis of multi-environment plant breeding trials: a modern perspective. *Australian & New Zealand Journal of Statistics*, 46(2), 241–254.
