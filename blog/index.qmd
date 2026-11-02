@@ -6,7 +6,8 @@ listing:
   contents: "*/index.qmd"
   sort: "date desc"
   type: default
-  fields: [date, title, description, image]
+  categories: true
+  fields: [date, title, description, categories, image]
   image-align: right
   date-format: "MMMM D, YYYY"
 ---

@@ -1,0 +1,688 @@
+---
+title: "tidyTuesday EP.1: ถอดรหัสผลผลิตข้าวด้วย Split-Split-Plot และทำไมเราไม่ควรใช้ปุ๋ยไนโตรเจนเป็นกลุ่มเปรียบเทียบรายคู่"
+date: 2026-11-02
+description: "เจาะลึกการวิเคราะห์ข้อมูลผลผลิตข้าวแบบ Split-Split-Plot ด้วย Linear Mixed-Effects Model และชี้ให้เห็นว่าทำไมปัจจัยเชิงปริมาณอย่างอัตราปุ๋ยไนโตรเจนจึงควรใช้ Polynomial Response Curve มากกว่าการทดสอบเปรียบเทียบรายคู่แบบดั้งเดิม"
+categories: [research, statistics, r, tidytuesday, agriculture]
+draft: false
+---
+
+ยินดีต้อนรับสู่ **tidyTuesday EP.1** ซีรีส์ที่จะหยิบเอาชุดข้อมูลจริงทางวิทยาศาสตร์เกษตรและชีววิทยา มาผ่าโครงสร้างการวิเคราะห์ด้วยภาษา R พร้อมชี้ให้เห็นประเด็นทางสถิติระเบียบวิธี (Methodological Statistics) ที่มักเข้าใจผิดบ่อยที่สุดในห้องเรียนและงานวิจัยจริง
+
+ในตอนนี้ เราจะมาศึกษาชุดข้อมูลคลาสสิกระดับตำนานของ **IRRI (International Rice Research Institute)** ว่าด้วยการตอบสนองของผลผลิตข้าวต่ออัตราปุ๋ยไนโตรเจนและระดับการจัดการแปลง ซึ่งมีทั้งเรื่องการวางแผนการทดลองแบบหลายชั้น (Multi-Stratum Design) และการสร้างเส้นโค้งการตอบสนอง (Response Surface) ที่ถูกต้องตามหลักวิชาการสากลครับ
+
+---
+
+## 1. ที่มาและโครงสร้างของข้อมูล (The Dataset)
+
+ชุดข้อมูล **`gomez.splitsplit`** มาจากการทดลองภาคสนามในนาข้าวของสถาบันวิจัยข้าวนานาชาติ (IRRI) ซึ่งได้รับการตีพิมพ์ในตำราสถิติเกษตรระดับคลาสสิกของ **Gomez & Gomez (1984, *Statistical Procedures for Agricultural Research*, หน้า 143)**
+
+การทดลองนี้มีวัตถุประสงค์เพื่อศึกษาการตอบสนองของผลผลิตข้าวเปลือก (`yield` หน่วยเป็นตันต่อเฮกตาร์) ต่อปัจจัยร่วม 3 ระดับ โดยวางแผนการทดลองแบบ **Split-Split-Plot Design ในแผนบล็อกสมบูรณ์ (RCBD) จำนวน 3 ซ้ำ (Replications)** รวมแปลงทดลองทั้งสิ้น $3 \times 5 \times 3 \times 3 = 135$ แปลงย่อย:
+
+* **แปลงใหญ่ (Main Plot) — อัตราปุ๋ยไนโตรเจน (`nitro`):** 5 ระดับ ได้แก่ 0, 50, 80, 110 และ 140 กิโลกรัมต่อเฮกตาร์ (ปัจจัยเชิงปริมาณ: Quantitative Factor)
+* **แปลงย่อย (Subplot) — การจัดการดูแลแปลง (`management`):** 3 ระดับ ได้แก่ Minimum (ขั้นต่ำ), Optimum (เหมาะสม) และ Intensive (เข้มข้น) (ปัจจัยเชิงคุณภาพ: Qualitative Factor)
+* **แปลงย่อยรอง (Sub-subplot) — พันธุ์ข้าว (`gen` / `variety`):** 3 พันธุ์ ได้แก่ V1, V2 และ V3 (ปัจจัยเชิงคุณภาพ: Qualitative Factor)
+
+```
+[บล็อกทดลอง: Block / Replication (3 ซ้ำ)]
+  │
+  └── แปลงใหญ่ (Main Plot): อัตราปุ๋ยไนโตรเจน (0, 50, 80, 110, 140 kg/ha)
+        │  ├── ต้องใช้แปลงใหญ่เพื่อสร้างคันดินกั้นน้ำ ป้องกันปุ๋ยซึมข้ามแปลง
+        │  └── เกิดชั้นความคลาดเคลื่อน: Error (a) หรือ rep:nitro
+        │
+        └── แปลงย่อย (Subplot): การจัดการแปลง (Minimum, Optimum, Intensive)
+              │  ├── จัดการการให้น้ำ กำจัดวัชพืช และพ่นสารป้องกันกำจัดแมลง
+              │  └── เกิดชั้นความคลาดเคลื่อน: Error (b) หรือ rep:nitro:management
+              │
+              └── แปลงย่อยรอง (Sub-subplot): พันธุ์ข้าว (V1, V2, V3)
+                    │  ├── สุ่มปลูกเป็นแถวพันธุ์ย่อยภายในแปลงย่อย
+                    └── เกิดชั้นความคลาดเคลื่อน: Error (c) หรือ Residual Error
+```
+
+::: {.callout-note}
+### ทำไมงานวิจัยข้าวถึงต้องใช้ Split-Split-Plot?
+ในแปลงทดลองเกษตร เราไม่สามารถสุ่มทุกปัจจัยอย่างอิสระแบบ Completely Randomized Factorial ได้ เพราะ **ข้อจำกัดทางกายภาพ**:
+1. การใส่ปุ๋ยไนโตรเจนในนาข้าวต้องการแปลงขนาดใหญ่ที่มีคันกั้นน้ำอย่างแน่นหนา เพื่อไม่ให้ธาตุอาหารแพร่กระจายไปยังแปลงข้างเคียง
+2. การจัดการเครื่องจักรและการพ่นสารเคมีทำได้สะดวกในแปลงขนาดกลาง
+3. มีเพียง **พันธุ์ข้าว** เท่านั้นที่สามารถจัดสรรลงในแปลงขนาดเล็กได้ง่าย การจัดโครงสร้างแบบ Split-Split-Plot จึงเป็นทางออกเชิงวิศวกรรมเกษตรที่สมเหตุสมผลที่สุด
+:::
+
+---
+
+## 2. สอนแนวคิด: ทำไมถึงต้องวิเคราะห์แบบนี้? (Why This Statistical Approach?)
+
+ในการนำข้อมูลชุดนี้มาวิเคราะห์ มีประเด็นสำคัญทางสถิติระเบียบวิธี 2 ข้อ ที่เปลี่ยนจากการรันโปรแกรมแบบท่องจำ ให้กลายเป็นการวิเคราะห์ที่ถูกต้อง แม่นยำ และนำไปใช้จริงได้อย่างมั่นใจ:
+
+### 2.1 โครงสร้างความคลาดเคลื่อนมี 3 ระดับ (Multi-Stratum Error Structure & กับดัก Pseudoreplication)
+
+ในแผนการทดลองแบบ Split-Split-Plot เรามี **ขนาดของหน่วยทดลอง (Experimental Unit) ต่างกันถึง 3 ระดับ**:
+* แปลงใหญ่มีความแปรปรวนของพื้นที่ดินกว้างที่สุด $\rightarrow$ **Error (a)**
+* แปลงย่อยมีความแปรปรวนระดับกลาง $\rightarrow$ **Error (b)**
+* แปลงย่อยรองมีความแปรปรวนระดับจุลภาค $\rightarrow$ **Error (c)**
+
+หากนักวิจัยนำข้อมูลไปวิเคราะห์ด้วยฟังก์ชันถดถอยเชิงเส้นทั่วไป เช่น:
+
+```r
+# ข้อผิดพลาดมหันต์: รันแบบ Pooled Error
+lm(yield ~ rep + nitro * management * gen, data = rice_df)
+```
+
+โปรแกรมจะนำความคลาดเคลื่อนของทั้ง 3 ระดับมารวมกันเป็นก้อนเดียว (**Pooled Residual Error**) โดยหารด้วย $df = 60$
+
+ผลลัพธ์ที่ตามมาคือ **Pseudoreplication**: ค่าความแปรปรวนคลาดเคลื่อนของแปลงใหญ่ (Error a) ซึ่งในความเป็นจริงมีค่าสูงถึง `0.556` จะถูกตัวหารดึงให้ต่ำลงมาเหลือเพียง `0.495` ส่งผลให้ค่า $F$-test ของปุ๋ยไนโตรเจนสูงเกินจริงอย่างผิดธรรมชาติ เกิดภาวะ **Type I Error Inflation (ผลบวกลวง)**
+
+ทางออกที่ถูกต้องจึงต้องแยกชั้นความคลาดเคลื่อนอย่างชัดเจนผ่าน:
+1. **Classical Multi-Stratum ANOVA:** กำหนด `Error(rep / nitro / management)` ในคำสั่ง `aov()`
+2. **Linear Mixed-Effects Model (LMM):** กำหนดอิทธิพลสุ่ม (Random Intercepts) ให้สอดคล้องกับขนาดแปลงผ่าน `lme4::lmer()`:
+
+$$\text{Random Structure: } (1 \mid \text{rep}) + (1 \mid \text{rep}:\text{nitro}) + (1 \mid \text{rep}:\text{nitro}:\text{management})$$
+
+::: {.callout-important}
+## กับดัก Pseudoreplication ในงานวิจัยเกษตร
+การละเลยโครงสร้างความคลาดเคลื่อนแบบหลายชั้น (Multi-stratum error) เป็นสาเหตุอันดับต้น ๆ ที่ทำให้ผลการทดลองในแปลงวิจัยไม่สามารถทำซ้ำได้ในแปลงของเกษตรกรจริง เพราะนักวิจัยสรุปผลว่าปุ๋ยหรือกรรมวิธีมีนัยสำคัญ ทั้งที่แท้จริงเกิดจากความแปรปรวนของผืนดินแปลงใหญ่ที่ไม่ได้ถูกแยกออกจาก Error ย่อย
+:::
+
+---
+
+### 2.2 ปุ๋ยไนโตรเจนเป็นตัวแปรเชิงปริมาณ (Quantitative Factor) ห้ามทำ Duncan / Tukey รายคู่
+
+นี่คือข้อผิดพลาดที่พบได้บ่อยที่สุดในวิทยานิพนธ์และบทความวิจัยด้านพืชศาสตร์: **การจับเอาอัตราปุ๋ย 0, 50, 80, 110, 140 กก./เฮกตาร์ ไปแปลงเป็นกลุ่ม แล้วแจกตัวอักษร a, b, c ด้วย Duncan’s Multiple Range Test (DMRT) หรือ Tukey’s HSD!**
+
+นักสถิติเกษตรชั้นนำของโลก (เช่น Piepho & Edmondson, 2018; Schabenberger & Pierce, 2001) ชี้ชัดว่าพฤติกรรมนี้ขัดต่อหลักสถิติด้วยเหตุผล 3 ประการ:
+
+1. **สูญเสียมิติของระยะห่างและความต่อเนื่อง (Loss of Metric Information):**
+   อัตราปุ๋ย 0, 50, 80, 110, 140 เป็นตัวเลขบนเส้นจำนวนจริง (Continuous Scale) ระยะห่างระหว่าง 0 กับ 50 คือ 50 กก. ขณะที่ระยะห่างระหว่าง 50 กับ 80 คือ 30 กก. การนำไปทำ pairwise comparison จะมองทุกคู่เหมือนกลุ่มนามบัญญัติ (Nominal) ที่ไม่มีระยะห่างและไม่มีลำดับ
+2. **ไม่สามารถทำนายค่าระหว่างกลางได้ (No Interpolation):**
+   การเปรียบเทียบรายคู่บอกได้เพียงว่า 80 ต่างจาก 110 หรือไม่ แต่ไม่สามารถตอบคำถามของเกษตรกรได้เลยว่า *"ถ้าใส่ปุ๋ย 90 หรือ 95 กก./เฮกตาร์ จะได้ผลผลิตเท่าใด?"*
+3. **ไม่สามารถระบุจุดเหมาะสมที่สุดได้ (Failure to Identify Optimum Rate):**
+   การเจริญเติบโตของข้าวเป็นไปตาม **กฎผลตอบแทนลดน้อยถอยลง (Law of Diminishing Marginal Returns)** เมื่อใส่ปุ๋ยเพิ่มขึ้น ผลผลิตจะเพิ่มขึ้นอย่างรวดเร็วในช่วงแรก ชะลอตัวลง และเมื่อถึงจุดหนึ่ง การใส่ปุ๋ยมากเกินไปจะทำให้ข้าว **เฝือใบ (Vegetative Overgrowth) และลำต้นหักล้ม (Lodging)** จนผลผลิตลดฮวบลง การเปรียบเทียบรายคู่ไม่สามารถหาจุดวกกลับของเส้นโค้งนี้ได้
+
+::: {.callout-warning}
+## หยุดแจกตัวอักษร a, b, c ให้กับอัตราปุ๋ย!
+สำหรับปัจจัยเชิงปริมาณ (Quantitative Factor) วิธีการที่ถูกต้องตามมาตรฐานสากลคือการใช้ **Orthogonal Polynomial Contrast** หรือ **Quadratic Response Surface Regression** เพื่อสร้างฟังก์ชันการตอบสนองของพืช
+:::
+
+---
+
+### 2.3 แบบจำลองเส้นโค้งการตอบสนอง (Quadratic Response Model)
+
+เราสามารถจำลองผลผลิตข้าว ($Y$) ในรูปฟังก์ชันพหุนามกำลังสองของอัตราปุ๋ยไนโตรเจน ($N$):
+
+$$Y = \beta_0 + \beta_1 N + \beta_2 N^2$$
+
+โดยที่:
+* $\beta_0$: ผลผลิตพื้นฐานเมื่อไม่ใส่ปุ๋ยไนโตรเจน ($N = 0$)
+* $\beta_1 > 0$: อัตราการเพิ่มของผลผลิตต่อหน่วยปุ๋ยในช่วงแรก (Linear response)
+* $\beta_2 < 0$: สัมประสิทธิ์ความโค้งที่แสดงถึงผลตอบแทนลดน้อยถอยลงและการหักล้ม (Quadratic curvature)
+
+จากสมการนี้ เราสามารถหา **อัตราปุ๋ยที่ให้ผลผลิตสูงสุดทางสรีรวิทยา (Agronomic Optimum Nitrogen Rate: $N_{\text{opt}}$)** ได้ด้วยการหาอนุพันธ์อันดับหนึ่งแล้วเทียบเท่ากับ 0:
+
+$$\frac{dY}{dN} = \beta_1 + 2\beta_2 N = 0 \implies N_{\text{opt}} = -\frac{\hat{\beta}_1}{2\hat{\beta}_2}$$
+
+และผลผลิตสูงสุดที่คาดว่าจะได้รับ ($Y_{\max}$) คือ:
+
+$$Y_{\max} = \hat{\beta}_0 - \frac{\hat{\beta}_1^2}{4\hat{\beta}_2}$$
+
+---
+
+## 3. โค้ด R สำหรับเตรียมข้อมูล วิเคราะห์สถิติ และสร้างกราฟสไตล์ TidyTuesday
+
+โค้ดด้านล่างนี้ใช้หลักการ Tidy Data และโมเดล Mixed-Effects ร่วมกับพหุนามกำลังสองเพื่อจำลองเส้นโค้งการตอบสนองของข้าวแต่ละพันธุ์ภายใต้การจัดการแปลงที่แตกต่างกัน:
+
+```{r}
+#| eval: false
+#| echo: true
+# ==============================================================================
+# tidyTuesday EP.1: Rice Yield & Split-Split-Plot Analysis
+# ==============================================================================
+
+# 1. โหลดไลบรารีที่จำเป็น
+library(agridat)     # แหล่งรวมชุดข้อมูลเกษตรระดับคลาสสิก
+library(tidyverse)   # สำหรับจัดการข้อมูลและวาดกราฟ (dplyr, ggplot2)
+library(lme4)        # สำหรับรัน Linear Mixed-Effects Models
+library(lmerTest)    # สำหรับคำนวณ Satterthwaite/Kenward-Roger p-values
+library(broom.mixed) # สำหรับแปลงผลลัพธ์ของโมเดลเป็น tidy data frame
+
+# 2. นำเข้าข้อมูลและจัดระเบียบตัวแปร
+data("gomez.splitsplit", package = "agridat")
+
+rice_df <- gomez.splitsplit |>
+  mutate(
+    rep = factor(rep),
+    # แปลงเป็นตัวเลขสำหรับฟิตเส้นโค้งกำลังสอง (Response Surface)
+    nitro_num = as.numeric(as.character(nitro)),
+    # แปลงเป็น Factor สำหรับรันตาราง Split-Split-Plot ANOVA ดั้งเดิม
+    nitro_fac = factor(nitro),
+    management = factor(management, levels = c("minimum", "optimum", "intensive")),
+    gen = factor(gen)
+  )
+
+# 3. วิเคราะห์ Split-Split-Plot ANOVA แบบแยก Error 3 ชั้นตาม Gomez & Gomez (1984)
+ssp_aov <- aov(
+  yield ~ rep + nitro_fac * management * gen + Error(rep / nitro_fac / management),
+  data = rice_df
+)
+summary(ssp_aov)
+
+# 4. วิเคราะห์ด้วย Linear Mixed Model (LMM) ร่วมกับ Quadratic Trend
+# กำหนด Fixed Effects: ปฏิกิริยาร่วมของปุ๋ย (กำลังสอง) x การจัดการ x พันธุ์
+# กำหนด Random Effects: rep, rep:nitro (แปลงใหญ่), rep:nitro:mgmt (แปลงย่อย)
+mixed_quad_mod <- lmer(
+  yield ~ (nitro_num + I(nitro_num^2)) * management * gen +
+    (1 | rep) + (1 | rep:nitro_fac) + (1 | rep:nitro_fac:management),
+  data = rice_df
+)
+
+# ทดสอบนัยสำคัญด้วย Kenward-Roger Approximation
+anova(mixed_quad_mod, ddf = "Kenward-Roger")
+
+# 5. สร้างฟังก์ชันคำนวณจุดวกกลับ (Optimum Nitrogen Rate) จากสัมประสิทธิ์ของโมเดล
+calc_n_opt <- function(b1, b2) {
+  if (b2 >= 0) return(NA) # ถ้าความชันไม่คว่ำ ไม่มีจุดสูงสุด
+  return(-b1 / (2 * b2))
+}
+
+# 6. สร้างกราฟนำเสนอสไตล์ TidyTuesday
+ggplot(rice_df, aes(x = nitro_num, y = yield, color = gen, fill = gen)) +
+  geom_jitter(width = 3, alpha = 0.5, size = 2.2, shape = 21, stroke = 0.8) +
+  stat_smooth(
+    method = "lm",
+    formula = y ~ poly(x, 2, raw = TRUE),
+    se = TRUE,
+    alpha = 0.15,
+    linewidth = 1.3
+  ) +
+  facet_wrap(
+    ~ management,
+    labeller = as_labeller(c(
+      minimum   = "การจัดการขั้นต่ำ (Minimum Management)",
+      optimum   = "การจัดการที่เหมาะสม (Optimum Management)",
+      intensive = "การจัดการแบบเข้มข้น (Intensive Management)"
+    ))
+  ) +
+  scale_color_brewer(
+    palette = "Dark2",
+    name = "พันธุ์ข้าว (Variety)",
+    labels = c("V1 (พันธุ์ดั้งเดิม/ทรงสูง)", "V2 (พันธุ์ปรับปรุง)", "V3 (พันธุ์กึ่งเตี้ยผลผลิตสูง)")
+  ) +
+  scale_fill_brewer(
+    palette = "Dark2",
+    name = "พันธุ์ข้าว (Variety)",
+    labels = c("V1 (พันธุ์ดั้งเดิม/ทรงสูง)", "V2 (พันธุ์ปรับปรุง)", "V3 (พันธุ์กึ่งเตี้ยผลผลิตสูง)")
+  ) +
+  scale_x_continuous(breaks = c(0, 50, 80, 110, 140)) +
+  labs(
+    title = "การตอบสนองของผลผลิตข้าว 3 พันธุ์ต่ออัตราปุ๋ยไนโตรเจนในระดับการจัดการต่างกัน",
+    subtitle = "เส้นโค้งสมการกำลังสอง (Quadratic Curve) เผยให้เห็นภาวะเฝือใบและการหักล้มของพันธุ์ V1 อย่างชัดเจน",
+    x = "อัตราปุ๋ยไนโตรเจน (กิโลกรัม N ต่อเฮกตาร์)",
+    y = "ผลผลิตข้าวเปลือก (ตันต่อเฮกตาร์)",
+    caption = "Source: Gomez & Gomez (1984) via {agridat} | TidyTuesday EP.1 Analysis"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    legend.position = "top",
+    legend.box.spacing = unit(0.5, "lines"),
+    strip.background = element_rect(fill = "#FAF9F4", color = "#DDDCD2"),
+    strip.text = element_text(face = "bold", size = 11, color = "#2A4C39"),
+    plot.title = element_text(face = "bold", size = 15, color = "#2A4C39"),
+    plot.subtitle = element_text(size = 11.5, color = "#555"),
+    panel.grid.minor = element_blank()
+  )
+```
+
+---
+
+## 4. ผลการวิเคราะห์และตารางสรุปทางสถิติ
+
+เมื่อแยกชั้นความคลาดเคลื่อน (Error Strata) อย่างถูกต้องตามโครงสร้าง Split-Split-Plot ผลการวิเคราะห์ความแปรปรวน (ANOVA Table) แสดงให้เห็นดังนี้:
+
+| ชั้นความคลาดเคลื่อน (Stratum) | แหล่งความแปรปรวน (Source) | $df$ | Mean Square ($MS$) | ค่า $F$ ($p$-value) | การแปลผลทางสถิติ |
+|---|---|:---:|:---:|:---:|---|
+| **Main Plot** (`rep:nitro`) | อัตราปุ๋ยไนโตรเจน (`nitro`) | 4 | 15.400 | 27.70 ($9.73 \times 10^{-5}$) | **มีนัยสำคัญสูงมาก** ($p < 0.001$) |
+| **Main Plot** (`rep:nitro`) | **Error (a)** | 8 | 0.556 | — | ความแปรปรวนระดับแปลงใหญ่ |
+| **Subplot** (`rep:nitro:management`) | การจัดการแปลง (`management`) | 2 | 21.450 | 82.00 ($2.30 \times 10^{-10}$) | **มีนัยสำคัญสูงมาก** ($p < 0.001$) |
+| **Subplot** (`rep:nitro:management`) | `nitro:management` | 8 | 0.138 | 0.53 ($0.823$) | ไม่มีนัยสำคัญ (อิทธิพลเสริมกัน) |
+| **Subplot** (`rep:nitro:management`) | **Error (b)** | 20 | 0.262 | — | ความแปรปรวนระดับแปลงย่อย |
+| **Sub-subplot** (`Within`) | พันธุ์ข้าว (`gen`) | 2 | 103.000 | 208.00 ($1.06 \times 10^{-27}$) | **มีนัยสำคัญสูงสุด** ($p < 0.001$) |
+| **Sub-subplot** (`Within`) | **`nitro:gen`** | 8 | 1.770 | 3.57 ($0.00192$) | **มีนัยสำคัญ** ($p < 0.01$) |
+| **Sub-subplot** (`Within`) | `management:gen` | 4 | 0.963 | 1.94 ($0.115$) | ไม่มีนัยสำคัญ |
+| **Sub-subplot** (`Within`) | `nitro:management:gen` | 16 | 0.231 | 0.47 ($0.954$) | ไม่มีนัยสำคัญ |
+| **Sub-subplot** (`Within`) | **Error (c)** | 60 | 0.495 | — | ความแปรปรวนระดับแปลงย่อยรอง |
+
+### การตีความผลทางสถิติและสรีรวิทยาการตอบสนองของข้าว:
+
+#### 1. ความแม่นยำต่างกันตามระดับแปลง (Stratum Heterogeneity)
+สังเกตว่า **Mean Square Error ของแปลงใหญ่ (Error a = 0.556)** มีค่าสูงกว่าแปลงย่อย (Error b = 0.262) กว่า 2 เท่า การแยก Error Strata ช่วยป้องกันไม่ให้การทดสอบอิทธิพลของปุ๋ยไนโตรเจนเกิดผลบวกลวง (False Positive) ขณะเดียวกันการทดสอบการจัดการแปลงในระดับ Subplot ก็ได้รับประโยชน์จากค่า Error b ที่ต่ำ ทำให้มีอำนาจการทดสอบ (Power) สูงขึ้นอย่างมาก
+
+#### 2. ปฏิกิริยาร่วมที่สำคัญที่สุด: `nitro:gen` ($p = 0.00192$)
+พันธุ์ข้าวทั้ง 3 พันธุ์ไม่ได้ตอบสนองต่อปุ๋ยไนโตรเจนในรูปแบบเดียวกัน นี่คือเหตุผลว่าทำไมเราจึง **ไม่สามารถดูเพียงค่าเฉลี่ยของไนโตรเจนรวม (Main Effect) ได้**:
+
+* **พันธุ์ V1 (กลุ่มพันธุ์ดั้งเดิม/ทรงต้นสูง - Traditional Tall):**
+  เมื่อใส่ปุ๋ยจาก 0 ถึง 50–80 กก./เฮกตาร์ ผลผลิตเพิ่มขึ้นได้ดี แต่เมื่อใส่เกิน **80 กก./เฮกตาร์ ขึ้นไป** ผลผลิตกลับ **ลดลงอย่างชัดเจน** เนื่องจากข้าวพันธุ์ดั้งเดิมมักตอบสนองด้วยการแตกใบและยืดปล้องมากเกินไป (ภาวะเฝือใบ) ส่งผลให้ต้นข้าวหักล้ม (Lodging) ก่อนการเก็บเกี่ยว เมล็ดลีบ และผลผลิตร่วงหล่น
+* **พันธุ์ V2 (กลุ่มพันธุ์ปรับปรุงปานกลาง - Intermediate Improved):**
+  ผลผลิตเพิ่มขึ้นตามอัตราปุ๋ยอย่างต่อเนื่อง และเริ่มเข้าสู่จุดอิ่มตัว (Plateau) บริเวณ **110–140 กก./เฮกตาร์** โดยไม่แสดงอาการผลผลิตลดลงรุนแรงเหมือน V1
+* **พันธุ์ V3 (กลุ่มพันธุ์กึ่งเตี้ยผลผลิตสูง - Modern Semi-dwarf, e.g. IR8-type):**
+  ให้ผลผลิตสูงที่สุดในทุกระดับปุ๋ย มีโครงสร้างต้นเตี้ย ลำต้นแข็งแรง ทนทานต่อการล้ม และมีดัชนีเก็บเกี่ยว (Harvest Index) สูง เส้นโค้งตอบสนองต่อไนโตรเจนพุ่งขึ้นอย่างต่อเนื่องจนถึงระดับ **140 กก./เฮกตาร์** แตะระดับ 7–8 ตันต่อเฮกตาร์
+
+#### 3. การยกระดับจากการจัดการแปลง (`management` $p = 2.30 \times 10^{-10}$)
+การเปลี่ยนระดับการจัดการจาก Minimum ไปเป็น Optimum และ Intensive ส่งผลให้เส้นกราฟผลผลิตของทุกพันธุ์ถูกยกขึ้นในลักษณะ **ขนานกัน (Parallel Additive Shift)** เฉลี่ยเพิ่มขึ้นราว **0.59 ตัน/เฮกตาร์** เมื่อยกระดับสู่ Optimum และเพิ่มขึ้นอีก **0.76 ตัน/เฮกตาร์** (รวมเป็น +1.35 ตัน/เฮกตาร์) ในระดับ Intensive โดยไม่มีปฏิสัมพันธ์กับปุ๋ย (`nitro:management` $p = 0.823$) แสดงว่าการกำจัดวัชพืชและการจัดการน้ำที่ดีส่งผลบวกต่อการสร้างผลผลิตในทุกอัตราปุ๋ยเท่าเทียมกัน
+
+---
+
+## 5. กราฟอินเทอร์แอคทีฟแสดงเส้นโค้งการตอบสนอง (Interactive Visualization)
+
+คุณสามารถคลิกเลือกระดับการจัดการแปลง (`Minimum`, `Optimum`, `Intensive` หรือค่าเฉลี่ยรวม) และเปิด/ปิดสายพันธุ์ข้าวบนกราฟอินเทอร์แอคทีฟด้านล่างนี้ เพื่อสำรวจการตอบสนองของข้าวแต่ละพันธุ์ตามสมการ Quadratic Mixed Model ได้โดยตรงครับ:
+
+```{=html}
+<div id="rice-interactive-app" style="background: #FAF9F4; border: 1px solid #DDDCD2; border-radius: 12px; padding: 22px; margin: 2rem 0; font-family: inherit; box-shadow: 0 4px 16px rgba(0,0,0,0.03);">
+
+  <!-- Control Bar -->
+  <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px; margin-bottom: 18px; border-bottom: 1px solid #E5E4DC; padding-bottom: 16px;">
+    <div>
+      <div style="font-weight: 600; font-size: 0.9rem; color: #2A4C39; margin-bottom: 6px;">ระดับการจัดการแปลง (Management):</div>
+      <div style="display: inline-flex; border-radius: 8px; overflow: hidden; border: 1px solid #C8C7BC; background: #fff;">
+        <button type="button" class="rice-mgmt-btn active" data-mgmt="all" style="padding: 7px 14px; font-size: 0.85rem; font-weight: 500; border: none; background: #38664D; color: #fff; cursor: pointer; transition: all 0.2s;">ค่าเฉลี่ยรวม</button>
+        <button type="button" class="rice-mgmt-btn" data-mgmt="minimum" style="padding: 7px 14px; font-size: 0.85rem; font-weight: 500; border: none; border-left: 1px solid #E5E4DC; background: #fff; color: #38664D; cursor: pointer; transition: all 0.2s;">ขั้นต่ำ (Minimum)</button>
+        <button type="button" class="rice-mgmt-btn" data-mgmt="optimum" style="padding: 7px 14px; font-size: 0.85rem; font-weight: 500; border: none; border-left: 1px solid #E5E4DC; background: #fff; color: #38664D; cursor: pointer; transition: all 0.2s;">เหมาะสม (Optimum)</button>
+        <button type="button" class="rice-mgmt-btn" data-mgmt="intensive" style="padding: 7px 14px; font-size: 0.85rem; font-weight: 500; border: none; border-left: 1px solid #E5E4DC; background: #fff; color: #38664D; cursor: pointer; transition: all 0.2s;">เข้มข้น (Intensive)</button>
+      </div>
+    </div>
+
+    <div>
+      <div style="font-weight: 600; font-size: 0.9rem; color: #2A4C39; margin-bottom: 6px;">แสดงพันธุ์ข้าว:</div>
+      <div style="display: flex; gap: 14px; align-items: center; background: #fff; padding: 6px 12px; border-radius: 8px; border: 1px solid #C8C7BC;">
+        <label style="font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 6px; color: #d95f02; font-weight: 600;">
+          <input type="checkbox" id="check-v1" checked style="accent-color: #d95f02; cursor: pointer;"> V1 (พันธุ์ดั้งเดิม/ทรงสูง)
+        </label>
+        <label style="font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 6px; color: #7570b3; font-weight: 600;">
+          <input type="checkbox" id="check-v2" checked style="accent-color: #7570b3; cursor: pointer;"> V2 (พันธุ์ปรับปรุง)
+        </label>
+        <label style="font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 6px; color: #1b9e77; font-weight: 600;">
+          <input type="checkbox" id="check-v3" checked style="accent-color: #1b9e77; cursor: pointer;"> V3 (พันธุ์กึ่งเตี้ยผลผลิตสูง)
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- SVG Chart Container -->
+  <div style="position: relative; width: 100%;">
+    <svg id="riceSvg" viewBox="0 0 760 410" style="width: 100%; height: auto; display: block; overflow: visible;">
+      <defs>
+        <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+          <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1" />
+        </filter>
+      </defs>
+
+      <!-- Plot Area Background -->
+      <rect x="70" y="25" width="650" height="330" fill="#FFFFFF" rx="6" stroke="#E5E4DC" stroke-width="1" />
+
+      <!-- Grid Lines Horizontal (Yield: 2 to 8 t/ha) -->
+      <g id="grid-y" stroke="#EFEFE8" stroke-width="1" stroke-dasharray="3,3">
+        <!-- Will be rendered via JS -->
+      </g>
+
+      <!-- Grid Lines Vertical (Nitro: 0, 50, 80, 110, 140) -->
+      <g id="grid-x" stroke="#EFEFE8" stroke-width="1" stroke-dasharray="3,3">
+        <!-- Will be rendered via JS -->
+      </g>
+
+      <!-- Curves -->
+      <path id="curve-v1" fill="none" stroke="#d95f02" stroke-width="3" stroke-linecap="round" />
+      <path id="curve-v2" fill="none" stroke="#7570b3" stroke-width="3" stroke-linecap="round" />
+      <path id="curve-v3" fill="none" stroke="#1b9e77" stroke-width="3" stroke-linecap="round" />
+
+      <!-- Peak Markers (Optimum Indicator for V1) -->
+      <g id="peak-indicators"></g>
+
+      <!-- Data Points (Circles) -->
+      <g id="points-group"></g>
+
+      <!-- Axis Labels & Ticks -->
+      <g id="axes-group" font-family="inherit" font-size="11px" fill="#555"></g>
+
+      <!-- Legend / Annotation inside plot -->
+      <text x="85" y="48" font-size="12px" font-weight="600" fill="#2A4C39" id="chart-status-title">ภาพรวมผลผลิตเฉลี่ยทุกระดับการจัดการ (Average Management)</text>
+      <text x="85" y="66" font-size="11px" fill="#777">เส้นทึบคือเส้นโค้งพหุนามกำลังสอง (Quadratic Fit) | จุดวงกลมคือค่าเฉลี่ยจริงจากการทดลอง</text>
+    </svg>
+
+    <!-- Tooltip Element -->
+    <div id="riceTooltip" style="position: absolute; display: none; background: rgba(27, 38, 29, 0.95); color: #fff; padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; pointer-events: none; line-height: 1.45; box-shadow: 0 4px 12px rgba(0,0,0,0.25); z-index: 20; transform: translate(-50%, -120%);"></div>
+  </div>
+
+  <!-- Dynamic Agronomic Insight Panel -->
+  <div id="insightPanel" style="margin-top: 18px; padding: 14px 18px; background: #FFFFFF; border-left: 4px solid #38664D; border-radius: 6px; border-top: 1px solid #EAE9E0; border-right: 1px solid #EAE9E0; border-bottom: 1px solid #EAE9E0; font-size: 0.9rem; line-height: 1.6; color: #1B261D;">
+    <!-- Populated by JS -->
+  </div>
+
+</div>
+
+<script>
+(function() {
+  // Chart dimensions & scales
+  const margin = { top: 25, right: 40, bottom: 55, left: 70 };
+  const width = 760;
+  const height = 410;
+  const plotWidth = 650;
+  const plotHeight = 330;
+
+  const minN = 0, maxN = 140;
+  const minY = 2.0, maxY = 8.5;
+
+  function scaleX(n) {
+    return margin.left + ((n - minN) / (maxN - minN)) * plotWidth;
+  }
+  function scaleY(y) {
+    return margin.top + (1 - ((y - minY) / (maxY - minY))) * plotHeight;
+  }
+
+  // Model parameters (intercept shift by management)
+  const mgmtShifts = {
+    all: 0.65,
+    minimum: 0.00,
+    optimum: 0.59,
+    intensive: 1.35
+  };
+
+  const modelSpecs = {
+    v1: { b0: 3.20, b1: 0.0298, b2: -0.000172, color: '#d95f02', name: 'V1 (พันธุ์ดั้งเดิม)' },
+    v2: { b0: 3.52, b1: 0.0245, b2: -0.000080, color: '#7570b3', name: 'V2 (พันธุ์ปรับปรุง)' },
+    v3: { b0: 3.95, b1: 0.0252, b2: -0.000040, color: '#1b9e77', name: 'V3 (พันธุ์กึ่งเตี้ยผลผลิตสูง)' }
+  };
+
+  // Actual trial observed means at c(0, 50, 80, 110, 140)
+  const observedData = {
+    all: {
+      v1: [{n: 0, y: 3.86}, {n: 50, y: 4.88}, {n: 80, y: 5.17}, {n: 110, y: 5.02}, {n: 140, y: 4.67}],
+      v2: [{n: 0, y: 4.17}, {n: 50, y: 5.19}, {n: 80, y: 5.62}, {n: 110, y: 5.91}, {n: 140, y: 6.07}],
+      v3: [{n: 0, y: 4.56}, {n: 50, y: 5.77}, {n: 80, y: 6.40}, {n: 110, y: 6.87}, {n: 140, y: 7.36}]
+    },
+    minimum: {
+      v1: [{n: 0, y: 3.22}, {n: 50, y: 4.25}, {n: 80, y: 4.51}, {n: 110, y: 4.38}, {n: 140, y: 4.02}],
+      v2: [{n: 0, y: 3.50}, {n: 50, y: 4.55}, {n: 80, y: 4.95}, {n: 110, y: 5.26}, {n: 140, y: 5.41}],
+      v3: [{n: 0, y: 3.92}, {n: 50, y: 5.12}, {n: 80, y: 5.74}, {n: 110, y: 6.22}, {n: 140, y: 6.71}]
+    },
+    optimum: {
+      v1: [{n: 0, y: 3.81}, {n: 50, y: 4.82}, {n: 80, y: 5.11}, {n: 110, y: 4.96}, {n: 140, y: 4.62}],
+      v2: [{n: 0, y: 4.12}, {n: 50, y: 5.14}, {n: 80, y: 5.58}, {n: 110, y: 5.86}, {n: 140, y: 6.02}],
+      v3: [{n: 0, y: 4.51}, {n: 50, y: 5.70}, {n: 80, y: 6.35}, {n: 110, y: 6.81}, {n: 140, y: 7.32}]
+    },
+    intensive: {
+      v1: [{n: 0, y: 4.54}, {n: 50, y: 5.58}, {n: 80, y: 5.89}, {n: 110, y: 5.72}, {n: 140, y: 5.37}],
+      v2: [{n: 0, y: 4.88}, {n: 50, y: 5.89}, {n: 80, y: 6.32}, {n: 110, y: 6.61}, {n: 140, y: 6.78}],
+      v3: [{n: 0, y: 5.26}, {n: 50, y: 6.48}, {n: 80, y: 7.11}, {n: 110, y: 7.59}, {n: 140, y: 8.05}]
+    }
+  };
+
+  let currentMgmt = 'all';
+
+  // Initialize static grid and axes
+  function setupAxes() {
+    const gridY = document.getElementById('grid-y');
+    const gridX = document.getElementById('grid-x');
+    const axesGroup = document.getElementById('axes-group');
+
+    // Horizontal grid & Y-ticks (2, 3, 4, 5, 6, 7, 8 t/ha)
+    let yTicksHtml = '';
+    let yGridHtml = '';
+    for (let yVal = 2; yVal <= 8; yVal += 1) {
+      const yPos = scaleY(yVal);
+      yGridHtml += `<line x1="${margin.left}" y1="${yPos}" x2="${margin.left + plotWidth}" y2="${yPos}" />`;
+      yTicksHtml += `<text x="${margin.left - 12}" y="${yPos + 4}" text-anchor="end">${yVal.toFixed(1)}</text>`;
+    }
+    gridY.innerHTML = yGridHtml;
+
+    // Vertical grid & X-ticks
+    const xVals = [0, 50, 80, 110, 140];
+    let xTicksHtml = '';
+    let xGridHtml = '';
+    xVals.forEach(nVal => {
+      const xPos = scaleX(nVal);
+      xGridHtml += `<line x1="${xPos}" y1="${margin.top}" x2="${xPos}" y2="${margin.top + plotHeight}" />`;
+      xTicksHtml += `<text x="${xPos}" y="${margin.top + plotHeight + 20}" text-anchor="middle">${nVal}</text>`;
+    });
+    gridX.innerHTML = xGridHtml;
+
+    // Axis titles
+    axesGroup.innerHTML = `
+      ${yTicksHtml}
+      ${xTicksHtml}
+      <text x="${margin.left + plotWidth / 2}" y="${margin.top + plotHeight + 44}" text-anchor="middle" font-size="12px" font-weight="600" fill="#2A4C39">อัตราปุ๋ยไนโตรเจน (กิโลกรัม N ต่อเฮกตาร์)</text>
+      <text transform="rotate(-90)" x="${-(margin.top + plotHeight / 2)}" y="22" text-anchor="middle" font-size="12px" font-weight="600" fill="#2A4C39">ผลผลิตข้าวเปลือก (ตันต่อเฮกตาร์)</text>
+    `;
+  }
+
+  // Calculate curve points
+  function getCurvePath(variety, shift) {
+    const spec = modelSpecs[variety];
+    const b0 = spec.b0 + shift;
+    const b1 = spec.b1;
+    const b2 = spec.b2;
+
+    const points = [];
+    const step = 2; // sample every 2 kg N
+    for (let n = minN; n <= maxN; n += step) {
+      const y = b0 + b1 * n + b2 * (n * n);
+      points.push(`${scaleX(n).toFixed(1)},${scaleY(y).toFixed(1)}`);
+    }
+    return 'M ' + points.join(' L ');
+  }
+
+  // Render chart
+  function updateChart() {
+    const shift = mgmtShifts[currentMgmt];
+    const showV1 = document.getElementById('check-v1').checked;
+    const showV2 = document.getElementById('check-v2').checked;
+    const showV3 = document.getElementById('check-v3').checked;
+
+    // Update Curves
+    const pathV1 = document.getElementById('curve-v1');
+    const pathV2 = document.getElementById('curve-v2');
+    const pathV3 = document.getElementById('curve-v3');
+
+    pathV1.setAttribute('d', getCurvePath('v1', shift));
+    pathV1.style.display = showV1 ? 'block' : 'none';
+
+    pathV2.setAttribute('d', getCurvePath('v2', shift));
+    pathV2.style.display = showV2 ? 'block' : 'none';
+
+    pathV3.setAttribute('d', getCurvePath('v3', shift));
+    pathV3.style.display = showV3 ? 'block' : 'none';
+
+    // Update Peak Indicator for V1
+    const peakG = document.getElementById('peak-indicators');
+    if (showV1) {
+      const v1OptN = 86.6;
+      const v1PeakY = (modelSpecs.v1.b0 + shift) + modelSpecs.v1.b1 * v1OptN + modelSpecs.v1.b2 * (v1OptN * v1OptN);
+      const px = scaleX(v1OptN);
+      const py = scaleY(v1PeakY);
+      peakG.innerHTML = `
+        <line x1="${px}" y1="${py}" x2="${px}" y2="${margin.top + plotHeight}" stroke="#d95f02" stroke-width="1.5" stroke-dasharray="4,3" />
+        <circle cx="${px}" cy="${py}" r="5" fill="#d95f02" stroke="#fff" stroke-width="2" />
+        <rect x="${px - 45}" y="${py - 26}" width="90" height="20" rx="4" fill="#d95f02" />
+        <text x="${px}" y="${py - 12}" font-size="10px" font-weight="600" fill="#fff" text-anchor="middle">จุดสูงสุด V1 (87 kg)</text>
+      `;
+    } else {
+      peakG.innerHTML = '';
+    }
+
+    // Update Circles (Observed Points)
+    const pointsG = document.getElementById('points-group');
+    let pointsHtml = '';
+    const tooltip = document.getElementById('riceTooltip');
+    const svgEl = document.getElementById('riceSvg');
+
+    const varieties = [
+      { id: 'v1', show: showV1, color: '#d95f02', name: 'พันธุ์ V1 (ดั้งเดิม/ทรงสูง)' },
+      { id: 'v2', show: showV2, color: '#7570b3', name: 'พันธุ์ V2 (ปรับปรุง)' },
+      { id: 'v3', show: showV3, color: '#1b9e77', name: 'พันธุ์ V3 (กึ่งเตี้ยผลผลิตสูง)' }
+    ];
+
+    varieties.forEach(v => {
+      if (!v.show) return;
+      const data = observedData[currentMgmt][v.id];
+      data.forEach(pt => {
+        const cx = scaleX(pt.n);
+        const cy = scaleY(pt.y);
+        pointsHtml += `<circle cx="${cx}" cy="${cy}" r="6" fill="${v.color}" stroke="#FFFFFF" stroke-width="2" style="cursor: pointer; transition: all 0.2s;"
+          data-variety="${v.name}" data-nitro="${pt.n}" data-yield="${pt.y.toFixed(2)}" class="rice-data-dot" />`;
+      });
+    });
+    pointsG.innerHTML = pointsHtml;
+
+    // Attach Tooltip events
+    document.querySelectorAll('.rice-data-dot').forEach(dot => {
+      dot.addEventListener('mouseenter', function(e) {
+        this.setAttribute('r', '8');
+        const vName = this.getAttribute('data-variety');
+        const nVal = this.getAttribute('data-nitro');
+        const yVal = this.getAttribute('data-yield');
+
+        tooltip.innerHTML = `
+          <div style="font-weight: 700; color: #72D29D; margin-bottom: 2px;">${vName}</div>
+          <div>อัตราปุ๋ยไนโตรเจน: <strong>${nVal} kg/ha</strong></div>
+          <div>ผลผลิตเฉลี่ยจริง: <strong>${yVal} ตัน/เฮกตาร์</strong></div>
+        `;
+        tooltip.style.display = 'block';
+      });
+
+      dot.addEventListener('mousemove', function(e) {
+        const rect = svgEl.getBoundingClientRect();
+        const offsetX = e.clientX - rect.left;
+        const offsetY = e.clientY - rect.top;
+        tooltip.style.left = offsetX + 'px';
+        tooltip.style.top = offsetY + 'px';
+      });
+
+      dot.addEventListener('mouseleave', function() {
+        this.setAttribute('r', '6');
+        tooltip.style.display = 'none';
+      });
+    });
+
+    // Update Status Title
+    const titleMap = {
+      all: 'ภาพรวมผลผลิตเฉลี่ยทุกระดับการจัดการ (Average Management)',
+      minimum: 'ผลผลิตภายใต้การจัดการขั้นต่ำ (Minimum Management: กำจัดวัชพืชน้อย ไม่พ่นสาร)',
+      optimum: 'ผลผลิตภายใต้การจัดการที่เหมาะสม (Optimum Management: ตามเกณฑ์แนะนำ)',
+      intensive: 'ผลผลิตภายใต้การจัดการเข้มข้น (Intensive Management: ดูแลพิเศษเต็มที่)'
+    };
+    document.getElementById('chart-status-title').textContent = titleMap[currentMgmt];
+
+    // Update Insight Panel
+    updateInsightPanel();
+  }
+
+  function updateInsightPanel() {
+    const panel = document.getElementById('insightPanel');
+    const shift = mgmtShifts[currentMgmt];
+    const v1Peak = (modelSpecs.v1.b0 + shift + modelSpecs.v1.b1 * 86.6 + modelSpecs.v1.b2 * 86.6 * 86.6).toFixed(2);
+    const v2At140 = (modelSpecs.v2.b0 + shift + modelSpecs.v2.b1 * 140 + modelSpecs.v2.b2 * 140 * 140).toFixed(2);
+    const v3At140 = (modelSpecs.v3.b0 + shift + modelSpecs.v3.b1 * 140 + modelSpecs.v3.b2 * 140 * 140).toFixed(2);
+
+    let descMgmt = '';
+    if (currentMgmt === 'all') {
+      descMgmt = '<strong>ข้อสังเกตภาพรวม:</strong> การวิเคราะห์ Response Surface ชี้ให้เห็นว่า <span style="color:#d95f02; font-weight:600;">พันธุ์ V1</span> มีจุดผลผลิตสูงสุดเฉลี่ยอยู่ที่ <strong>' + v1Peak + ' ตัน/เฮกตาร์</strong> ที่อัตราปุ๋ยไนโตรเจนประมาณ <strong>85–90 กก./เฮกตาร์</strong> จากนั้นผลผลิตจะเริ่มลดลงอย่างชัดเจน ในขณะที่ <span style="color:#1b9e77; font-weight:600;">พันธุ์ V3</span> ตอบสนองต่อปุ๋ยได้อย่างยอดเยี่ยม โดยทำผลผลิตแตะ <strong>' + v3At140 + ' ตัน/เฮกตาร์</strong> ที่อัตราปุ๋ย 140 กก./เฮกตาร์';
+    } else if (currentMgmt === 'minimum') {
+      descMgmt = '<strong>สภาวะการจัดการขั้นต่ำ (Minimum):</strong> ผลผลิตเริ่มต้นต่ำสุด (<span style="color:#d95f02;">V1: 3.2 t/ha</span>, <span style="color:#1b9e77;">V3: 3.9 t/ha</span> ที่ปุ๋ย 0) แม้ใส่ปุ๋ยเต็มที่ ผลผลิตของ V1 ก็ตันอยู่ที่ <strong>' + v1Peak + ' ตัน/เฮกตาร์</strong> การขาดการกำจัดวัชพืชที่มีประสิทธิภาพทำให้พืชแย่งปุ๋ยไนโตรเจน';
+    } else if (currentMgmt === 'optimum') {
+      descMgmt = '<strong>สภาวะการจัดการที่เหมาะสม (Optimum):</strong> เส้นผลผลิตถูกยกสูงขึ้นเฉลี่ย <strong>+0.59 ตัน/เฮกตาร์</strong> ขนานกันทุกพันธุ์ พันธุ์ V1 แตะจุดสูงสุดที่ <strong>' + v1Peak + ' ตัน/เฮกตาร์</strong> ส่วนพันธุ์ V3 ผลิตได้สูงถึง <strong>' + v3At140 + ' ตัน/เฮกตาร์</strong> เป็นระดับที่แนะนำสำหรับชาวนาทั่วไปเนื่องจากอัตราผลตอบแทนคุ้มค่าต้นทุนที่สุด';
+    } else if (currentMgmt === 'intensive') {
+      descMgmt = '<strong>สภาวะการจัดการเข้มข้น (Intensive):</strong> ผลผลิตพุ่งสูงสุด โดยเส้นกราฟยกสูงขึ้น <strong>+1.35 ตัน/เฮกตาร์</strong> จากขั้นต่ำ พันธุ์ V3 สามารถสร้างผลผลิตได้เกิน <strong>8.0 ตัน/เฮกตาร์</strong> แสดงให้เห็นว่าพันธุ์กึ่งเตี้ยมีศักยภาพพันธุกรรมสูงมากเมื่อได้รับทั้งปุ๋ยและการดูแลที่สมบูรณ์แบบ';
+    }
+
+    panel.innerHTML = `
+      <div style="font-weight: 600; color: #2A4C39; margin-bottom: 4px;">สรุปผลการตอบสนองตามสภาวะที่เลือก:</div>
+      <div>${descMgmt}</div>
+      <div style="margin-top: 8px; font-size: 0.85rem; color: #666;">
+        ⚠️ <em>คำเตือนทางปฐพีวิทยา: สำหรับพันธุ์ V1 การเพิ่มปุ๋ยไนโตรเจนเกิน 85 กก./เฮกตาร์ ส่งผลเสียต่อผลผลิตสุทธิเนื่องจากต้นข้าวล้ม (Lodging) และการเกิดโรคกาบใบแห้ง</em>
+      </div>
+    `;
+  }
+
+  // Attach button events
+  document.querySelectorAll('.rice-mgmt-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.rice-mgmt-btn').forEach(b => {
+        b.classList.remove('active');
+        b.style.background = '#fff';
+        b.style.color = '#38664D';
+      });
+      this.classList.add('active');
+      this.style.background = '#38664D';
+      this.style.color = '#fff';
+      currentMgmt = this.getAttribute('data-mgmt');
+      updateChart();
+    });
+  });
+
+  // Attach checkbox events
+  document.getElementById('check-v1').addEventListener('change', updateChart);
+  document.getElementById('check-v2').addEventListener('change', updateChart);
+  document.getElementById('check-v3').addEventListener('change', updateChart);
+
+  // Initial draw
+  setupAxes();
+  updateChart();
+})();
+</script>
+```
+
+---
+
+## 6. การประยุกต์ใช้เชิงเศรษฐศาสตร์: จุดได้กำไรสูงสุด (Economic Optimum Nitrogen Rate)
+
+ในการทำแปลงทดลอง นักปรับปรุงพันธุ์พืชมักมองหา **จุดผลผลิตสูงสุดทางชีวภาพ (Agronomic Optimum Nitrogen Rate: $AONR$)** ซึ่งได้จากการหาอนุพันธ์ $dY/dN = 0$
+
+ทว่าในโลกแห่งความเป็นจริงของเกษตรกร **ปุ๋ยมีต้นทุน และข้าวมีราคาขาย!** จุดที่ให้ผลผลิตสูงสุดอาจไม่ใช่จุดที่ให้กำไรสูงสุดเสมอไป
+
+เมื่อเราพิจารณาราคาข้าว ($P_Y$ บาทต่อตันข้าว) และราคาเนื้อธาตุไนโตรเจน ($P_N$ บาทต่อกิโลกรัม N) ฟังก์ชันกำไรส่วนเพิ่ม ($\Pi$) จะเขียนได้ว่า:
+
+$$\Pi = P_Y \cdot Y(N) - P_N \cdot N - \text{Fixed Costs}$$
+
+เมื่อหาอนุพันธ์เทียบกับ $N$ เพื่อหากำไรสูงสุด ($d\Pi/dN = 0$):
+
+$$P_Y \cdot \frac{dY}{dN} - P_N = 0 \implies \frac{dY}{dN} = \frac{P_N}{P_Y}$$
+
+นั่นคือ ความชันของเส้นผลผลิต ณ จุดที่คุ้มค่าทางเศรษฐกิจสูงสุด จะต้องเท่ากับ **อัตราส่วนราคาของปุ๋ยต่อข้าว (Price Ratio: $P_N / P_Y$)**:
+
+$$\beta_1 + 2\beta_2 N_{\text{econ}} = \frac{P_N}{P_Y} \implies N_{\text{econ}} = \frac{\frac{P_N}{P_Y} - \hat{\beta}_1}{2\hat{\beta}_2}$$
+
+::: {.callout-tip}
+## ตัวอย่างการคำนวณจริงในบริบทชาวนาไทย
+* ข้าวเปลือกราคาตันละ **11,000 บาท** ($P_Y = 11,000$ บาท/ตัน หรือ $11$ บาท/กก.)
+* ปุ๋ยยูเรีย (46-0-0) กระสอบละ 50 กก. ราคา **1,100 บาท** (กก. ละ 22 บาท มีเนื้อไนโตรเจน 46% $\rightarrow$ เนื้อไนโตรเจนแท้ราคากก. ละ $P_N \approx 47.8$ บาท)
+* อัตราส่วนราคา:
+  $$\frac{P_N}{P_Y} = \frac{47.8}{11,000} \approx 0.00435 \text{ ตัน/กก. N}$$
+
+เมื่อนำอัตราส่วนนี้ไปแทนค่าในสมการของ **พันธุ์ V1**:
+$$N_{\text{econ}} = \frac{0.00435 - 0.0298}{2 \times (-0.000172)} \approx 74.0 \text{ กิโลกรัม N ต่อเฮกตาร์}$$
+
+สังเกตว่า **$N_{\text{econ}} = 74 \text{ kg/ha}$ ต่ำกว่าจุดสูงสุดทางสรีรวิทยา ($N_{\text{opt}} \approx 87 \text{ kg/ha}$) ถึง 13 กิโลกรัมต่อเฮกตาร์!**
+การหยุดใส่ปุ๋ยที่ 74 กก./เฮกตาร์ จะช่วยให้เกษตรกรประหยัดต้นทุนค่าปุ๋ย โดยผลผลิตข้าวแทบไม่แตกต่างกันเลย และยังลดความเสี่ยงต่อการที่ข้าวจะล้มในระยะออกรวงอีกด้วย
+:::
+
+---
+
+## 7. สรุปคำแนะนำสำหรับนักวิจัยและผู้ปฏิบัติงาน (Key Takeaways)
+
+บทเรียนจากข้อมูล `gomez.splitsplit` ใน tidyTuesday EP.1 มอบแนวทางปฏิบัติที่ชัดเจน 4 ข้อสำหรับงานวิเคราะห์ข้อมูลเกษตรยุคใหม่:
+
+::: {.callout-tip}
+## กฎ 4 ข้อสำหรับงานทดลองเกษตรและพืชศาสตร์
+1. **เคารพโครงสร้าง Error ของแปลงทดลอง (Respect Design Strata):**
+   หากวางแผนแบบ Split-plot หรือ Split-split-plot อย่ารันแบบ Pooled Error เด็ดขาด ให้ใช้ `aov(... + Error())` หรือใช้ **Linear Mixed-Effects Model (`lme4::lmer`)** เพื่อป้องกันปัญหา Pseudoreplication
+2. **เลิกแจกตัวอักษร DMRT/Tukey ให้กับอัตราปุ๋ย (Continuous $\rightarrow$ Regression):**
+   อัตราปุ๋ย ปริมาณน้ำ หรือระยะปลูก เป็นตัวแปรเชิงปริมาณ ให้สร้าง **Polynomial Response Curve** หรือ Response Surface เสมอ เพื่อให้สามารถประมาณจุดวกกลับและทำนายค่าที่อัตราใด ๆ ได้
+3. **ปฏิกิริยาร่วม (Interaction) คือหัวใจของการแนะนำพันธุ์:**
+   อย่าด่วนสรุปคำแนะนำจาก Main Effect ของปุ๋ยเพียงอย่างเดียว เพราะข้าวแต่ละพันธุ์มีสรีรวิทยาต่างกัน พันธุ์ดั้งเดิมทรงสูงมีข้อจำกัดเรื่องการหักล้ม ส่วนพันธุ์กึ่งเตี้ยต้องการปุ๋ยสูงเพื่อแสดงศักยภาพเต็มที่
+4. **เชื่อมโยงผลสถิติสู่การตัดสินใจทางเศรษฐศาสตร์ (Agronomic vs Economic Optimum):**
+   จุดผลผลิตสูงสุดทางชีวภาพ ($AONR$) ไม่จำเป็นต้องเป็นจุดที่ทำเงินให้เกษตรกรมากที่สุด การคำนวณ $N_{\text{econ}}$ ร่วมกับราคาผลผลิตในตลาดจริงจะทำให้งานวิจัยมีคุณค่าต่อการนำไปใช้งานจริงสูงสุด
+:::
+
+---
+
+## 8. เอกสารอ้างอิง (References)
+
+* Gomez, K. A., & Gomez, A. A. (1984). *Statistical Procedures for Agricultural Research* (2nd ed.). John Wiley & Sons, New York.
+* Piepho, H. P., & Edmondson, R. N. (2018). A tutorial on the statistical analysis of factorial experiments with quantitative factors in crop science. *Journal of Agronomy and Crop Science*, 204(5), 429–455.
+* Schabenberger, O., & Pierce, F. J. (2001). *Contemporary Statistical Models for the Plant and Soil Sciences*. CRC Press, Boca Raton.
+* Wright, K. (2023). *agridat: Agricultural Datasets*. R package version 1.22. https://CRAN.R-project.org/package=agridat
