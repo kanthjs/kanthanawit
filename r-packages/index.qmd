@@ -9,3 +9,21 @@ listing:
 ---
 
 R package, หนังสือ และ เครื่องมือต่าง ๆ ที่ พัฒนาขึ้น
+
+## R packages
+
+| Package | What it does |
+|---|---|
+| [**ricecooker**](https://github.com/kanthjs/ricecooker) | Analysis of agricultural field experiments — CRD, RCBD and split-plot designs, CV%, DMRT, data transformations, Type III SS, and ready-made plots |
+| [**talatThaiR**](https://github.com/kanthjs/talatThaiR) | Fetch Thai agricultural price and production index data straight into R |
+| [**kanth_lib**](https://github.com/kanthjs/kanth_lib) | My personal R library |
+
+## Apps
+
+| App | What it does |
+|---|---|
+| [**Rice Blast Forecast**](https://kanthjs.github.io/rice_blast_forcast_app/) | Rice blast disease forecasting tool |
+| [**Rice Pest Warning**](https://kanthjs.github.io/rice_pest_warning_app/) | Rice pest warning based on historical survey data |
+| [**RDstat**](https://kanthjs.github.io/RDstat/) | Statistical analysis in the browser — R runs on your own machine, so uploaded data never leaves your computer |
+
+## Details
