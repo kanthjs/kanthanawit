@@ -1,11 +1,11 @@
 ---
 title: "Software"
 pagetitle: "Software — Kanthanawit"
-description: "R packages for agricultural data and statistics."
+description: "R packages, books and tools for agricultural data and statistics."
 listing:
   contents: "*/index.qmd"
   type: grid
   fields: [title, description]
 ---
 
-R package ต่าง ๆ ที่ พัฒนาขึ้น
+R package, หนังสือ และ เครื่องมือต่าง ๆ ที่ พัฒนาขึ้น

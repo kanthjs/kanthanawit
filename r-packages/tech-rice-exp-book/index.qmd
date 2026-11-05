@@ -1,0 +1,8 @@
+---
+title: "Tech Rice Exp Book"
+description: "หนังสือเทคนิคการวิจัยและการออกแบบการทดลองทางข้าว เขียนโดย Kanthanawit"
+---
+
+An online book on experimental design and data analysis for rice research, written by Kanthanawit.
+
+[Read the book](https://kanthjs.github.io/tech_rice_exp_book/){.btn-link-out target="_blank"} [GitHub](https://github.com/kanthjs/tech_rice_exp_book){.btn-link-out target="_blank"}
