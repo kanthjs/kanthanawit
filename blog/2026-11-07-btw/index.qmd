@@ -1,0 +1,212 @@
+---
+title: "จบปัญหา AI มโนชื่อคอลัมน์: ให้ AI ส่อง R Session ของเราด้วย btw และ mcptools"
+date: 2026-11-07
+description: "posit-dev/btw และ mcptools เชื่อม R Session ในเครื่องเข้ากับ AI ให้ LLM เห็นตาราง คอลัมน์ และคู่มือฟังก์ชันเวอร์ชันที่ติดตั้งจริง โดยไม่ต้องคอยก๊อปปี้วาง"
+categories: [r, ai, btw, mcptools, ellmer, llm]
+execute:
+  eval: false
+draft: false
+---
+
+ใช้ AI ช่วยเขียน R ไม่ว่าจะผ่าน ChatGPT, Claude หรือ Cursor ปัญหาที่เจอบ่อยที่สุดคือ
+
+> **AI มองไม่เห็น Environment ในเครื่องเรา**
+
+ทุกครั้งที่ขอให้ช่วยเขียน `dplyr` หรือ `ggplot2` ยาวๆ เราต้องทำพิธีเดิมซ้ำ: รัน `glimpse(df)` หรือ `str(df)` แล้วก๊อปไปแปะ บางทีต้องก๊อปหน้า Help ของแพ็กเกจไปด้วย ถ้าลืมแปะ AI ก็ **มโนชื่อคอลัมน์** ขึ้นมาเอง หรือใช้อาร์กิวเมนต์ของเวอร์ชันเก่าที่เลิกใช้ไปแล้ว
+
+ทีม Posit (Garrick Aden-Buie และ Simon Couch) จึงทำ **`btw`** ("By The Way") และ **`mcptools`** ขึ้นมาเป็นสะพาน ให้ AI เห็นตัวแปร โครงสร้างข้อมูล และคู่มือฟังก์ชันใน R Session ของเราได้โดยตรง
+
+---
+
+## แบบเดิม vs แบบใหม่
+
+:::: {layout-ncol="2"}
+
+::: {}
+**แบบเดิม: ก๊อปแปะเอง**
+
+```{mermaid}
+flowchart TD
+  A["R Session"] --> B["glimpse() / str()"]
+  B --> C["ลากคลุม + ก๊อปปี้"]
+  C --> D["แปะลงแชท AI"]
+  D --> E["ลืมแปะ = AI มโนคอลัมน์"]
+```
+:::
+
+::: {}
+**แบบใหม่: btw + MCP**
+
+```{mermaid}
+flowchart TD
+  A["R Session"] -->|"btw() / MCP"| B["AI Assistant"]
+  B --> C["อ่านโครงสร้างตารางเอง"]
+  B --> D["เปิด Help เวอร์ชันในเครื่อง"]
+  C --> E["โค้ดตรงกับข้อมูลจริง"]
+  D --> E
+```
+:::
+
+::::
+
+---
+
+## 1. `btw()` — สรุป R Session ลง Clipboard ในคำสั่งเดียว
+
+แทนที่จะรัน `glimpse()` หรือเปิด `?function` แล้วก๊อปทีละส่วน ใส่สิ่งที่อยากให้ AI รู้ลงใน `btw()` ได้เลย แพ็กเกจจะแปลงโครงสร้างข้อมูลและคู่มือฟังก์ชันเป็น **Markdown ที่ LLM อ่านง่าย** แล้วคัดลอกลง Clipboard ให้
+
+### ติดตั้ง
+
+ทั้งสองแพ็กเกจอยู่บน CRAN แล้ว
+
+```{r}
+# | eval: false
+install.packages(c("btw", "mcptools"))
+
+# หรือเวอร์ชันพัฒนาล่าสุด
+# pak::pak(c("posit-dev/btw", "posit-dev/mcptools"))
+```
+
+### ท่าที่ 1: ส่งตาราง + คู่มือฟังก์ชัน + คำถาม ในบรรทัดเดียว
+
+```{r}
+# | eval: false
+library(btw)
+
+btw(
+  my_survey_df,
+  ?dplyr::summarise,
+  "ช่วยเขียนโค้ดหาค่าเฉลี่ยแยกตามภูมิภาคและปีให้หน่อย"
+)
+# จากนั้นสลับไปหน้าแชท AI แล้วกด Ctrl+V / Cmd+V
+```
+
+สิ่งที่อยู่ใน Clipboard:
+
+- **โครงสร้างตาราง**: ชื่อคอลัมน์ ชนิดข้อมูล (`chr`, `dbl`, `date`) และตัวอย่างค่า
+- **คู่มือฟังก์ชัน**: หน้า Help ของ `dplyr::summarise` จาก **เวอร์ชันที่ติดตั้งอยู่จริง**
+- **คำถาม**: ข้อความที่พิมพ์ต่อท้าย
+
+ใส่ `"{dplyr}"` เพื่อส่งภาพรวมทั้งแพ็กเกจก็ได้
+
+### ท่าที่ 2: ส่งทั้ง Environment
+
+ถ้ามีหลายตารางที่ต้องใช้ร่วมกัน เช่น ตารางผลผลิต ตารางพิกัดแปลง และตารางสภาพอากาศ
+
+```{r}
+# | eval: false
+# ส่งโครงสร้างของทุกออบเจ็กต์ใน Global Environment
+btw(globalenv())
+```
+
+### ท่าที่ 3: ให้ AI ส่องเองผ่าน `ellmer`
+
+ถ้าใช้ **`ellmer`** (แพ็กเกจคุย LLM จากทีม Tidyverse) อยู่แล้ว ส่ง "เครื่องมือ" ของ btw ให้ AI ได้เลย AI จะเลือกเปิดดูตัวแปรหรือคู่มือที่ต้องใช้เอง
+
+```{r}
+# | eval: false
+library(ellmer)
+library(btw)
+
+chat <- chat_anthropic() # หรือ chat_google_gemini(), chat_openai()
+chat$register_tools(btw_tools())
+
+# ถามได้เลย ไม่ต้องส่งข้อมูลไปก่อน
+chat$chat("ใน R session ตอนนี้มีตารางอะไรบ้าง ตารางไหนมีคอลัมน์ผลผลิตข้าว?")
+```
+
+เบื้องหลังคือ AI เรียก tool ของ btw เพื่อดูรายชื่อออบเจ็กต์ เช็กชื่อคอลัมน์ แล้วจึงตอบ โดยที่เราไม่ต้องพิมพ์อธิบายโครงสร้างเลย
+
+ถ้าไม่อยากให้เข้าถึงทุกอย่าง เลือกเฉพาะกลุ่มได้ เช่น `btw_tools(c("docs", "env"))`
+
+---
+
+## 2. เปลี่ยน R Session เป็น MCP Server
+
+**Claude Desktop**, **Claude Code**, **Cursor** และ **Positron** รองรับ **Model Context Protocol (MCP)** ซึ่งเป็นมาตรฐานเปิดให้ AI ต่อกับเครื่องมือภายนอกได้ btw (ทำงานบน `mcptools`) เปิด MCP Server สำหรับ R ให้ในคำสั่งเดียว
+
+### ตั้งค่าฝั่ง AI
+
+**Claude Desktop** เพิ่มใน `claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "r-btw": {
+      "command": "Rscript",
+      "args": ["-e", "btw::btw_mcp_server(list('docs', 'pkg', 'env', 'sessioninfo', 'cran'))"]
+    }
+  }
+}
+```
+
+**Claude Code** รันใน Terminal
+
+```bash
+claude mcp add -s "user" r-btw -- Rscript -e "btw::btw_mcp_server(list('docs', 'pkg', 'env', 'sessioninfo', 'cran'))"
+```
+
+**Positron / VS Code** ใช้ JSON แบบเดียวกัน แต่ใส่ใน `.vscode/mcp.json` ภายใต้คีย์ `"servers"` และเพิ่ม `"type": "stdio"`
+
+`list(...)` คือการเลือกกลุ่ม tool ที่จะเปิดให้ AI ใช้ ถ้าไม่ใส่จะได้ tool ทั้งหมด
+
+### ผูก Session ที่กำลังทำงานอยู่
+
+ถ้าไม่ทำขั้นนี้ Server จะใช้ R Session ใหม่ของตัวเอง ซึ่งไม่มีตัวแปรของเรา ให้รันใน RStudio หรือ Positron
+
+```{r}
+# | eval: false
+btw::btw_mcp_session()
+```
+
+ใส่บรรทัดนี้ไว้ใน `.Rprofile` จะได้ไม่ต้องรันเองทุกครั้ง
+
+### AI ทำอะไรได้บ้าง
+
+1. **ดูข้อมูลในหน่วยความจำ**: เช็กตาราง ตัวแปร และเวกเตอร์ที่โหลดไว้ใน Session ได้ทันที
+2. **เปิด Help จากเวอร์ชันที่ติดตั้งจริง**: ลดการแนะนำฟังก์ชันที่ Deprecated หรืออาร์กิวเมนต์ผิด
+3. **รันโค้ดทดสอบ** (ทดลอง): `btw_tool_run_r()` ให้ AI รันโค้ดเพื่อเช็กผลและ Error ก่อนตอบ ยังเป็นฟีเจอร์ experimental และ **ให้ AI รันโค้ดในเครื่องเราได้จริง** ควรเปิดเมื่อเข้าใจความเสี่ยงแล้ว
+
+---
+
+## 3. สตรีมโค้ดลงสคริปต์ด้วย `gander`
+
+ถ้าไม่อยากสลับหน้าต่างระหว่างแชทกับ Editor ลอง **`gander`** ของ Simon Couch ซึ่งเป็น Addin สำหรับ RStudio และ Positron
+
+```{r}
+# | eval: false
+install.packages("gander")
+```
+
+### วิธีใช้
+
+1. ตั้งคีย์ลัด: RStudio ไปที่ *Tools > Modify Keyboard Shortcuts* ค้นคำว่า "gander" (แนะนำ `Ctrl+Alt+G` หรือ `Ctrl+Cmd+G` บน macOS) ส่วน Positron ตั้งผ่าน `keybindings.json`
+2. ไฮไลต์โค้ด หรือวางเคอร์เซอร์ไว้ตรงที่ต้องการ
+3. กดคีย์ลัด พิมพ์สิ่งที่ต้องการ เช่น "สรุปผลผลิตเฉลี่ยแยกตามพันธุ์ข้าว เรียงจากมากไปน้อย"
+4. gander ส่ง Context ของไฟล์และตัวแปรใน Environment ไปให้ AI แล้ว **สตรีมโค้ดลงไฟล์โดยตรง**
+
+---
+
+## สรุป: เลือกใช้อะไรดี
+
+| เครื่องมือ | เหมาะกับ | ใช้ยังไง | จุดเด่น |
+|---|---|---|---|
+| **`btw()`** | แชท AI บนเว็บ (Claude.ai, ChatGPT, Gemini) | รันใน Console แล้ว `Ctrl+V` | แปลงตาราง, Help, Environment เป็น Markdown |
+| **`btw_tools()`** | เขียน AI Workflow ใน R ด้วย `ellmer` | เรียกในสคริปต์ R | AI ส่อง Environment และค้น Help เอง |
+| **`btw_mcp_server()`** | Claude Desktop, Claude Code, Cursor, Positron | ตั้งค่า MCP ครั้งเดียว | AI เข้าถึง Session ที่กำลังทำงานอยู่ |
+| **`gander`** | เขียนสคริปต์ใน RStudio / Positron | กดคีย์ลัดใน Editor | โค้ดลงไฟล์ทันที ไม่ต้องสลับหน้าต่าง |
+
+**คำแนะนำ**
+
+- ใช้งานทั่วไป จำแค่ `btw(my_df, "คำถาม")` ก็ลดปัญหา AI มโนคอลัมน์ไปได้เยอะแล้ว
+- ใช้ Claude Code, Cursor หรือ Positron Assistant อยู่แล้ว ตั้ง MCP Server ครั้งเดียวคุ้มมาก
+
+---
+
+## อ้างอิง
+
+- [posit-dev/btw](https://github.com/posit-dev/btw) และ [เอกสารคู่มือ](https://posit-dev.github.io/btw/)
+- [btw: การตั้งค่า MCP](https://posit-dev.github.io/btw/reference/mcp.html)
+- [posit-dev/mcptools](https://github.com/posit-dev/mcptools)
+- [simonpcouch/gander](https://github.com/simonpcouch/gander)
+- [tidyverse/ellmer](https://github.com/tidyverse/ellmer)

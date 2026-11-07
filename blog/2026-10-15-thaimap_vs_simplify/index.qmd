@@ -36,11 +36,11 @@ library(viridis)
 #| label: load-gadm
 
 # ดึงข้อมูลระดับจังหวัด (Level 1) และแปลงเป็น sf object ทันที
-th_prov_gadm <- gadm(country = "THA", level = 1, path = tempdir()) |>
+th_prov_gadm <- gadm(country = "THA", level = 1, path = tools::R_user_dir("geodata", "cache")) |>
   st_as_sf()
 
 # ดึงข้อมูลระดับอำเภอ (Level 2)
-th_amphoe_gadm <- gadm(country = "THA", level = 2, path = tempdir()) |>
+th_amphoe_gadm <- gadm(country = "THA", level = 2, path = tools::R_user_dir("geodata", "cache")) |>
   st_as_sf()
 
 # ตรวจสอบข้อมูล (NAME_1 คือชื่อจังหวัดภาษาอังกฤษ, NL_NAME_1 คือชื่อภาษาไทย)
@@ -120,7 +120,7 @@ ggplot(data = th_prov_data) +
 library(rmapshaper)
 
 # 1. ดึงข้อมูลระดับอำเภอทั้งประเทศ (Level 2) จาก GADM
-th_amphoe_full <- gadm(country = "THA", level = 2, path = tempdir()) |>
+th_amphoe_full <- gadm(country = "THA", level = 2, path = tools::R_user_dir("geodata", "cache")) |>
   st_as_sf()
 
 # 2. ลดขนาดด้วย ms_simplify (เก็บจุดพิกัดไว้ 5%)
