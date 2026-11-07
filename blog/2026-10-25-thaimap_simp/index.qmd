@@ -23,7 +23,7 @@ library(rmapshaper)
 ### ดึงข้อมูลแผนที่ประเทศไทย และ จัดมันเป็น shp file (อาจจะใช้เวลาสักนิด)
 ```{r}
 # 1. ดึงแผนที่ขอบเขตจังหวัดของไทย (Level 1) จาก GADM
-th_sf_raw <- gadm(country = "THA", level = 1, path = tempdir()) |>
+th_sf_raw <- gadm(country = "THA", level = 1, path = tools::R_user_dir("geodata", "cache")) |>
   st_as_sf()
 ```
 

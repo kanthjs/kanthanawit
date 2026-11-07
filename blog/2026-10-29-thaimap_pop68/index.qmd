@@ -35,7 +35,11 @@ library(scales)
 #| warning: false
 
 # 1. ดาวน์โหลดข้อมูล Shapefile ระดับจังหวัดของไทย
-th_sf_raw <- gadm(country = "THA", level = 1, path = tempdir()) |>
+th_sf_raw <- gadm(
+  country = "THA",
+  level = 1,
+  path = tools::R_user_dir("geodata", "cache")
+) |>
   st_as_sf()
 
 # 2. ลดความซับซ้อนของเส้นขอบเขตเพื่อลดขนาดไฟล์
@@ -63,7 +67,7 @@ th_map_ready <- th_sf_simplified |>
 
 ## 2. ดึงและทำความสะอาดข้อมูลประชากรจากกรมการปกครอง (DOPA)
 
-ข้อมูลสถิติจำนวนประชากรและบ้านรายจังหวัด ประจำปี พ.ศ. 2568 เผยแพร่ผ่านทางเว็บไซต์ [สำนักบริหารการทะเบียน กรมการปกครอง](https://stat.bora.dopa.go.th/new_stat/webPage/statByYear.php) 
+ข้อมูลสถิติจำนวนประชากรและบ้านรายจังหวัด ประจำปี พ.ศ. 2568 เผยแพร่ผ่านทางเว็บไซต์ [สำนักบริหารการทะเบียน กรมการปกครอง](https://stat.bora.dopa.go.th/new_stat/webPage/statByYear.php)
 
 ไฟล์ข้อมูลใช้เครื่องหมาย `|` (Pipe) เป็นตัวคั่น และในปัจจุบันไฟล์ถูกบันทึกด้วยการเข้ารหัสแบบ **`UTF-8`** เรียบร้อยแล้ว ทำให้เราสามารถใช้ `readr::read_delim()` อ่านตรงจาก URL ได้ทันที
 
