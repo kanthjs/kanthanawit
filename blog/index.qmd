@@ -2,12 +2,74 @@
 title: "Kanth with R"
 pagetitle: "Blog — Kanthanawit"
 description: "บันทึกต่าง ๆ ของผม กับ R"
+page-layout: full
+language:
+  listing-page-field-categories: "หัวข้อแนะนำ"
 listing:
   contents: "*/index.qmd"
   sort: "date desc"
-  type: default
-  categories: true
+  template: _post-list.ejs
+  categories: numbered
   fields: [date, title, description, categories, image]
-  image-align: right
-  date-format: "MMMM D, YYYY"
+  date-format: "D MMM YYYY"
 ---
+
+```{=html}
+<div class="post-filters" role="tablist" aria-label="กรองบทความ">
+  <button type="button" class="post-filter active" data-filter="">ทั้งหมด</button>
+  <button type="button" class="post-filter" data-filter="r-tip">R tips</button>
+  <button type="button" class="post-filter" data-filter="tidytuesday">TidyTuesday</button>
+  <button type="button" class="post-filter" data-filter="map">แผนที่</button>
+  <button type="button" class="post-filter" data-filter="statistics">สถิติ</button>
+</div>
+<script>
+// Filter by clicking the matching category in Quarto's sidebar, so this works
+// whether or not the installed Quarto base64-encodes category names.
+(() => {
+  const decode = (v) => { try { return decodeURIComponent(atob(v)); } catch (e) { return v; } };
+  const sidebarCats = () => [...document.querySelectorAll(".quarto-listing-category .category")];
+  const sync = () => {
+    const active = sidebarCats().find((el) => el.classList.contains("active"));
+    const raw = active ? active.dataset.category || "" : "";
+    document.querySelectorAll(".post-filter").forEach((p) =>
+      p.classList.toggle("active", p.dataset.filter === raw || p.dataset.filter === decode(raw)));
+  };
+  window.blogFilter = (name) => {
+    const el = sidebarCats().find((c) =>
+      (c.dataset.category || "") === name || decode(c.dataset.category || "") === name);
+    if (el) el.click();
+    sync();
+  };
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".post-filter").forEach((p) =>
+      p.addEventListener("click", () => window.blogFilter(p.dataset.filter)));
+    sidebarCats().forEach((el) => el.addEventListener("click", () => setTimeout(sync)));
+    window.addEventListener("hashchange", () => setTimeout(sync));
+    // "r (12)" -> "r 12", and list the most-used topics first ("All" stays on top)
+    const count = (el) => parseInt(el.querySelector(".quarto-category-count")?.textContent.replace(/\D/g, "") || "0", 10);
+    const container = document.querySelector(".quarto-listing-category");
+    if (container) {
+      const [all, ...rest] = [...container.children];
+      rest.sort((a, b) => count(b) - count(a)).forEach((el) => container.appendChild(el));
+      container.querySelectorAll(".quarto-category-count")
+        .forEach((c) => { c.textContent = c.textContent.replace(/[()]/g, ""); });
+      // Show the top topics only, with a toggle for the rest
+      const TOP = 12;
+      if (rest.length > TOP) {
+        container.classList.add("is-collapsed");
+        const more = document.createElement("button");
+        more.type = "button";
+        more.className = "topics-more";
+        more.textContent = `ดูทั้งหมด (${rest.length})`;
+        more.addEventListener("click", () => {
+          const collapsed = container.classList.toggle("is-collapsed");
+          more.textContent = collapsed ? `ดูทั้งหมด (${rest.length})` : "ย่อ";
+        });
+        container.after(more);
+      }
+    }
+    setTimeout(sync, 50);
+  });
+})();
+</script>
+```
