@@ -11,9 +11,10 @@ project:
   resources:
     - "images/**"
     - "robots.txt"
+    - "CNAME"
 
 execute:
-  freeze: auto
+  freeze: true
 
 website:
   title: "Kanthanawit"
