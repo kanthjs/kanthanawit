@@ -25,5 +25,6 @@ R package, หนังสือ และ เครื่องมือต่�
 | [**Rice Blast Forecast**](https://kanthjs.github.io/rice_blast_forcast_app/) | Rice blast disease forecasting tool |
 | [**Rice Pest Warning**](https://kanthjs.github.io/rice_pest_warning_app/) | Rice pest warning based on historical survey data |
 | [**RDstat**](https://kanthjs.github.io/RDstat/) | Statistical analysis in the browser — R runs on your own machine, so uploaded data never leaves your computer |
+| [**RBTool**](https://kanthjs.github.io/RBTool/) | Plant breeding trial analysis in the browser — single-environment, multi-environment, and GxE / stability analyses (IRRI PBTools re-engineered with Shinylive) |
 
 ## Details

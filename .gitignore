@@ -4,6 +4,7 @@ node_modules/
 # quarto
 /_site/
 /.quarto/
+/.quarto_local/
 **/*.quarto_ipynb
 *.knit.md
 *.utf8.md
