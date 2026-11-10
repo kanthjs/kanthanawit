@@ -1,0 +1,40 @@
+---
+title: "RBTool"
+description: "เว็บแอปสำหรับวิเคราะห์ข้อมูลการปรับปรุงพันธุ์พืช (Plant Breeding Trials) บนเบราว์เซอร์ พัฒนาจากแนวคิด IRRI PBTools ด้วย Shinylive"
+---
+
+A browser-based application for analyzing plant breeding trials, developed in the spirit of IRRI **PBTools** (Phenotypic Analysis menu). It runs R entirely in the browser using **Shinylive** (WebAssembly), meaning your data is processed locally on your computer and never uploaded to an external server.
+
+[Open App](https://kanthjs.github.io/RBTool/){.btn-link-out target="_blank"} [GitHub](https://github.com/kanthjs/RBTool){.btn-link-out target="_blank"}
+
+## Overview
+
+RBTool builds upon published, modern R packages (`lme4`, `emmeans`, `multcomp`, `nlme`, `metan`) instead of PBTools' legacy custom functions, with all outputs benchmarked and verified against the original PBTools 1.1:
+
+| Analysis | Package | Description |
+|---|---|---|
+| Single Environment | `lme4`, `emmeans`, `multcomp` | RCBD design, BLUEs / BLUPs, Heritability ($H^2$), LRT, Pairwise mean comparison (Tukey, Dunnett) with letter grouping |
+| Multi-Environment | `lme4`, `emmeans` | One-stage and two-stage analysis (weighted by $1/\text{SE}^2$) |
+| GxE & Stability | `metan`, `nlme` | Finlay-Wilkinson regression, Shukla's stability variance, AMMI biplots, and GGE biplots |
+
+## วิธีใช้งาน (How to use)
+
+1. **เข้าใช้งานผ่านเบราว์เซอร์**: เข้าไปที่ [RBTool](https://kanthjs.github.io/RBTool/) ใช้งานได้ทันทีโดยไม่ต้องติดตั้งโปรแกรม R หรือแพ็กเกจใด ๆ ลงในเครื่อง
+2. **เลือกโมเดลการวิเคราะห์ (แท็บด้านบน)**:
+   - **Single environment**: สำหรับแปลงทดลองสภาพแวดล้อมเดียว (RCBD)
+   - **Multi-environment**: สำหรับการทดลองหลายสภาพแวดล้อม (One-stage และ Two-stage)
+   - **GxE & stability**: สำหรับวิเคราะห์ปฏิสัมพันธ์ระหว่างพันธุ์และสภาพแวดล้อม (Finlay-Wilkinson, Shukla, AMMI, GGE)
+3. **นำเข้าข้อมูล (Data)**:
+   - นำเข้าไฟล์ข้อมูลของคุณผ่านการอัปโหลด (CSV หรือ Excel)
+   - หรือคลิกเลือกตัวอย่างข้อมูลทดสอบ (**Example data**) ในแถบเมนูด้านซ้ายเพื่อทดลองใช้งานทันที
+4. **กำหนดตัวแปรและตั้งค่า (Variables & Options)**:
+   - ระบุตัวแปรตอบสนอง (Response variable เช่น Yield), ตัวแปรพันธุ์ (Genotype), บล็อก/ซ้ำ (Block/Replicate), และสภาพแวดล้อม (Environment)
+   - เลือกลักษณะผลของพันธุ์ (Genotype effect) ว่าเป็น **Fixed** (สำหรับการเปรียบเทียบค่าเฉลี่ย Pairwise) หรือ **Random** (สำหรับประเมิน BLUPs และ Heritability)
+5. **กดปุ่ม Run**:
+   - กดปุ่ม **Run** ที่แถบเมนูด้านซ้าย
+   - ผลการวิเคราะห์จะประมวลผลทันทีในเบราว์เซอร์ สามารถดูผลในแท็บต่าง ๆ ได้แก่:
+     - **Results**: ตารางสรุปค่าสถิติสำคัญและ Variance components
+     - **Mean comparison**: การเปรียบเทียบพหุคูณ (Tukey / Dunnett) พร้อมจัดกลุ่มตัวอักษร
+     - **Plot**: กราฟแสดงผลและ Biplot
+     - **Assumptions**: ตรวจสอบการกระจายตัวของ Residuals และ Normality (Shapiro-Wilk)
+   - สามารถดาวน์โหลดรายงานและผลการวิเคราะห์เป็นไฟล์ **Excel** หรือ **Word** ได้โดยตรง
