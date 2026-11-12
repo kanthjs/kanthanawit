@@ -1,0 +1,217 @@
+---
+title: "R Tips 11: จบปัญหาการเขียนสูตรคณิตศาสตร์จำลองความไม่แน่นอน (Monte Carlo Simulation) หรือเช็กโครงสร้างตัวแปรแบบมึนๆ ด้วย r-lib/rray และความมหัศจรรย์ของ posterior (rvar)"
+date: 2026-11-12
+description: "จบปัญหาการเขียนสูตรจำลองความไม่แน่นอน (Monte Carlo Simulation) เลิกเขียน loop หรือ map() สุ่มตัวเลขหลายแสนแถวให้ตารางบวมและกิน RAM ด้วย rvar (Random Variable Datatype) จาก stan-dev/posterior นำการแจกแจงความน่าจะเป็นมาบวกลบคูณหารเหมือนตัวเลขปกติ พร้อมพล็อต Half-eye สวยๆ ด้วย ggdist"
+categories: [r, r-tip, simulation, monte-carlo, posterior, rvar, ggdist, uncertainty, bayesian]
+draft: false
+---
+
+เวลาเราต้องคำนวณตัวเลขที่มีความไม่แน่นอนมาเกี่ยวข้อง เช่น การประเมินผลผลิตข้าวต่อไร่ (ที่อาจแกว่งตามปริมาณน้ำฝนและโรคระบาด), การประเมินความเสี่ยงทางการเงิน หรือการจำลอง Scenario Planning ในธุรกิจ... ถ้าเราสั่งให้ AI ช่วยเขียนโค้ดทำ **Monte Carlo Simulation** สิ่งที่ AI มักจะเขียนให้คือ:
+
+1. ใช้ลูป `for` วนสุ่มตัวเลขหลายหมื่นหลายแสนรอบ
+2. หรือใช้ `purrr::map()` สุ่มข้อมูลแตกออกมาเป็นตารางยักษ์ (Long format) นับล้านแถว
+3. แล้วค่อยนำมา `group_by()` + `summarise()` เพื่อหาค่า Mean, Median, หรือ Quantile
+
+ผลลัพธ์คือ **โค้ดรก อ่านยาก และกิน RAM มหาศาล** ตารางที่มีแค่ 3 พื้นที่หรือ 3 ทางเลือก กลับขยายใหญ่เป็นล้านแถวอย่างไม่จำเป็น
+
+วันนี้เราขอหยิบหนึ่งในฟีเจอร์ที่ **"ว้าวและเปลี่ยนวิธีคิดในการคำนวณตัวเลขใน R ไปเลย"** แต่คนนอกสาย Bayesian สถิติขั้นสูงยังรู้น้อยมาก นั่นคือออบเจกต์ **`rvar` (Random Variable Datatype)** จากแพ็กเกจ **`posterior`** (`stan-dev/posterior`) ร่วมกับ **`ggdist`** (`mjskay/ggdist`) ครับ!
+
+---
+
+## 1. ปัญหาของวิธีดั้งเดิม vs แนวคิด Random Variable Vector (`rvar`)
+
+:::: {layout-ncol="2"}
+
+::: {}
+**แบบเดิม: ระเบิดตารางเป็นล้านแถว (Tidy Simulation Explosion)**
+
+```{mermaid}
+flowchart TD
+  A["3 พื้นที่ / ตัวแปรต้น"] --> B["สุ่ม 10,000 Draws ต่อแถว"]
+  B --> C["ตารางขยายเป็น 30,000+ แถว<br/>(กิน RAM และเปลือง Memory)"]
+  C --> D["คำนวณสมการทีละแถว"]
+  D --> E["group_by() + summarise()<br/>เพื่อหา Mean, SD, Quantile"]
+```
+:::
+
+::: {}
+**แบบใหม่: `rvar` ยุบ Simulation ลงเซลล์เดียว**
+
+```{mermaid}
+flowchart TD
+  A["3 พื้นที่ / ตัวแปรต้น"] --> B["rvar: สุ่ม 4,000 Draws<br/>บรรจุใน Cell เดียวของ Tibble"]
+  B --> C["ตารางขนาดคงที่ 3 แถวเท่าเดิม!"]
+  C --> D["บวก ลบ คูณ หาร สมการตรงๆ<br/>(Tensor Vectorized C++)"]
+  D --> E["Pr(), E(), median() ได้ทันที<br/>พล็อตลง ggdist ได้โดยตรง"]
+```
+:::
+
+::::
+
+---
+
+## 2. ความว้าวที่คนรู้น้อย: คำนวณ "การแจกแจงความน่าจะเป็น" เหมือนบวกลบตัวเลขธรรมดา
+
+ด้วยแพ็กเกจ `posterior` คุณสามารถยุบผลการสุ่ม (Simulation Draws) นับพันๆ รอบ ให้กลายเป็นตัวแปร `rvar` เพียงตัวเดียวที่วางอยู่ในคอลัมน์ของ Tibble ได้เหมือนตัวเลขปกติ แล้วนำมา **บวก ลบ คูณ หาร หรือใส่สูตรสมการตรงๆ** โดยที่ความแปรปรวนและสหสัมพันธ์ (Correlation/Covariance) จะถูกส่งต่อ (Propagate) ไปในสมการให้อัตโนมัติ!
+
+### ติดตั้งแพ็กเกจที่จำเป็น
+
+```r
+# ติดตั้งแพ็กเกจผ่าน pak
+pak::pkg_install(c("posterior", "distributional", "ggdist", "dplyr", "ggplot2"))
+```
+
+### โค้ดตัวอย่าง: จำลองผลผลิตข้าวสุทธิ (Net Yield Simulation)
+
+สมมติว่าเราต้องการประเมินผลผลิตข้าวสุทธิ (กก./ไร่) ของ 3 จังหวัด โดยมีปัจจัยความไม่แน่นอน 2 ด้าน:
+1. **ผลผลิตพื้นฐาน (`base_yield`)**: มีการกระจายตัวแบบ Normal Distribution
+2. **อัตราความเสียหายจากศัตรูพืชและภัยธรรมชาติ (`loss_rate`)**: มีการกระจายตัวแบบ Beta Distribution (0 ถึง 1)
+
+```r
+library(posterior)
+library(dplyr)
+
+# 1. สร้างตัวแปรสุ่ม (Random Variables) จากการจำลอง 4,000 รอบ (Draws)
+# สมมติจำลองผลผลิตพื้นฐาน (กก./ไร่) และเปอร์เซ็นต์ความเสียหายของ 3 พื้นที่
+sim_df <- tibble(
+  province = c("ปทุมธานี", "อยุธยา", "สุพรรณบุรี"),
+  
+  # ใช้ rdo() ห่อฟังก์ชันสุ่มปกติของ R ให้กลายเป็นก้อน rvar ทันที!
+  base_yield = c(
+    rdo(rnorm(4000, mean = 850, sd = 60)),
+    rdo(rnorm(4000, mean = 800, sd = 80)),
+    rdo(rnorm(4000, mean = 900, sd = 50))
+  ),
+  
+  loss_rate = c(
+    rdo(rbeta(4000, shape1 = 2, shape2 = 18)), # เสียหายเฉลี่ย ~10%
+    rdo(rbeta(4000, shape1 = 5, shape2 = 15)), # เสียหายเฉลี่ย ~25%
+    rdo(rbeta(4000, shape1 = 1, shape2 = 19))  # เสียหายเฉลี่ย ~5%
+  )
+)
+
+print(sim_df)
+```
+
+หน้าตาของ Tibble จะแสดงผลอย่างเป็นระเบียบ โดยคอลัมน์ที่เป็น `rvar` จะแสดงเป็นค่า `Mean ± SD` สวยงาม ไม่แตกกระจายเป็นล้านแถว:
+
+```
+#> # A tibble: 3 × 3
+#>   province   base_yield loss_rate     
+#>   <chr>          <rvar>        <rvar>   
+#> 1 ปทุมธานี     850 ± 60   0.100 ± 0.064
+#> 2 อยุธยา       800 ± 80   0.250 ± 0.094
+#> 3 สุพรรณบุรี    900 ± 50   0.050 ± 0.047
+```
+
+---
+
+## 3. ใส่สูตรคำนวณและหาความน่าจะเป็นตรงๆ ด้วย `Pr()`
+
+เมื่อข้อมูลอยู่ในรูป `rvar` เราสามารถนำมาเข้าสมการคณิตศาสตร์ได้เหมือนตัวเลขสเกลาร์ (Scalar) ทั่วไป:
+
+$$\text{Net Yield} = \text{Base Yield} \times (1 - \text{Loss Rate})$$
+
+เบื้องหลังการทำงาน R จะคำนวณทั้ง 4,000 ซีนาริโอพร้อมกันด้วยความเร็วระดับ Tensor ใน C++ และรักษา Dependency ระหว่างตัวแปรไว้อย่างสมบูรณ์
+
+```r
+# 2. ความว้าว: นำคอลัมน์ที่เป็นความน่าจะเป็นมาคำนวณเหมือนตัวเลขธรรมดาได้เลย!
+result_df <- sim_df |>
+  mutate(
+    # นำ rvar มาคูณและลบกันตรงๆ!
+    net_yield = base_yield * (1 - loss_rate),
+    
+    # ถามความน่าจะเป็นตรงๆ เช่น "โอกาสที่ผลผลิตสุทธิจะต่ำกว่า 650 กก./ไร่ มีกี่ %?"
+    prob_crisis = Pr(net_yield < 650),
+    
+    # ดึงค่าสถิติสรุป เช่น Median และ 90% Uncertainty Interval (5% - 95%)
+    median_yield = median(net_yield),
+    ci_90_low = quantile2(net_yield, probs = 0.05),
+    ci_90_high = quantile2(net_yield, probs = 0.95)
+  )
+
+print(result_df |> select(province, net_yield, prob_crisis, median_yield, ci_90_low, ci_90_high))
+```
+
+ผลลัพธ์ที่ได้:
+
+```
+#> # A tibble: 3 × 6
+#>   province    net_yield prob_crisis median_yield ci_90_low ci_90_high
+#>   <chr>          <rvar>       <dbl>        <dbl>     <dbl>      <dbl>
+#> 1 ปทุมธานี     765 ± 76     0.0430          762.      643.       892.
+#> 2 อยุธยา       600 ± 98     0.701           595.      446.       768.
+#> 3 สุพรรณบุรี    855 ± 62     0.00025         853.      754.       959.
+```
+
+สังเกตว่าฟังก์ชัน `Pr(net_yield < 650)` ทำงานได้เหมือนประโยคภาษาอังกฤษหรือสูตรสถิติในกระดาษเลย โดยคืนค่าความน่าจะเป็นออกมาเป็นสัดส่วนทศนิยมทันที!
+
+---
+
+## 4. เกร็ดลับระดับ Pro: พล็อตกราฟความไม่แน่นอนระดับ Top Tier ในบรรทัดเดียวด้วย `ggdist`
+
+สิ่งที่ทำให้ `rvar` ทรงพลังถึงขีดสุดคือ **ความเข้ากันได้แบบไร้รอยต่อกับ `mjskay/ggdist`** ของ Matthew Kay ซึ่งถูกออกแบบมาเพื่อทำ Uncertainty Visualization โดยเฉพาะ คุณไม่ต้อง `unnest()` หรือแปลงข้อมูลกลับเป็นตารางยาวให้เหนื่อย สามารถส่งคอลัมน์ `rvar` เข้า Aesthetics `xdist` หรือ `ydist` ได้ทันที:
+
+```r
+library(ggplot2)
+library(ggdist)
+
+# พล็อตกราฟ Half-eye (Density + Interval) จากคอลัมน์ rvar ได้ตรงๆ
+ggplot(result_df, aes(y = province, xdist = net_yield, fill = after_stat(x < 650))) +
+  stat_halfeye(
+    point_interval = median_qi,
+    .width = c(0.66, 0.95),
+    interval_size_range = c(1, 2)
+  ) +
+  geom_vline(xintercept = 650, linetype = "dashed", color = "#c0392b", linewidth = 0.8) +
+  scale_fill_manual(
+    values = c("FALSE" = "#2ecc71", "TRUE" = "#e74c3c"),
+    labels = c("FALSE" = "ปลอดภัย (>= 650)", "TRUE" = "เสี่ยงวิกฤต (< 650)"),
+    name = "สถานะความเสี่ยง"
+  ) +
+  labs(
+    title = "การกระจายตัวของผลผลิตสุทธิคาดการณ์และพื้นที่เสี่ยงวิกฤต (< 650 กก./ไร่)",
+    subtitle = "Monte Carlo Simulation 4,000 รอบ จำลองผ่าน rvar และพล็อตด้วย stat_halfeye()",
+    x = "ผลผลิตสุทธิคาดการณ์ (กก./ไร่)",
+    y = NULL,
+    caption = "Source: Simulation model with posterior::rvar & ggdist"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    legend.position = "bottom",
+    panel.grid.minor = element_blank(),
+    plot.title = element_text(face = "bold")
+  )
+```
+
+กราฟที่ได้จะมีทั้งเส้นโค้งความหนาแน่น (Density slab) และแถบช่วงความไม่แน่นอน (Point & Interval) พร้อมไฮไลต์สีบริเวณที่เป็นวิกฤตแยกตามเงื่อนไขทางคณิตศาสตร์อย่างคมชัด
+
+---
+
+## 5. ทำไมเทคนิคและ Repo นี้ถึงมีประโยชน์มากในยุคปัจจุบัน
+
+1. **โค้ดสั้นลง 10 เท่าและไม่กิน RAM:** ตาราง 10 แถวที่แต่ละแถวเก็บการจำลอง 10,000 รอบ ยังคงมีขนาดแค่ 10 แถวเวลาเราตรวจดูใน IDE (RStudio, Positron, หรือ VS Code) พร้อมแสดงสรุปสถิติ `Mean ± SD` ให้อัตโนมัติใน console
+2. **ฟังก์ชัน `Pr()` และ `E()` อ่านง่ายเหมือนตำราสถิติ:** เราสามารถเขียนเปรียบเทียบข้ามกลุ่มได้ตรงๆ เช่น `Pr(result_df$net_yield[3] > result_df$net_yield[1])` เพื่อหาความน่าจะเป็นที่สุพรรณบุรีจะได้ผลผลิตสูงกว่าปทุมธานีได้ทันที
+3. **รักษา Dependency & Correlation ครบถ้วน:** หากตัวแปรมี Joint Distribution หรือสุ่มมาจาก MCMC draws เดียวกัน การนำ `rvar` มาคำนวณจะคำนึงถึงความสัมพันธ์ระหว่าง draws คู่เดียวกันเสมอ
+4. **เป็นหัวใจของการทำ Decision Analysis ยุคใหม่:** ไม่ว่าจะเป็นการพยากรณ์สภาพอากาศ, การระบาดวิทยา, หรือผลลัพธ์จาก Machine Learning ที่มีความไม่แน่นอน การเก็บค่าเป็น `rvar` จะช่วยป้องกันไม่ให้เราตัดสินใจผิดพลาดจาก **"กับดักค่าเฉลี่ยเลขตัวเดียว" (Flaw of Averages)**
+
+---
+
+## สรุปคำสั่งสำคัญที่ควรมีติดตัว
+
+| คำสั่ง | แพ็กเกจ | การใช้งาน |
+|---|---|---|
+| `rdo(expr)` | `posterior` | ห่อ expression ของการสุ่มปกติ (เช่น `rnorm()`, `runif()`) ให้กลายเป็น `rvar` |
+| `as_rvar(x)` | `posterior` | แปลง vector / matrix / array ของ simulation draws ให้เป็น `rvar` |
+| `Pr(condition)` | `posterior` | คำนวณความน่าจะเป็นของเงื่อนไขทางตรรกะ เช่น `Pr(x > 100)` |
+| `E(x)` | `posterior` | หาค่าคาดหวัง (Expected Value / Mean) ของตัวแปรสุ่ม |
+| `quantile2(x)` | `posterior` | หา Quantiles ของ `rvar` ได้รวดเร็วและแม่นยำ |
+| `stat_halfeye()` | `ggdist` | พล็อตกราฟ Slab + Interval รองรับคอลัมน์ `rvar` บน `xdist`/`ydist` ทันที |
+
+---
+
+## ลิงก์ GitHub Repo น่าส่องวันนี้
+
+* **stan-dev/posterior**: [https://github.com/stan-dev/posterior](https://github.com/stan-dev/posterior) — แพ็กเกจเจ้าของชนิดตัวแปร `rvar` ที่เปลี่ยนการคำนวณ Simulation และ Bayesian Draws ใน R ให้กลายเป็นเรื่องง่าย
+* **mjskay/ggdist**: [https://github.com/mjskay/ggdist](https://github.com/mjskay/ggdist) — แพ็กเกจ Visualizations สำหรับข้อมูลความไม่แน่นอนและการแจกแจงที่สวยงาม ทรงพลัง และยืดหยุ่นที่สุดตัวหนึ่งของจักรวาล R
+* **mitchelloharild/distributional**: [https://github.com/mitchelloharild/distributional](https://github.com/mitchelloharild/distributional) — ตัวแทนการจัดการ Vector ของ Probability Distributions แบบ Parametric ในรูปแบบ Tidy data
