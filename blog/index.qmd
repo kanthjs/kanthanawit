@@ -12,6 +12,7 @@ listing:
   categories: numbered
   fields: [date, title, description, categories, image]
   date-format: "D MMM YYYY"
+  page-size: 10
 ---
 
 ```{=html}
