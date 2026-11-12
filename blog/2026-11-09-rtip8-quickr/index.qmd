@@ -1,7 +1,7 @@
 ---
-title: "R Tips 08: เร่งความเร็ว for loop ใน R ให้เร็วระดับ C/Fortran (เร็วขึ้น 100–200 เท่า) โดยไม่ต้องแตะ C++ ด้วย quickr"
+title: "R Tips 08: เร่งความเร็ว for loop ระดับ C ด้วย quickr"
 date: 2026-11-09
-description: "เบื่อไหมกับการแปลงโค้ด R เป็น C++ ผ่าน Rcpp ที่ต้องปวดหัวกับ 0-based index และ Segfault? ทำความรู้จักกับ t-kalinowski/quickr คอมไพเลอร์ R-to-Fortran ที่เปลี่ยนลูป R แท้ๆ ให้กลายเป็น Machine Code ความเร็วสูง เพียงประกาศ declare() บรรทัดเดียว พร้อมฟีเจอร์ Strict Shape Checking และ OpenMP"
+description: "เพิ่มความเร็วของ for loop ใน R ให้เทียบเท่า Machine Code โดยไม่ต้องเขียน C++ หรือ Rcpp ด้วยคอมไพเลอร์ quickr เพียงแค่ประกาศ declare()"
 categories: [r, r-tip, performance, quickr, compiler, fortran]
 draft: false
 ---

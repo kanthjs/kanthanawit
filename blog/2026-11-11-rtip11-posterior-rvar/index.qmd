@@ -1,7 +1,7 @@
 ---
-title: "R Tips 11: จบปัญหาการเขียนสูตรคณิตศาสตร์จำลองความไม่แน่นอน (Monte Carlo Simulation) หรือเช็กโครงสร้างตัวแปรแบบมึนๆ ด้วย r-lib/rray และความมหัศจรรย์ของ posterior (rvar)"
+title: "R Tips 11: คำนวณความไม่แน่นอนด้วย posterior rvar"
 date: 2026-11-12
-description: "จบปัญหาการเขียนสูตรจำลองความไม่แน่นอน (Monte Carlo Simulation) เลิกเขียน loop หรือ map() สุ่มตัวเลขหลายแสนแถวให้ตารางบวมและกิน RAM ด้วย rvar (Random Variable Datatype) จาก stan-dev/posterior นำการแจกแจงความน่าจะเป็นมาบวกลบคูณหารเหมือนตัวเลขปกติ พร้อมพล็อต Half-eye สวยๆ ด้วย ggdist"
+description: "จำลองและคำนวณการแจกแจงความน่าจะเป็นแบบ Monte Carlo ได้เสมือนตัวเลขปกติด้วย rvar จากแพ็กเกจ posterior โดยไม่ต้องสร้างลูปให้เปลืองหน่วยความจำ พร้อมพล็อตผลด้วย ggdist"
 categories: [r, r-tip, simulation, monte-carlo, posterior, rvar, ggdist, uncertainty, bayesian]
 draft: false
 ---

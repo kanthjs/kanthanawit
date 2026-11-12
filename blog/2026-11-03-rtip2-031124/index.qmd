@@ -1,7 +1,7 @@
 ---
-title: "R Tips 02: รันงาน Parallel ระดับ Microsecond ใน purrr ด้วย in_parallel() และ mirai"
+title: "R Tips 02: รัน Parallel ความเร็วสูงด้วย purrr และ mirai"
 date: 2026-11-03
-description: "บอกลา Overhead มหาศาลและปัญหา RAM บวมจาก parallel หรือ furrr ยุคเดิม ด้วย purrr::in_parallel() และเอนจิน r-lib/mirai บนสถาปัตยกรรม NNG ที่เร็วระดับ Microsecond พร้อมระบบ Dynamic Scheduling และ Strict Isolation"
+description: "รันงานประมวลผลคู่ขนานแบบ microsecond ใน purrr ด้วย in_parallel() ร่วมกับ mirai ลด overhead และปัญหาหน่วยความจำ พร้อมระบบ dynamic scheduling"
 categories: [r, r-tip, purrr, mirai, parallel]
 draft: false
 ---

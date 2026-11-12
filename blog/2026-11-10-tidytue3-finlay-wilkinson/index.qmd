@@ -1,7 +1,7 @@
 ---
-title: "tidyTuesday EP.3: พันธุ์ที่ให้ผลผลิตเฉลี่ยสูงสุดอาจไม่ใช่พันธุ์ที่ปลอดภัยที่สุด — ถอดรหัสเสถียรภาพพันธุ์พืช (G×E) ด้วย Finlay–Wilkinson Joint Regression"
+title: "tidyTuesday EP.3: ประเมินเสถียรภาพพันธุ์พืชด้วย Finlay–Wilkinson Regression"
 date: 2026-11-10
-description: "เจาะลึกปัญหาสถิติการปรับปรุงพันธุ์พืช เมื่อ Combined ANOVA เกิด G×E Interaction ผ่านชุดข้อมูลจริง fisher.barley จาก {agridat} พร้อมเรียนรู้การวิเคราะห์ Finlay–Wilkinson Joint Regression และ Eberhart–Russell Stability Parameters ด้วย R แบบ Step-by-Step พร้อมผลลัพธ์จริง"
+description: "วิเคราะห์เสถียรภาพการให้ผลผลิตและปฏิสัมพันธ์ระหว่างพันธุกรรมกับสภาพแวดล้อม (GxE) ด้วย Finlay–Wilkinson Joint Regression และแบบจำลอง Eberhart–Russell ผ่านข้อมูลจริงใน R"
 categories: [research, statistics, r, tidytuesday, agriculture, plant-breeding, gxe]
 draft: false
 ---

@@ -1,7 +1,7 @@
 ---
-title: "R Tips 01: เร่งสปีด dplyr ด้วย DuckDB ในบรรทัดเดียวผ่าน duckplyr"
+title: "R Tips 01: เร่งสปีด dplyr ด้วย duckplyr"
 date: 2026-11-02
-description: "ไม่ต้องแก้โค้ดเดิม ไม่ต้องสลับไป data.table หรือเขียน SQL ด้วย duckplyr::methods_overwrite() เปลี่ยนเอนจินของ dplyr ให้เป็น DuckDB แบบ Zero-copy พร้อมระบบ Fallback อัตโนมัติ"
+description: "เร่งความเร็วการทำงานของ dplyr ด้วย DuckDB ในบรรทัดเดียวผ่าน duckplyr โดยไม่ต้องแก้โค้ดเดิมหรือเขียน SQL พร้อมระบบ fallback อัตโนมัติเมื่อเจอฟังก์ชันที่ไม่รองรับ"
 categories: [r, r-tip, duckplyr, dplyr, duckdb]
 draft: false
 ---

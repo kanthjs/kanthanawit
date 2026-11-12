@@ -1,7 +1,7 @@
 ---
-title: "R Tips 04: สกัดข้อความดิบ รูปภาพ และ PDF ให้กลายเป็น Tibble แบบ Type-safe ด้วย ellmer"
+title: "R Tips 04: สกัดข้อความและรูปภาพเป็น Tibble ด้วย ellmer"
 date: 2026-11-05
-description: "เลิกเขียน Regex เปราะบางแกะข้อความภาคสนาม ด้วย tidyverse/ellmer ที่บังคับ LLM ให้ตอบกลับเป็น Schema ตามที่กำหนด พร้อม parallel_chat_structured() ยิงหลายร้อยแถวพร้อมกันแล้วได้ Tibble พร้อมต่อ dplyr ทันที"
+description: "เชื่อมต่อ LLM เข้ากับกระบวนการทำงานใน R เพื่อดึงข้อมูลจากเอกสาร รูปภาพ และ PDF ให้ออกมาเป็นโครงสร้าง tibble แบบ type-safe ด้วยแพ็กเกจ ellmer"
 categories: [r, r-tip, ellmer, llm, tidyverse]
 draft: false
 ---

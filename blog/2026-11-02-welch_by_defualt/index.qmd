@@ -1,7 +1,7 @@
 ---
-title: "Welch's Test by Default: เลิกทดสอบความแปรปรวนก่อนเปรียบเทียบค่าเฉลี่ย"
+title: "เปรียบเทียบค่าเฉลี่ยด้วย Welch Test เป็นค่าเริ่มต้น"
 date: 2026-11-02
-description: "ทำไมเราควรเลือกใช้ Welch's t-test และ Welch's ANOVA เป็นค่าเริ่มต้นเสมอ โดยไม่ต้องเสียเวลารัน Levene's test ก่อน"
+description: "เหตุผลที่ควรเลือกใช้ Welch t-test และ Welch ANOVA เป็นค่าเริ่มต้นสำหรับการเปรียบเทียบค่าเฉลี่ย โดยไม่จำเป็นต้องทดสอบความเท่ากันของความแปรปรวนล่วงหน้า"
 categories: [research, statistics, r]
 draft: false
 ---

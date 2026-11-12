@@ -1,7 +1,7 @@
 ---
-title: "R Tips 10: ยุติฝันร้ายของการจัดการวันที่และเวลาที่ซ่อนบั๊กเงียบๆ ใน lubridate ด้วยอาวุธลับระดับ C++: clock"
+title: "R Tips 10: จัดการวันและเวลาอย่างแม่นยำด้วย clock"
 date: 2026-11-10
-description: "ป้องกันบั๊กเงียบๆ จาก Invalid Dates และ Daylight Saving Time (DST) ที่ lubridate มักเปลี่ยนเป็น NA แบบไม่เตือน ด้วย r-lib/clock จาก Davis Vaughan พร้อมฟังก์ชันเด็ด date_group(), date_shift() และระบบ Calendars ปีงบประมาณระดับ C++"
+description: "แก้ไขปัญหาและข้อผิดพลาดในการคำนวณวันและเวลาด้วยแพ็กเกจ clock ที่ทำงานด้วย C++ ช่วยจัดการเขตเวลา วันที่ผิดรูป และปฏิทินงบประมาณได้อย่างแม่นยำ"
 categories: [r, r-tip, clock, lubridate, date-time, time-series, production]
 draft: false
 ---

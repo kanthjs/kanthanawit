@@ -1,7 +1,7 @@
 ---
-title: "จัดระเบียบและสแกนบั๊กโค้ด R ด้วย Air และ Jarl"
+title: "จัดรูปแบบและตรวจบั๊กโค้ด R ด้วย Air และ Jarl"
 date: 2026-11-06
-description: "air จัดฟอร์แมตโค้ด R ทุกครั้งที่กด Save และ jarl สแกนหาโค้ดช้าหรือบั๊กแฝงพร้อม --fix อัตโนมัติ"
+description: "แนะนำเครื่องมือสมัยใหม่สำหรับจัดฟอร์แมตโค้ดและตรวจจับข้อผิดพลาดในภาษา R ด้วยความเร็วสูง เพื่อยกระดับคุณภาพโค้ดให้สะอาดและเป็นระเบียบ"
 categories: [r, air, jarl, linter, formatter]
 # image: /images/writing/first-post.jpg
 draft: false            # remove this line to publish

@@ -1,7 +1,7 @@
 ---
-title: "tidyTuesday EP.1: ถอดรหัสผลผลิตข้าวด้วย Split-Split-Plot และทำไมเราไม่ควรใช้ปุ๋ยไนโตรเจนเป็นกลุ่มเปรียบเทียบรายคู่"
+title: "tidyTuesday EP.1: วิเคราะห์ผลผลิตข้าวแบบ Split-Split-Plot"
 date: 2026-11-02
-description: "เจาะลึกการวิเคราะห์ข้อมูลผลผลิตข้าวแบบ Split-Split-Plot ด้วย Linear Mixed-Effects Model และชี้ให้เห็นว่าทำไมปัจจัยเชิงปริมาณอย่างอัตราปุ๋ยไนโตรเจนจึงควรใช้ Polynomial Response Curve มากกว่าการทดสอบเปรียบเทียบรายคู่แบบดั้งเดิม"
+description: "วิเคราะห์การทดลองผลผลิตข้าวแบบ Split-Split-Plot ด้วย Linear Mixed-Effects Model พร้อมแนวทางการประเมินอัตราปุ๋ยไนโตรเจนด้วย Polynomial Response Curve แทนการเปรียบเทียบรายคู่"
 categories: [research, statistics, r, tidytuesday, agriculture]
 draft: false
 ---

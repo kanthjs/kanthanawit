@@ -1,7 +1,7 @@
 ---
-title: "R Tips 09: บอกลาโค้ดเช็กข้อมูลรกๆ ด้วย pointblank — ระบบตรวจจับข้อมูลเน่า (Data Validation) อัตโนมัติและแยกกักตัวแถวที่มีปัญหา"
+title: "R Tips 09: ตรวจสอบคุณภาพข้อมูลอัตโนมัติด้วย pointblank"
 date: 2026-11-10
-description: "เลิกใช้ stopifnot() หรือ if-else ดิบๆ ที่บอกแค่บรรทัดที่พังแต่ไม่บอกว่าแถวไหน ด้วย pointblank จากผู้สร้าง gt ทำ Data Validation แบบมือโปร พร้อมระบบ Quarantine สกัดแถวพังแยกออกมาซ่อม และ scan_data() ตรวจ MRI ตารางในบรรทัดเดียว"
+description: "สร้างระบบตรวจสอบความถูกต้องของข้อมูล (Data Validation) แบบมืออาชีพด้วย pointblank พร้อมระบบกักกันแถวข้อมูลที่มีปัญหาและการสแกนโครงสร้างตาราง"
 categories: [r, r-tip, pointblank, data-validation, data-quality, production]
 draft: false
 ---

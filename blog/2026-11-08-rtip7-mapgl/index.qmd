@@ -1,7 +1,7 @@
 ---
-title: "R Tips 07: วาดแผนที่ข้อมูลพิกัดหลักแสนจุดแบบลื่นหัวแตกระดับ 60 FPS ด้วย GPU ผ่าน walkerke/mapgl (และเทคนิคดึงแผนที่โลกฟรีแบบ Serverless ด้วย pmtiles)"
+title: "R Tips 07: แสดงผลแผนที่ขนาดใหญ่ความเร็วสูงด้วย mapgl"
 date: 2026-11-08
-description: "เลิกทนกับ leaflet ที่พล็อตหมื่นจุดแล้วหน้าเว็บค้างกระตุก! ด้วย walkerke/mapgl ที่ดึงขุมพลัง WebGL บนการ์ดจอ (GPU) มารันบน R รองรับแผนที่ 3D เอียงหมุนอิสระ สไลเดอร์เทียบก่อน-หลังด้วย compare() และเปิดโลก Cloud-Native Geospatial ผ่าน PMTiles โดยไม่ต้องตั้ง GeoServer"
+description: "พล็อตข้อมูลพิกัดขนาดใหญ่แบบลื่นไหลระดับ 60 FPS ด้วยการประมวลผลผ่าน GPU ด้วย mapgl พร้อมรองรับแผนที่ 3D และข้อมูลแบบ cloud-native PMTiles"
 categories: [r, r-tip, mapgl, maplibre, pmtiles, spatial, gis, webgl]
 draft: false
 ---

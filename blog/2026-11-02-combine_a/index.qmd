@@ -1,7 +1,7 @@
 ---
-title: "ทำไมถึงรวมไม่ได้? จาก Combined Analysis สู่ Mixed Model ยุคใหม่"
+title: "วิเคราะห์การทดลองข้ามสถานที่ด้วย Mixed Model"
 date: 2026-11-02
-description: "ผ่าทางตันงานทดลองข้ามสถานที่/ฤดูกาล: ทำความเข้าใจสูตรคลาสสิกของ Gomez & Gomez (1984), กับดัก Bartlett's test และวิธีวิเคราะห์ด้วย Linear Mixed Model เมื่อความแปรปรวนไม่เท่ากัน"
+description: "ทำความเข้าใจข้อจำกัดของการวิเคราะห์รวมแบบดั้งเดิม (Combined Analysis) และกับดักของ Bartlett test พร้อมแนวทางการใช้ Linear Mixed Model เมื่อความแปรปรวนไม่เท่ากัน"
 categories: [research, statistics, r, agriculture]
 ---
 

@@ -1,7 +1,7 @@
 ---
-title: "tidyTuesday EP.2: เลิกแปลงข้อมูลนับด้วย $\\sqrt{y+0.5}$ แล้วมาใช้ Generalized Linear Mixed Models (GLMM) วิเคราะห์ข้อมูลจำนวนแมลงศัตรูพืชกันเถอะ"
+title: "tidyTuesday EP.2: วิเคราะห์ข้อมูลนับแมลงศัตรูพืชด้วย GLMM"
 date: 2026-11-03
-description: "เจาะลึกปัญหาของการแปลงข้อมูลนับจำนวนแมลงด้วยการถอดรากที่สอง (Square Root Transformation) และชี้ให้เห็นว่าทำไม Poisson และ Negative Binomial GLMM จึงเป็นวิธีที่ถูกต้องทางชีวสถิติ พร้อมอธิบาย Overdispersion, Jensen's Inequality และตัวอย่างการแปลผลจริง"
+description: "อธิบายข้อจำกัดของการแปลงข้อมูลนับแบบดั้งเดิม และแนะนำการใช้ Generalized Linear Mixed Models (GLMM) จัดการข้อมูลนับและการกระจายตัวแบบ Overdispersion อย่างถูกต้อง"
 categories: [research, statistics, r, tidytuesday, entomology, glmm]
 draft: false
 ---

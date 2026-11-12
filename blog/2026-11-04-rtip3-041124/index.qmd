@@ -1,7 +1,7 @@
 ---
-title: "R Tips 03: ยุติปัญหา Dependency Hell และติดตั้งแพ็กเกจติดสปีดด้วย rig, pak และ CRAN Time Travel"
+title: "R Tips 03: จัดการเวอร์ชันและแพ็กเกจ R ด้วย rig และ pak"
 date: 2026-11-04
-description: "หมดปัญหาลงแพ็กเกจเต่าคลาน ขาด System Libraries และโค้ดพังข้ามปี ด้วยคู่หู r-lib/pak และ r-lib/rig พร้อมความลับการทำ CRAN Time Travel ย้อนเวลากลับไปดึงแพ็กเกจในอดีตได้ในบรรทัดเดียว"
+description: "จัดการสภาพแวดล้อมภาษา R ให้เสถียรและติดตั้งแพ็กเกจได้รวดเร็วด้วย rig และ pak พร้อมเทคนิคจำลอง CRAN snapshot ย้อนหลังเพื่อลดปัญหา dependency hell"
 categories: [r, r-tip, pak, rig, devops, reproducibility]
 draft: false
 ---

@@ -1,7 +1,7 @@
 ---
-title: "จบปัญหา AI มโนชื่อคอลัมน์: ให้ AI ส่อง R Session ของเราด้วย btw และ mcptools"
+title: "เชื่อมต่อบริบท R Session สู่ AI ด้วย btw และ mcptools"
 date: 2026-11-07
-description: "posit-dev/btw และ mcptools เชื่อม R Session ในเครื่องเข้ากับ AI ให้ LLM เห็นตาราง คอลัมน์ และคู่มือฟังก์ชันเวอร์ชันที่ติดตั้งจริง โดยไม่ต้องคอยก๊อปปี้วาง"
+description: "ช่วยให้ AI Assistant เข้าถึงตัวแปรและโครงสร้างข้อมูลใน R Session ได้โดยตรงผ่าน btw และ mcptools ป้องกันปัญหา AI สร้างชื่อคอลัมน์ที่ไม่ตรงกับความเป็นจริง"
 categories: [r, ai, btw, mcptools, ellmer, llm]
 execute:
   eval: false
