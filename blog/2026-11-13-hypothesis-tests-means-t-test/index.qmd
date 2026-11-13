@@ -104,14 +104,17 @@ $$H_0: \mu_1 - \mu_2 = 0 \quad \text{vs.} \quad H_A: \mu_1 - \mu_2 \neq 0$$
 ### การวิเคราะห์ด้วย R
 
 ```{r}
-# เปรียบเทียบค่าเฉลี่ยสองกลุ่มอิสระด้วย Welch's t-test
-t.test(chirps$cps, chirps$cps_2)
+# ข้อมูลอัตราการส่งเสียงของจิ้งหรีดกลุ่มตัวอย่างที่ 2
+cps_2 <- c(20.5, 16.3, 20.9, 18.6, 17.5, 15.7, 14.9, 17.5, 15.9, 16.5, 15.3, 17.7, 16.2, 17.6, 14.6)
+
+# เปรียบเทียบค่าเฉลี่ยสองกลุ่มอิสระด้วย Welch's t-test (Default)
+t.test(chirps$cps, cps_2)
 ```
 
 หากต้องการบังคับให้เป็น Equal variance test แบบคลาสสิก สามารถกำหนดพารามิเตอร์ `var.equal = TRUE`:
 
 ```{r}
-t.test(chirps$cps, chirps$cps_2, var.equal = TRUE)
+t.test(chirps$cps, cps_2, var.equal = TRUE)
 ```
 
 ---
@@ -127,16 +130,41 @@ t.test(chirps$cps, chirps$cps_2, var.equal = TRUE)
 $$H_0: \mu_d = 0 \quad \text{vs.} \quad H_A: \mu_d \neq 0$$
 
 ### ตัวอย่าง: การสำรวจพฤติกรรมพรานล่าสัตว์ (`hunt`)
-ในชุดข้อมูล `hunt` มีการเก็บข้อมูลจำนวนวันที่ออกล่าสัตว์ของพรานแต่ละคน ก่อนและหลังเข้าร่วมการอบรมให้ความรู้:
+ในตัวอย่างนี้เป็นการเก็บข้อมูลจำนวนวันที่พรานแต่ละคน ($n = 8$) คาดว่าจะออกล่าสัตว์ ก่อน (`Pre`) และหลัง (`Post`) เข้าร่วมการอบรมกฎระเบียบการล่าสัตว์:
 
 ```{r}
-data(hunt)
+#| message: false
+#| warning: false
+library(tibble)
+library(dplyr)
 
-# ดูตัวอย่างข้อมูล
-head(hunt)
+# สร้างข้อมูลจับคู่การออกล่าสัตว์
+hunt <- tribble(
+  ~hunterID, ~time, ~days,
+  1, "Pre",  5,
+  2, "Pre",  7,
+  3, "Pre",  3,
+  4, "Pre",  9,
+  5, "Pre",  4,
+  6, "Pre",  1,
+  7, "Pre",  6,
+  8, "Pre",  8,
+  1, "Post", 8,
+  2, "Post", 7,
+  3, "Post", 4,
+  4, "Post", 11,
+  5, "Post", 9,
+  6, "Post", 3,
+  7, "Post", 10,
+  8, "Post", 5
+)
+
+# แยกข้อมูลก่อนและหลัง
+pre <- hunt %>% filter(time == "Pre")
+post <- hunt %>% filter(time == "Post")
 
 # ทดสอบ Paired t-test
-t.test(hunt$days_before, hunt$days_after, paired = TRUE)
+t.test(pre$days, post$days, paired = TRUE)
 ```
 
 การใส่ `paired = TRUE` จะบอกให้ R คำนวณความแตกต่างภายในแต่ละคนก่อน ซึ่งช่วยตัดอิทธิพลความแปรปรวนระหว่างบุคคล (Between-subject variation) ออกไป ทำให้การทดสอบมี **Statistical Power (กำลังของการทดสอบ)** สูงกว่าการนำสองกลุ่มมาเทียบแบบ Two-sample ธรรมดาอย่างมาก

@@ -41,9 +41,9 @@ flowchart TD
 ## 2. ตัวอย่างการวิเคราะห์ใน R: กับดักผีเสื้อกลางคืน (`moths`)
 
 ชุดข้อมูล `moths` ในแพ็กเกจ `{stats4nr}` บันทึกจำนวนผีเสื้อกลางคืนชนิด Spruce Moth ที่จับได้ในกับดัก โดยมี 2 ปัจจัยหลัก:
-* `location`: ตำแหน่งการวางกับดักบนต้นไม้ (Ground, Lower, Middle, Top)
-* `lure`: ชนิดของสารเคมีล่อแมลง (Chemical lure ชนิดต่างๆ)
-* `moths`: จำนวนตัวที่ดักจับได้ (ตัวแปรตาม)
+* `Location`: ตำแหน่งการวางกับดักบนต้นไม้ (Ground, Lower, Middle, Top)
+* `Lure`: ชนิดของสารเคมีล่อแมลง (Chemical lure ชนิดต่างๆ เช่น Scent, Sugar, Chemical)
+* `Moths`: จำนวนตัวที่ดักจับได้ (ตัวแปรตาม)
 
 ```{r}
 #| message: false
@@ -56,7 +56,7 @@ head(moths)
 
 # สร้างแบบจำลอง Two-Way ANOVA พร้อม Interaction Term (*)
 # เครื่องหมาย * หมายถึงการรวมทั้ง Main Effect ของทั้งสองตัวและ Interaction เข้าด้วยกัน
-moths_aov <- aov(moths ~ location * lure, data = moths)
+moths_aov <- aov(Moths ~ Location * Lure, data = moths)
 summary(moths_aov)
 ```
 
@@ -65,7 +65,7 @@ summary(moths_aov)
 ## 3. การแปลผลเชิงวิชาการและการตรวจสอบ Interaction
 
 จากผลลัพธ์ข้างต้น:
-1. **Interaction Effect (`location:lure`):** มีค่า $F = 4.591, \, p = 0.00152$ ($p < 0.01$) มีนัยสำคัญทางสถิติอย่างชัดเจน!
+1. **Interaction Effect (`Location:Lure`):** มีค่า $F = 4.591, \, p = 0.00152$ ($p < 0.01$) มีนัยสำคัญทางสถิติอย่างชัดเจน!
 2. **ความหมาย:** ประสิทธิภาพของเหยื่อล่อแต่ละชนิดจะแสดงผลแตกต่างกันอย่างสิ้นเชิงขึ้นอยู่กับว่านำไปแขวนไว้ที่ระดับความสูงใดของต้นไม้
 
 ---
@@ -76,7 +76,7 @@ summary(moths_aov)
 
 ```{r}
 # พล็อตกราฟ Interaction ด้วย ggplot2
-ggplot(moths, aes(x = location, y = moths, color = lure, group = lure)) +
+ggplot(moths, aes(x = Location, y = Moths, color = Lure, group = Lure)) +
   stat_summary(fun = mean, geom = "point", size = 3) +
   stat_summary(fun = mean, geom = "line", linewidth = 1) +
   stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +

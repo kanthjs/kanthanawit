@@ -44,7 +44,7 @@ $$F = \frac{MS_{\text{Treatment}}}{MS_{\text{Error}}}$$
 
 ## 2. ตัวอย่างการวิเคราะห์ด้วย R: ปริมาณธาตุเหล็กในอ่าว Chesapeake (`iron`)
 
-ในชุดข้อมูล `iron` จากแพ็กเกจ `{stats4nr}` มีการบันทึกปริมาณธาตุเหล็กในน้ำ (`iron_content`) ที่ระดับความลึก 3 ระดับ (`depth`: Surface, Medium, Deep):
+ในชุดข้อมูล `iron` จากแพ็กเกจ `{stats4nr}` มีการบันทึกปริมาณธาตุเหล็กในน้ำ (`iron`) ที่ระดับความลึก 3 ระดับ (`depth`: Surface, Medium, Deep):
 
 ```{r}
 #| message: false
@@ -59,7 +59,7 @@ head(iron)
 iron$depth <- as.factor(iron$depth)
 
 # สร้างแบบจำลอง One-Way ANOVA ด้วยคำสั่ง aov()
-iron_aov <- aov(iron_content ~ depth, data = iron)
+iron_aov <- aov(iron ~ depth, data = iron)
 
 # แสดงตาราง ANOVA Table
 summary(iron_aov)
@@ -86,7 +86,7 @@ TukeyHSD(iron_aov)
 ### วิธีที่ 2: Pairwise $t$-test with Bonferroni Correction
 
 ```{r}
-pairwise.t.test(iron$iron_content, iron$depth, p.adjust.method = "bonferroni")
+pairwise.t.test(iron$iron, iron$depth, p.adjust.method = "bonferroni")
 ```
 
 **ผลลัพธ์การเปรียบเทียบ:**

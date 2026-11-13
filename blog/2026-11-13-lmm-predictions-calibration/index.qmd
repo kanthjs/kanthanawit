@@ -41,7 +41,7 @@ redpine_lmm <- lmer(HT ~ DBH + (1 | CoverType), data = redpine)
 # สร้างข้อมูลต้นไม้จำลองใหม่
 new_trees <- data.frame(
   DBH = c(10, 12),
-  CoverType = c("Jack Pine", "White Pine")
+  CoverType = c("Jack pine", "White pine")
 )
 ```
 
