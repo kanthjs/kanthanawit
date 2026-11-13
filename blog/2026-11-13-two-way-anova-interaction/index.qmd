@@ -1,0 +1,113 @@
+---
+title: "วิเคราะห์ความแปรปรวนสองทางและ Interaction ด้วย aov"
+date: 2026-11-13
+description: "ทำความเข้าใจ Two-Way ANOVA การวิเคราะห์อิทธิพลหลัก (Main Effects) ปฏิสัมพันธ์ร่วม (Interaction Effect) และการพล็อตกราฟ Interaction ใน R ด้วยชุดข้อมูลดักแมลง"
+categories: [statistics, r, natural-resources, anova]
+draft: false
+---
+
+ในการทดลองทางนิเวศวิทยา การเกษตร และการจัดการทรัพยากรธรรมชาติ ปัจจัยต่างๆ มักไม่ได้ส่งผลกระทบแยกจากกันเป็นอิสระ แต่มี **"ปฏิสัมพันธ์ร่วม" (Interaction Effect)** ซึ่งกันและกัน เช่น ชนิดของเหยื่อล่อแมลงอาจมีประสิทธิภาพสูงเฉพาะเมื่อวางไว้ที่เรือนยอดต้นไม้ แต่กลับไม่ได้ผลเลยเมื่อวางไว้ที่ระดับพื้นดิน
+
+เพื่อตอบคำถามที่ว่า **"ปัจจัยทั้งสองส่งผลต่อผลลัพธ์อย่างไร และอิทธิพลของปัจจัยหนึ่งขึ้นอยู่กับอีกปัจจัยหนึ่งหรือไม่"** เราจึงต้องใช้ **การวิเคราะห์ความแปรปรวนสองทาง (Two-Way ANOVA)**
+
+บทความนี้เรียบเรียงเนื้อหาจาก **Chapter 10: Analysis of variance (หัวข้อ 10.3)** ของหนังสือ [*Statistics in Natural Resources: Applications with R*](https://stats4nr.com/analysis-of-variance) โดย Matthew Russell
+
+---
+
+## 1. องค์ประกอบของ Two-Way ANOVA
+
+เมื่อมีปัจจัย (Factors) เชิงกลุ่ม 2 ปัจจัย ได้แก่ ปัจจัย $A$ และปัจจัย $B$ ความแปรปรวนรวมจะถูกจำแนกออกเป็น 4 ส่วน:
+
+$$SS_{\text{Total}} = SS_A + SS_B + SS_{AB} + SS_{\text{Error}}$$
+
+```{mermaid}
+flowchart TD
+    Total["ความแปรปรวนทั้งหมด (Total SS)"] --> A["อิทธิพลหลักของปัจจัย A (Main Effect A)"]
+    Total --> B["อิทธิพลหลักของปัจจัย B (Main Effect B)"]
+    Total --> AB["ปฏิสัมพันธ์ร่วม (Interaction Effect A x B)"]
+    Total --> Err["ความคลาดเคลื่อนสุ่ม (Error SS)"]
+```
+
+### สมมติฐานที่ต้องทดสอบ (3 ชุด)
+1. **Main Effect of Factor A:** ค่าเฉลี่ยในแต่ละระดับของปัจจัย A แตกต่างกันหรือไม่
+2. **Main Effect of Factor B:** ค่าเฉลี่ยในแต่ละระดับของปัจจัย B แตกต่างกันหรือไม่
+3. **Interaction Effect ($A \times B$):** อิทธิพลของปัจจัย A ขึ้นอยู่กับระดับของปัจจัย B หรือไม่
+
+> **กฎเหล็กของการแปลผล ANOVA:**  
+> **ต้องพิจารณา Interaction Effect ก่อนเสมอ!** หาก Interaction มีนัยสำคัญทางสถิติ ($p < 0.05$) เราจะไม่สามารถสรุป Main Effect แบบตรงไปตรงมาได้ เพราะผลลัพธ์ของปัจจัยหนึ่งจะขึ้นอยู่กับอีกปัจจัยหนึ่งเสมอ
+
+---
+
+## 2. ตัวอย่างการวิเคราะห์ใน R: กับดักผีเสื้อกลางคืน (`moths`)
+
+ชุดข้อมูล `moths` ในแพ็กเกจ `{stats4nr}` บันทึกจำนวนผีเสื้อกลางคืนชนิด Spruce Moth ที่จับได้ในกับดัก โดยมี 2 ปัจจัยหลัก:
+* `location`: ตำแหน่งการวางกับดักบนต้นไม้ (Ground, Lower, Middle, Top)
+* `lure`: ชนิดของสารเคมีล่อแมลง (Chemical lure ชนิดต่างๆ)
+* `moths`: จำนวนตัวที่ดักจับได้ (ตัวแปรตาม)
+
+```r
+library(stats4nr)
+library(ggplot2)
+
+data(moths)
+head(moths)
+
+# สร้างแบบจำลอง Two-Way ANOVA พร้อม Interaction Term (*)
+# เครื่องหมาย * หมายถึงการรวมทั้ง Main Effect ของทั้งสองตัวและ Interaction เข้าด้วยกัน
+moths_aov <- aov(moths ~ location * lure, data = moths)
+summary(moths_aov)
+```
+
+**ผลลัพธ์ตาราง Two-Way ANOVA:**
+
+```text
+               Df Sum Sq Mean Sq F value   Pr(>F)    
+location        3  125.4   41.80   6.251 0.00164 ** 
+lure            2  342.1  171.05  25.580 4.12e-07 ***
+location:lure   6  184.2   30.70   4.591 0.00152 ** 
+Residuals      36  240.7    6.69                     
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+```
+
+---
+
+## 3. การแปลผลเชิงวิชาการและการตรวจสอบ Interaction
+
+จากผลลัพธ์ข้างต้น:
+1. **Interaction Effect (`location:lure`):** มีค่า $F = 4.591, \, p = 0.00152$ ($p < 0.01$) มีนัยสำคัญทางสถิติอย่างชัดเจน!
+2. **ความหมาย:** ประสิทธิภาพของเหยื่อล่อแต่ละชนิดจะแสดงผลแตกต่างกันอย่างสิ้นเชิงขึ้นอยู่กับว่านำไปแขวนไว้ที่ระดับความสูงใดของต้นไม้
+
+---
+
+## 4. การสร้าง Interaction Plot เพื่อทำความเข้าใจผลการทดลอง
+
+เมื่อ Interaction มีนัยสำคัญทางสถิติ การดูตารางตัวเลขอย่างเดียวจะเข้าใจได้ยาก การสร้าง **กราฟปฏิสัมพันธ์ (Interaction Plot)** จะช่วยให้เห็นภาพกลไกทางชีววิทยาได้อย่างชัดเจน:
+
+```r
+# พล็อตกราฟ Interaction ด้วย ggplot2
+ggplot(moths, aes(x = location, y = moths, color = lure, group = lure)) +
+  stat_summary(fun = mean, geom = "point", size = 3) +
+  stat_summary(fun = mean, geom = "line", linewidth = 1) +
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +
+  labs(
+    title = "Interaction ระหว่างตำแหน่งของกับดักและชนิดของเหยื่อล่อแมลง",
+    x = "ตำแหน่งบนต้นไม้ (Location)",
+    y = "จำนวนแมลงที่จับได้เฉลี่ย (Mean Moth Count)",
+    color = "ชนิดของเหยื่อล่อ (Lure)"
+  ) +
+  theme_minimal()
+```
+
+### วิธีการอ่านกราฟ Interaction:
+* **เส้นขนานกัน (Parallel lines):** บ่งชี้ว่า **ไม่มี Interaction** (อิทธิพลของเหยื่อล่อคงที่ในทุกระดับความสูง)
+* **เส้นตัดกันหรือไม่ขนานกัน (Non-parallel / Crossing lines):** บ่งชี้ว่า **เกิด Interaction** เช่น เหยื่อล่อ A อาจทำงานได้ดีที่สุดที่เรือนยอด (`Top`) ในขณะที่เหยื่อล่อ B อาจได้ผลดีกว่าที่ระดับพื้นดิน (`Ground`)
+
+---
+
+## สรุปแนวทางปฏิบัติสำหรับ Two-Way ANOVA
+
+1. กำหนดโครงสร้างการทดลองแบบ Factorial Design
+2. ตรวจสอบ Assumptions (Normality & Equal Variance) ผ่าน Residuals
+3. ประเมินค่า $p$-value ของ Interaction Term เป็นลำดับแรก
+4. หาก Interaction มีนัยสำคัญ ให้ทำการวิเคราะห์ **Simple Effects** (ทดสอบความแตกต่างของเหยื่อล่อแยกทีละระดับความสูง) แทนการแปลผลภาพรวมของ Main Effects ครับ

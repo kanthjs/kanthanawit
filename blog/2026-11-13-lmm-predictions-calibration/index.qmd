@@ -1,0 +1,93 @@
+---
+title: "ทำนายและสอบเทียบโมเดลเชิงเส้นแบบผสมใน R"
+date: 2026-11-13
+description: "ทำความเข้าใจการทำนายค่าด้วย Mixed Models ทั้งระดับประชากร (Population-level) และระดับกลุ่มย่อย (Subject-specific BLUPs) พร้อมแนวทางการสอบเทียบแบบจำลองใน R"
+categories: [statistics, r, natural-resources, mixed-models, lme4]
+draft: false
+---
+
+หนึ่งในจุดเด่นที่ทำให้ **Linear Mixed-Effects Models (LMM)** ได้รับความนิยมอย่างกว้างขวางในวิทยาศาสตร์ธรรมชาติและวนศาสตร์ คือความยืดหยุ่นในการ **ทำนาย (Prediction)** 
+
+เมื่อเราสร้างแบบจำลอง LMM คำถามสำคัญคือ:
+> **"เราต้องการทำนายค่าเฉลี่ยในภาพรวมของประชากร หรือต้องการทำนายเฉพาะเจาะจงลงไปในแต่ละแปลงสำรวจ?"**
+
+บทความนี้เรียบเรียงเนื้อหาจาก **Chapter 14: Linear mixed models (หัวข้อ 14.4–14.5)** ของหนังสือ [*Statistics in Natural Resources: Applications with R*](https://stats4nr.com/linear-mixed-models) โดย Matthew Russell
+
+---
+
+## 1. การทำนาย 2 ระดับใน Mixed Models
+
+```{mermaid}
+flowchart TD
+    A["การทำนายด้วย Linear Mixed Model"] --> B["1. Population-level Prediction (ระดับประชากร)<br/>- ใช้เฉพาะ Fixed Effects (Beta)<br/>- ละเว้น Random Effects (bi = 0)<br/>- เหมาะสำหรับพื้นที่ใหม่ที่ไม่เคยเก็บข้อมูลมาก่อน"]
+    A --> C["2. Subject-specific Prediction (ระดับกลุ่มย่อย)<br/>- รวมทั้ง Fixed Effects และ Random Effects (Beta + bi)<br/>- ใช้ค่า BLUPs ของแต่ละกลุ่ม<br/>- มีความแม่นยำสูงมากในกลุ่มที่เคยอยู่ในโมเดล"]
+```
+
+---
+
+## 2. ตัวอย่างการทำนายใน R ด้วยฟังก์ชัน `predict()`
+
+ต่อยอดจากชุดข้อมูล `redpine` และแบบจำลองความสูงต้นไม้ `redpine_lmm`:
+
+```r
+library(stats4nr)
+library(lme4)
+
+data(redpine)
+redpine_lmm <- lmer(HT ~ DBH + (1 | CoverType), data = redpine)
+
+# สร้างข้อมูลต้นไม้จำลองใหม่
+new_trees <- data.frame(
+  DBH = c(10, 12),
+  CoverType = c("Jack Pine", "White Pine")
+)
+```
+
+### การทำนายระดับกลุ่มย่อย (Subject-specific: รวม Random Effects)
+โดยค่าเริ่มต้น ฟังก์ชัน `predict()` จะดึงค่า Random Intercept ของแต่ละ `CoverType` มาบวกกับสมการเส้นตรงให้โดยอัตโนมัติ:
+
+```r
+predict(redpine_lmm, newdata = new_trees)
+```
+
+### การทำนายระดับประชากร (Population-level: ไม่รวม Random Effects)
+หากเราต้องการทำนายในภาพรวม หรือมีต้นไม้ที่อยู่ใน `CoverType` ใหม่ที่ไม่เคยปรากฏในชุดข้อมูลฝึกสอน ให้กำหนด `re.form = NA`:
+
+```r
+predict(redpine_lmm, newdata = new_trees, re.form = NA)
+```
+
+---
+
+## 3. การดึงค่า Random Effects ด้วย BLUPs
+
+ใน LMM ค่าสุ่มของแต่ละกลุ่มจะถูกประมาณด้วยวิธี **Best Linear Unbiased Predictor (BLUP)** ซึ่งมีคุณสมบัติพิเศษที่เรียกว่า **Shrinkage (การหดตัวเข้าสู่ค่าเฉลี่ย)** คือกลุ่มที่มีข้อมูลน้อยหรือความแปรปรวนสูง ค่า BLUP จะถูกดึงกลับเข้าหา 0 เพื่อป้องกัน Overfitting
+
+เราสามารถเรียกดูค่าชดเชยของแต่ละกลุ่มได้ด้วยคำสั่ง `ranef()`:
+
+```r
+ranef(redpine_lmm)
+```
+
+**ผลลัพธ์:**
+```text
+$CoverType
+           (Intercept)
+Jack Pine    -2.145
+Red Pine      1.821
+White Pine    0.324
+...
+```
+แสดงว่าต้นสนแดงที่เติบโตในสภาพป่าแบบ `Jack Pine` จะมีความสูงเฉลี่ยเตี้ยกว่าระดับประชากรประมาณ $2.15$ ฟุต ในขณะที่ป่า `Red Pine` แท้จะเติบโตได้สูงกว่าค่าเฉลี่ย $1.82$ ฟุต
+
+---
+
+## 4. โอกาสและข้อจำกัดของ Mixed Models
+
+### โอกาส (Opportunities):
+1. **จัดการข้อมูลไม่สมดุล (Unbalanced Data) ได้ดีเยี่ยม:** ไม่จำเป็นต้องมีจำนวนตัวอย่างเท่ากันในทุกแปลง
+2. **การสอบเทียบในระดับท้องถิ่น (Local Calibration):** เมื่อไปสำรวจแปลงใหม่ หากเราสุ่มวัดความสูงต้นไม้เพียงไม่กี่ต้นในแปลงนั้น เราสามารถนำข้อมูลมา "สอบเทียบ" เพื่อประเมินค่า Random Effect ของแปลงใหม่ได้ทันที
+
+### ข้อจำกัด (Limitations):
+1. **ต้องการจำนวนกลุ่มที่เพียงพอ:** ตัวแปร Random Effect ควรมีกลุ่มย่อยอย่างน้อย **5–6 กลุ่มขึ้นไป** (หากมีแค่ 2–3 กลุ่ม ควรใส่เป็น Fixed Effect ธรรมดา)
+2. **การตีความซับซ้อน:** การรายงานผลการทดสอบนัยสำคัญของ Fixed Effects มักไม่มี Degrees of Freedom ที่เป็นจำนวนเต็มชัดเจน ต้องอาศัยการประมาณค่าแบบ Satterthwaite หรือ Kenward-Roger ผ่านแพ็กเกจ `{lmerTest}` ครับ

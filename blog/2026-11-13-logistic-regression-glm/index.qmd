@@ -1,0 +1,116 @@
+---
+title: "สร้างแบบจำลองถดถอยโลจิสติกด้วย glm ใน R"
+date: 2026-11-13
+description: "ทำความเข้าใจ Binary Logistic Regression การแปลงค่าด้วยฟังก์ชัน Logit การประมาณค่า Odds Ratio และการทำนายความน่าจะเป็นของเหตุการณ์ใน R ด้วยฟังก์ชัน glm"
+categories: [statistics, r, natural-resources, logistic-regression, glm]
+draft: false
+---
+
+ในงานวิจัยทางวิทยาศาสตร์ชีวภาพและทรัพยากรธรรมชาติ ตัวแปรตามจำนวนมากไม่ได้เป็นตัวเลขต่อเนื่อง (Continuous) แต่เป็น **ข้อมูลทวิภาค (Binary Outcomes)** เช่น ต้นไม้รอดหรือไม่รอด (Alive/Dead), สัตว์ป่าปรากฏหรือไม่ปรากฏในพื้นที่ (Presence/Absence), หรือเมล็ดพันธุ์งอกหรือไม่งอก
+
+หากเรานำแบบจำลองถดถอยเชิงเส้นธรรมดา (OLS) มาใช้กับข้อมูลแบบ 0 และ 1 จะเกิดปัญหาใหญ่ทันที:
+1. ค่าทำนายอาจหลุดออกจากช่วงความเป็นจริง (น้อยกว่า 0 หรือมากกว่า 1)
+2. ความแปรปรวนไม่คงที่อย่างรุนแรง (Heteroscedasticity)
+3. ส่วนตกค้างไม่แจกแจงแบบปกติ
+
+เพื่อแก้ปัญหานี้ เราจึงต้องก้าวเข้าสู่กลุ่มแบบจำลอง **Generalized Linear Models (GLMs)** โดยใช้ **Binary Logistic Regression**
+
+บทความนี้เรียบเรียงเนื้อหาจาก **Chapter 12: Logistic regression (หัวข้อ 12.1–12.2)** ของหนังสือ [*Statistics in Natural Resources: Applications with R*](https://stats4nr.com/logistic-regression) โดย Matthew Russell
+
+---
+
+## 1. กลไกของ Logistic Regression: จากความน่าจะเป็นสู่อัตราต่อรอง (Odds)
+
+เป้าหมายของ Logistic Regression คือการทำนายความน่าจะเป็นของเหตุการณ์ ($p = P(Y = 1)$) โดยมีขั้นตอนการแปลงรูป 3 ขั้นตอน:
+
+```{mermaid}
+flowchart LR
+    P["ความน่าจะเป็น (p)<br/>[0, 1]"] -->|"Odds = p / (1 - p)"| O["อัตราต่อรอง (Odds)<br/>[0, +Inf)"]
+    O -->|"Logit = ln(Odds)"| L["Log-odds (Logit scale)<br/>(-Inf, +Inf)"]
+    L -->|"เชื่อมโยงสมการเส้นตรง"| Reg["Beta_0 + Beta_1 * X"]
+```
+
+สมการแบบจำลองในรูป **Logit Form**:
+
+$$\operatorname{logit}(p) = \ln\left(\frac{p}{1-p}\right) = \beta_0 + \beta_1 x$$
+
+และเมื่อถอดสมการกลับมาหาความน่าจะเป็น $p$ จะได้ฟังก์ชันรูปตัว S (**Sigmoid Curve**):
+
+$$p = \frac{1}{1 + e^{-(\beta_0 + \beta_1 x)}} = \frac{e^{\beta_0 + \beta_1 x}}{1 + e^{\beta_0 + \beta_1 x}}$$
+
+---
+
+## 2. ตัวอย่างการสร้างแบบจำลองใน R ด้วยชุดข้อมูล `elm`
+
+ในชุดข้อมูล `elm` จากแพ็กเกจ `{stats4nr}` มีการบันทึกข้อมูลต้น Cedar Elm โดยเราสนใจทำนายว่าต้นไม้นั้นจัดอยู่ในกลุ่มเรือนยอดที่ถูกบดบังอย่างรุนแรง (Suppressed Crown: รหัส 4) หรือไม่ จากขนาดเส้นผ่านศูนย์กลางลำต้น (`DIA`, นิ้ว):
+
+```r
+library(stats4nr)
+library(ggplot2)
+
+data(elm)
+head(elm)
+
+# สร้างตัวแปรทวิภาค (0 = ไม่อยู่ในสภาพบดบัง, 1 = อยู่ในสภาพบดบัง)
+elm$suppressed <- ifelse(elm$CROWN_CLASS_CD == 4, 1, 0)
+
+# สร้างแบบจำลอง Logistic Regression ด้วยคำสั่ง glm()
+# กำหนด family = binomial(link = "logit")
+elm_glm <- glm(suppressed ~ DIA, data = elm, family = binomial(link = "logit"))
+summary(elm_glm)
+```
+
+**ผลลัพธ์จากการรัน `summary(elm_glm)`:**
+
+```text
+Coefficients:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept)  1.82415    0.34211   5.332 9.71e-08 ***
+DIA         -0.24512    0.04153  -5.902 3.59e-09 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 374.22  on 332  degrees of freedom
+Residual deviance: 325.10  on 331  degrees of freedom
+AIC: 329.1
+```
+
+---
+
+## 3. การแปลผลทางสถิติและอัตราส่วนอัตราต่อรอง (Odds Ratio)
+
+ค่าสัมประสิทธิ์ที่ได้จากตารางสรุป ($b_1 = -0.2451$) อยู่ในมาตราส่วนของ **Log-odds** ซึ่งยากต่อการทำความเข้าใจโดยตรง ในทางวิชาการจึงนิยมแปลงกลับเป็น **Odds Ratio (OR)** ด้วยการยกกำลัง $e^{b_1}$:
+
+```r
+# คำนวณ Odds Ratio
+exp(coef(elm_glm))
+
+# คำนวณช่วงความเชื่อมั่น 95% ของ Odds Ratio
+exp(confint(elm_glm))
+```
+
+* **ค่า $b_1 = -0.2451$:** มีทิศทางเป็นลบอย่างมีนัยสำคัญ ($p < 0.001$) แสดงว่าต้นไม้ที่มีขนาดลำต้นใหญ่ขึ้น จะมีโอกาสถูกบดบังเรือนยอดลดลง
+* **ค่า Odds Ratio: $e^{-0.2451} \approx 0.7826$:** ทุกๆ ขนาดเส้นผ่านศูนย์กลางลำต้น (`DIA`) ที่เพิ่มขึ้น 1 นิ้ว **อัตราต่อรอง (Odds) ที่ต้นไม้จะถูกบดบังเรือนยอดจะลดลงประมาณ 21.7%** ($1 - 0.7826 = 0.2174$)
+
+---
+
+## 4. การทำนายความน่าจะเป็น (Predicting Probabilities)
+
+หากต้องการนำโมเดลไปทำนายความน่าจะเป็นจริง ($p$) ในช่วง $[0, 1]$ เราต้องระบุอาร์กิวเมนต์ `type = "response"` ในฟังก์ชัน `predict()`:
+
+```r
+# พล็อตกราฟเส้นโค้ง Sigmoid ด้วย ggplot2
+ggplot(elm, aes(x = DIA, y = suppressed)) +
+  geom_point(alpha = 0.3, size = 2) +
+  stat_smooth(method = "glm", method.args = list(family = "binomial"), color = "red", se = TRUE) +
+  labs(
+    title = "ความน่าจะเป็นที่ต้นไม้จะถูกบดบังเรือนยอดตามขนาดเส้นผ่านศูนย์กลาง",
+    x = "Diameter at Breast Height (นิ้ว)",
+    y = "ความน่าจะเป็น (Probability)"
+  ) +
+  theme_minimal()
+```
+
+เส้นโค้งที่ได้จะมีลักษณะหักงอเป็นรูปตัว S สวยงาม ไม่หลุดออกนอกช่วง 0 ถึง 1 ตามทฤษฎีความน่าจะเป็นครับ

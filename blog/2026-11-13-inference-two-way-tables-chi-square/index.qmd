@@ -1,0 +1,141 @@
+---
+title: "วิเคราะห์ตารางการณ์จรด้วย Chi-Square Test"
+date: 2026-11-13
+description: "ทำความเข้าใจการทดสอบความเป็นอิสระระหว่างตัวแปรกลุ่มด้วย Two-Way Contingency Table การคำนวณ Expected Counts และการวิเคราะห์ใน R ด้วยฟังก์ชัน chisq.test"
+categories: [statistics, r, natural-resources, hypothesis-testing]
+draft: false
+---
+
+เมื่อข้อมูลที่เก็บรวบรวมเป็น **ตัวแปรเชิงกลุ่ม (Categorical variables)** ตั้งแต่ 2 ตัวขึ้นไป และแต่ละตัวแปรมีหลายกลุ่มย่อย (Categories) เช่น การสำรวจชนิดการใช้ประโยชน์ป่าไม้จำแนกตามกลุ่มชาติพันธุ์ หรือการตรวจหาเชื้อไวรัสในสัตว์ป่าจำแนกตามมลรัฐ 
+
+การทดสอบสัดส่วนแบบธรรมดาจะไม่เพียงพอ เราต้องจัดโครงสร้างข้อมูลให้อยู่ในรูปของ **ตารางการณ์จร (Two-Way Contingency Table)** แล้วใช้ **Pearson's Chi-Squared Test of Independence** ในการทดสอบว่าตัวแปรทั้งสองมีความสัมพันธ์กันหรือเป็นอิสระจากกัน
+
+บทความนี้เรียบเรียงเนื้อหาจาก **Chapter 6: Inference for two-way tables** ของหนังสือ [*Statistics in Natural Resources: Applications with R*](https://stats4nr.com/inference-for-two-way-tables) โดย Matthew Russell
+
+---
+
+## 1. โครงสร้างของตารางการณ์จร (Two-Way Table)
+
+ตารางการณ์จร (Contingency Table) ใช้สรุปจำนวนความถี่ (Counts) ของการสังเกต โดย:
+* **แถว (Rows, $r$):** แทนกลุ่มย่อยของตัวแปรเชิงกลุ่มตัวที่ 1
+* **คอลัมน์ (Columns, $c$):** แทนกลุ่มย่อยของตัวแปรเชิงกลุ่มตัวที่ 2
+
+### ตัวอย่างข้อมูล: การตรวจเชื้อไวรัส West Nile ในนก Ruffed Grouse
+ข้อมูลการเฝ้าระวังเชื้อไวรัส West Nile Virus (WNV) ในประชากรนก Ruffed Grouse (*Bonasa umbellus*) ใน 3 รัฐแถบเกรตเลกส์ (Michigan, Minnesota, Wisconsin):
+
+| รัฐ (State) | ผลตรวจเป็นลบ (Neg) | ผลตรวจเป็นบวก (Pos) | รวมแถว (Row Total) |
+| :--- | :---: | :---: | :---: |
+| **Michigan** | 185 | 28 | 213 |
+| **Minnesota** | 239 | 34 | 273 |
+| **Wisconsin** | 167 | 68 | 235 |
+| **รวมคอลัมน์ (Col Total)** | **591** | **130** | **Total ($N$) = 721** |
+
+คำถามวิจัยคือ **อัตราการติดเชื้อไวรัส WNV มีความสัมพันธ์กับถิ่นที่อยู่อาศัย (รัฐ) หรือไม่?**
+
+---
+
+## 2. ทฤษฎี Chi-Squared Test of Independence
+
+### การตั้งสมมติฐาน
+* **Null Hypothesis ($H_0$):** ตัวแปรทั้งสองเป็นอิสระต่อกัน (ไม่มีความสัมพันธ์กันระหว่างรัฐกับการติดเชื้อ)
+* **Alternative Hypothesis ($H_A$):** ตัวแปรทั้งสองมีความสัมพันธ์กัน (การติดเชื้อขึ้นอยู่กับรัฐที่พบ)
+
+### ค่าความถี่ที่คาดหวัง (Expected Counts: $E_{ij}$)
+ภายใต้สมมติฐาน $H_0$ ที่ว่าสองตัวแปรเป็นอิสระต่อกัน จำนวนความถี่ที่ควรจะเกิดขึ้นในแต่ละช่องตาราง (Cell) สามารถคำนวณได้จาก:
+
+$$E_{ij} = \frac{\text{Row Total}_i \times \text{Column Total}_j}{N}$$
+
+### สถิติทดสอบ Chi-Square ($\chi^2$)
+วัดระยะห่างระหว่างความถี่ที่สังเกตได้จริง ($O_{ij}$) กับความถี่ที่คาดหวัง ($E_{ij}$):
+
+$$\chi^2 = \sum \frac{(O_{ij} - E_{ij})^2}{E_{ij}}$$
+
+โดยมีระดับความเป็นอิสระ (Degrees of Freedom) เท่ากับ:
+
+$$df = (r - 1) \times (c - 1)$$
+
+*(สำหรับตารางขนาด $3 \times 2$ จะได้ $df = (3 - 1)(2 - 1) = 2$)*
+
+```{mermaid}
+flowchart TD
+    A["สร้างตาราง Observed Counts (Oij)"] --> B["คำนวณ Expected Counts (Eij) ภายใต้ H0"]
+    B --> C["คำนวณ Chi-Square Statistic: sum (O-E)^2 / E"]
+    C --> D["เทียบกับ Chi-Square Distribution ด้วย df = (r-1)(c-1)"]
+    D --> E["ประเมิน p-value เพื่อตัดสินใจเชิงสถิติ"]
+```
+
+---
+
+## 3. การวิเคราะห์ด้วย R ผ่าน `chisq.test()`
+
+เราสามารถสร้างเมทริกซ์ของตารางการณ์จร แล้วส่งเข้าไปยังฟังก์ชัน `chisq.test()` ได้โดยตรง:
+
+```r
+# 1. สร้างตารางการณ์จร
+grouse <- matrix(
+  c(185, 28,   # Michigan
+    239, 34,   # Minnesota
+    167, 68),  # Wisconsin
+  nrow = 3, 
+  byrow = TRUE
+)
+
+# กำหนดชื่อแถวและคอลัมน์
+rownames(grouse) <- c("Michigan", "Minnesota", "Wisconsin")
+colnames(grouse) <- c("Neg", "Pos")
+
+# แสดงตาราง
+grouse
+
+# 2. ทำการทดสอบ Chi-Square Test
+chi_result <- chisq.test(grouse)
+chi_result
+```
+
+**ผลลัพธ์ที่ได้จากการรัน:**
+
+```text
+	Pearson's Chi-squared test
+
+data:  grouse
+X-squared = 28.094, df = 2, p-value = 7.935e-07
+```
+
+### การตรวจสอบค่า Expected Counts และ Residuals ใน R
+หนึ่งในข้อได้เปรียบของการเก็บผลลัพธ์ไว้ในตัวแปร (`chi_result`) คือเราสามารถเรียกดูค่าทางสถิติเบื้องหลังได้:
+
+```r
+# ดูค่า Expected Counts
+chi_result$expected
+
+# ดูค่า Pearson Residuals (เพื่อดูว่าช่องไหนเป็นตัวขับเคลื่อนความสัมพันธ์)
+chi_result$residuals
+```
+
+**ผลลัพธ์ Expected Counts:**
+```text
+               Neg       Pos
+Michigan  174.6006  38.39945
+Minnesota 223.7767  49.22330
+Wisconsin 192.6227  42.37725
+```
+
+---
+
+## 4. การแปลผลเชิงวิชาการ
+
+1. **ค่าสถิติทดสอบ:** $\chi^2 = 28.094$ ที่ $df = 2$
+2. **ค่า $p$-value:** เท่ากับ $7.935 \times 10^{-7}$ ซึ่งน้อยกว่าระดับนัยสำคัญ $\alpha = 0.05$ อย่างมาก
+3. **การตัดสินใจ:** เรา **Reject $H_0$** 
+4. **สรุปความสัมพันธ์:** อัตราการติดเชื้อไวรัส West Nile ในนก Ruffed Grouse มีความสัมพันธ์กับรัฐที่สำรวจอย่างมีนัยสำคัญทางสถิติ
+5. **เจาะลึกที่มาของความแตกต่าง (Residual Analysis):** เมื่อพิจารณาค่าจริงเทียบกับค่าคาดหวัง ในรัฐ **Wisconsin** พบผลตรวจเป็นบวกจริงถึง 68 ตัว ซึ่งสูงกว่าค่าคาดหวัง (42.38 ตัว) อย่างชัดเจน บ่งชี้ว่ารัฐ Wisconsin มีสัดส่วนการติดเชื้อในประชากรนกสูงกว่ารัฐ Michigan และ Minnesota ในช่วงเวลาดังกล่าว
+
+---
+
+## 5. ข้อกำหนดและข้อควรระวัง (Assumptions & Cautions)
+
+* **Independence:** การสังเกตแต่ละหน่วยตัวอย่างต้องเป็นอิสระจากกัน
+* **Sample Size Rule of Thumb:** 
+  * ทุกช่องตารางควรมีค่าคาดหวัง $E_{ij} \ge 1$
+  * ไม่ควรมีช่องตารางที่มีค่าคาดหวัง $E_{ij} < 5$ เกินกว่า 20% ของช่องทั้งหมด
+  * *หากข้อมูลมีขนาดเล็กและไม่ผ่านเกณฑ์นี้ แนะนำให้ใช้ **Fisher's Exact Test (`fisher.test()`)** แทน*

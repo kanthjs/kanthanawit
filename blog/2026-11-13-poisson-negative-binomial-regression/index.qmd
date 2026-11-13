@@ -1,0 +1,104 @@
+---
+title: "วิเคราะห์ข้อมูลนับด้วย Poisson และ Negative Binomial"
+date: 2026-11-13
+description: "ทำความเข้าใจการสร้างแบบจำลองถดถอยสำหรับข้อมูลนับ (Count Data) การรับมือกับปัญหา Overdispersion ด้วย Negative Binomial ผ่านฟังก์ชัน glm และ glm.nb ใน R"
+categories: [statistics, r, natural-resources, count-data, glm]
+draft: false
+---
+
+ข้อมูลในงานวิจัยด้านนิเวศวิทยาและชีววิทยาจำนวนมากจัดเป็น **ข้อมูลนับ (Count Data)** เช่น จำนวนนกที่พบในแปลงสำรวจ, จำนวนต้นกล้าที่งอก, หรือจำนวนปลาที่ตกได้ในอ่างเก็บน้ำ ข้อมูลประเภทนี้มีลักษณะทางคณิตศาสตร์เฉพาะตัวคือ:
+1. เป็นจำนวนเต็มที่ไม่เป็นลบเสมอ ($y = 0, 1, 2, \dots$)
+2. มีการแจกแจงแบบเบ้ขวา (Skewed right) อย่างรุนแรง
+3. ความแปรปรวนมักเพิ่มขึ้นตามขนาดของค่าเฉลี่ย
+
+หากเราใช้ Linear Regression (OLS) ค่าทำนายอาจติดลบและละเมิดข้อตกลงเรื่อง Normality อย่างร้ายแรง ทางเลือกที่เหมาะสมคือการใช้ **การถดถอยแบบปัวซง (Poisson Regression)** หรือ **ทวินามเชิงลบ (Negative Binomial Regression)**
+
+บทความนี้เรียบเรียงเนื้อหาจาก **Chapter 13: Count regression (หัวข้อ 13.1–13.2 และ 13.4)** ของหนังสือ [*Statistics in Natural Resources: Applications with R*](https://stats4nr.com/count-regression) โดย Matthew Russell
+
+---
+
+## 1. แบบจำลองปัวซงและกับดักความแปรปรวนเกิน (Overdispersion)
+
+ตามทฤษฎีการแจกแจงแบบปัวซง (Poisson Distribution) มีสมมติฐานสำคัญที่เรียกว่า **Equidispersion**:
+
+$$\text{Mean} = \lambda \quad \text{และ} \quad \text{Variance} = \lambda \quad (\text{Variance} = \text{Mean})$$
+
+สมการการถดถอย Poisson ใช้ฟังก์ชันเชื่อมโยงแบบลอการิทึม (**Log Link Function**):
+
+$$\ln(\lambda_i) = \beta_0 + \beta_1 x_{1i} + \dots + \beta_k x_{ki} \quad \Longleftrightarrow \quad \lambda_i = e^{\beta_0 + \beta_1 x_{1i} + \dots}$$
+
+### ปัญหา Overdispersion คืออะไร?
+ในข้อมูลจริงตามธรรมชาติ ความผันแปรของข้อมูลมักสูงกว่าค่าเฉลี่ยมาก (**$\text{Variance} > \text{Mean}$**) ปรากฏการณ์นี้เรียกว่า **Overdispersion** ซึ่งหากยังฝืนใช้ Poisson ต่อไป จะทำให้:
+* ค่า Standard Error ($SE$) ของสัมประสิทธิ์ถูกประเมินต่ำกว่าความเป็นจริง (Underestimated)
+* ค่า $p$-value ต่ำเกินจริง เกิดผลบวกลวง (Type I Error)
+
+```{mermaid}
+flowchart TD
+    A["ข้อมูลนับ (Count Data y >= 0)"] --> B{"Variance == Mean ?"}
+    B -- "เท่ากัน (Equidispersion)" --> C["Poisson Regression<br/>(glm family = poisson)"]
+    B -- "Variance > Mean (Overdispersion)" --> D["Negative Binomial Regression<br/>(glm.nb ใน MASS)"]
+```
+
+---
+
+## 2. ตัวอย่างจริง: การทำนายจำนวนปลาที่ตกได้ (`fishing`)
+
+ชุดข้อมูล `fishing` ในแพ็กเกจ `{stats4nr}` บันทึกข้อมูลการตกปลาของกลุ่มนักท่องเที่ยวในอุทยานแห่งชาติ โดยมีตัวแปร:
+* `count`: จำนวนปลาที่ตกได้ (ตัวแปรตาม)
+* `persons`: จำนวนคนในกลุ่ม
+* `child`: จำนวนเด็กในกลุ่ม
+* `camper`: นำรถบ้าน/เต็นท์มาตั้งแคมป์หรือไม่ (0/1)
+
+### ขั้นตอนที่ 1: สร้าง Poisson Regression ด้วย `glm()`
+
+```r
+library(stats4nr)
+
+data(fishing)
+head(fishing)
+
+# ตรวจสอบค่าเฉลี่ยและความแปรปรวนของตัวแปรตาม
+mean(fishing$count)
+var(fishing$count)  # จะพบว่าความแปรปรวนสูงกว่าค่าเฉลี่ยอย่างมาก!
+
+# สร้างแบบจำลอง Poisson
+m_pois <- glm(count ~ persons + child + camper, data = fishing, family = poisson)
+summary(m_pois)
+```
+
+**ผลลัพธ์จาก Poisson Model:**
+ค่า Residual Deviance ($1342.7$) สูงกว่า Degrees of Freedom ($246$) อย่างมหาศาล แสดงถึงปัญหา **Severe Overdispersion**
+
+---
+
+## 3. แก้ปัญหา Overdispersion ด้วย Negative Binomial Regression (`glm.nb`)
+
+แบบจำลอง Negative Binomial เพิ่มพารามิเตอร์การกระจายตัว ($\theta$ หรือ Dispersion Parameter) เข้ามาในฟังก์ชันความแปรปรวน:
+
+$$\text{Variance} = \mu + \frac{\mu^2}{\theta}$$
+
+เราสามารถรันโมเดลนี้ได้อย่างง่ายดายด้วยคำสั่ง `glm.nb()` จากแพ็กเกจ `{MASS}`:
+
+```r
+library(MASS)
+
+# สร้างแบบจำลอง Negative Binomial
+m_nb <- glm.nb(count ~ persons + child + camper, data = fishing)
+summary(m_nb)
+```
+
+**เปรียบเทียบผลลัพธ์:**
+
+| ตัวแปร | Poisson Estimate ($SE$) | Negative Binomial Estimate ($SE$) |
+| :--- | :--- | :--- |
+| **`persons`** | $0.8068$ ($0.0354$) | $0.8524$ ($0.1118$) |
+| **`child`** | $-1.3576$ ($0.0810$) | $-1.2483$ ($0.2223$) |
+| **`camper`** | $0.7183$ ($0.0934$) | $0.6628$ ($0.2312$) |
+| **AIC** | **$1682.1$** | **$820.4$** |
+
+### การแปลผล
+1. **Standard Errors ที่สมจริง:** จะเห็นว่าค่า $SE$ ของ Negative Binomial กว้างขึ้นประมาณ 3 เท่า สะท้อนความไม่แน่นอนจริงในธรรมชาติ
+2. **AIC ลดลงอย่างมีนัยสำคัญ:** ค่า AIC ลดลงจาก $1682$ เหลือเพียง $820$ แสดงว่า Negative Binomial เหมาะสมกับข้อมูลชุดนี้มากกว่า Poisson อย่างเทียบไม่ติด
+3. **การแปลความหมายสัมประสิทธิ์ (Incident Rate Ratio: IRR):** เมื่อนำค่าสัมประสิทธิ์ไปคำนวณ $e^{b}$:
+   * $e^{b_{\text{persons}}} = e^{0.8524} \approx 2.34$: ทุกๆ จำนวนคนในกลุ่มที่เพิ่มขึ้น 1 คน อัตราการตกปลาได้จะเพิ่มขึ้นประมาณ $2.34$ เท่า
+   * $e^{b_{\text{child}}} = e^{-1.2483} \approx 0.29$: ทุกๆ จำนวนเด็กที่เพิ่มขึ้น 1 คน อัตราการตกปลาได้จะลดลงถึง $71\%$ ($1 - 0.29$)

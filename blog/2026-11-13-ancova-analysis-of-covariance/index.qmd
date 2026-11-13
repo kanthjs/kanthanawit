@@ -1,0 +1,120 @@
+---
+title: "วิเคราะห์ความแปรปรวนร่วมด้วย ANCOVA ใน R"
+date: 2026-11-13
+description: "ทำความเข้าใจหลักการผสมผสาน ANOVA และ Regression ด้วย ANCOVA การทดสอบข้อตกลง Homogeneity of Slopes และการเปรียบเทียบค่าเฉลี่ยปรับปรุง (Adjusted Means) ใน R"
+categories: [statistics, r, natural-resources, anova, regression]
+draft: false
+---
+
+ในการศึกษาความแตกต่างระหว่างกลุ่มทดลอง (Treatment groups) บ่อยครั้งที่ตัวแปรตามได้รับอิทธิพลจาก **ตัวแปรเชิงปริมาณภายนอก** ที่เราไม่สามารถควบคุมให้อยู่ในระดับเท่ากันได้ในตอนเริ่มต้น เช่น การเปรียบเทียบน้ำหนักระหว่างชนิดพันธุ์ปลา ซึ่งแน่นอนว่าปลาที่มีขนาดตัวยาวกว่าย่อมมีน้ำหนักมากกว่าตามธรรมชาติ
+
+หากเราใช้ ANOVA ธรรมดา ความแปรปรวนจากความยาวจะกลายไปเป็นความคลาดเคลื่อนสุ่ม ($SSE$) ทำให้การทดสอบด้อยประสิทธิภาพ (Low Statistical Power) แต่ถ้าเรานำตัวแปรความยาวเข้ามาช่วยปรับค่าในแบบจำลอง เราจะได้เทคนิคที่เรียกว่า **การวิเคราะห์ความแปรปรวนร่วม (Analysis of Covariance: ANCOVA)**
+
+บทความนี้เรียบเรียงเนื้อหาจาก **Chapter 11: Analysis of covariance** ของหนังสือ [*Statistics in Natural Resources: Applications with R*](https://stats4nr.com/analysis-of-covariance) โดย Matthew Russell
+
+---
+
+## 1. แนวคิดและประโยชน์ของ ANCOVA
+
+ANCOVA เป็นการผสมผสานจุดแข็งระหว่าง **ANOVA (ตัวแปรต้นเชิงกลุ่ม)** และ **Linear Regression (ตัวแปรควบคุมเชิงปริมาณ หรือ Covariate)** เข้าด้วยกัน:
+
+```{mermaid}
+flowchart LR
+    A["ตัวแปรต้นเชิงกลุ่ม (Factor / Species)"] --> Y["ตัวแปรตาม (Response Y / Weight)"]
+    B["ตัวแปรควบคุมเชิงปริมาณ (Covariate X / Length)"] --> Y
+    subgraph S["ประโยชน์ของ ANCOVA"]
+      direction TB
+      P1["ลดความคลาดเคลื่อนสุ่ม (Reduce SSE)"]
+      P2["เพิ่ม Statistical Power ในการตรวจจับความแตกต่าง"]
+      P3["คำนวณ Adjusted Means โดยปรับอิทธิพลของ Covariate ออก"]
+    end
+```
+
+---
+
+## 2. ข้อตกลงเบื้องต้นสำคัญ: ความเท่ากันของความชัน (Homogeneity of Slopes)
+
+ก่อนจะทำการวิเคราะห์ ANCOVA แบบมาตรฐานได้ มีข้อตกลงสำคัญที่สุดข้อหนึ่งคือ:
+
+> **ความสัมพันธ์ระหว่างตัวแปรตาม ($Y$) และตัวแปรควบคุม ($X$) ต้องมีอัตราการเปลี่ยนแปลง (Slope) เท่ากันในทุกกลุ่มทดลอง**
+
+หากความชันไม่เท่ากัน (เกิด Interaction ระหว่าง Factor กับ Covariate) จะถือว่าละเมิดข้อตกลงของ ANCOVA และไม่สามารถเปรียบเทียบค่าเฉลี่ยปรับปรุงระหว่างกลุ่มได้อย่างเป็นเอกภาพ
+
+### ขั้นตอนที่ 1: ทดสอบ Homogeneity of Slopes ใน R
+ใช้ชุดข้อมูล `fish` ในแพ็กเกจ `{stats4nr}` เปรียบเทียบน้ำหนัก (`Weight`) ระหว่างปลา 2 ชนิด (`Species`: Bream และ Pike) โดยมีตัวแปรควบคุมคือความยาวปลา (`Length1`):
+
+```r
+library(stats4nr)
+library(dplyr)
+library(ggplot2)
+
+data(fish)
+
+# กรองเฉพาะปลา Bream และ Pike
+fish_sub <- fish %>% filter(Species %in% c("Bream", "Pike"))
+
+# สร้างแบบจำลองที่มี Interaction Term เพื่อทดสอบความเท่ากันของความชัน
+slope_test <- lm(Weight ~ Length1 * Species, data = fish_sub)
+summary(slope_test)
+```
+
+**การพิจารณาผล:**
+ดูที่ค่า $p$-value ของพจน์ปฏิสัมพันธ์ `Length1:SpeciesPike`
+* หาก $p \ge 0.05$: **ยอมรับว่าความชันเท่ากัน** สามารถตัดพจน์ Interaction ทิ้ง แล้วก้าวไปรันแบบจำลอง ANCOVA แบบ Additive ต่อได้
+* หาก $p < 0.05$: ละเมิดข้อตกลง ต้องวิเคราะห์ในฐานะโมเดลการถดถอยที่มี Interaction แทน
+
+---
+
+## 3. การสร้างและแปลผลแบบจำลอง ANCOVA
+
+เมื่อผ่านการทดสอบความชันเท่ากัน เราจะรันแบบจำลองแบบ Additive Model (`Weight ~ Length1 + Species`):
+
+```r
+# รัน ANCOVA ด้วยคำสั่ง lm()
+ancova_lm <- lm(Weight ~ Length1 + Species, data = fish_sub)
+summary(ancova_lm)
+
+# หรือแสดงตาราง ANOVA Table แบบทางการ
+anova(ancova_lm)
+```
+
+**ผลลัพธ์ตาราง ANCOVA:**
+
+```text
+Analysis of Variance Table
+
+Response: Weight
+          Df  Sum Sq Mean Sq F value    Pr(>F)    
+Length1    1 4185204 4185204  248.62 < 2.2e-16 ***
+Species    1  215840  215840   12.82 0.0007204 ***
+Residuals 50  841672   16833                      
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+```
+
+### การแปลผล
+1. **อิทธิพลของ Covariate (`Length1`):** มีค่า $F = 248.62, \, p < 0.001$ แสดงว่าความยาวปลาช่วยอธิบายความผันแปรของน้ำหนักได้อย่างมีนัยสำคัญยิ่ง
+2. **อิทธิพลของ Treatment (`Species`):** มีค่า $F = 12.82, \, p = 0.00072$ ($p < 0.001$)
+3. **ข้อสรุปเชิงวิชาการ:** **เมื่อควบคุมอิทธิพลของความยาวปลาให้เท่ากันแล้ว** ชนิดพันธุ์ปลายังคงมีน้ำหนักแตกต่างกันอย่างมีนัยสำคัญทางสถิติ
+
+---
+
+## 4. การแสดงผลด้วยเส้นถดถอยคู่ขนาน (Parallel Slopes)
+
+หัวใจเชิงเรขาคณิตของ ANCOVA คือการสร้างเส้นถดถอยที่มี **ความชันเท่ากัน (Parallel Lines)** แต่มี **จุดตัดแกนต่างกัน (Different Intercepts)**:
+
+```r
+# พล็อตกราฟ ANCOVA แสดงเส้นขนานระหว่างกลุ่ม
+ggplot(fish_sub, aes(x = Length1, y = Weight, color = Species)) +
+  geom_point(size = 3, alpha = 0.7) +
+  geom_line(aes(y = predict(ancova_lm)), linewidth = 1) +
+  labs(
+    title = "ANCOVA: เส้นถดถอยคู่ขนานของน้ำหนักปลาควบคุมด้วยความยาว",
+    x = "ความยาวปลา (Length1, ซม.)",
+    y = "น้ำหนักปลา (Weight, กรัม)",
+    color = "ชนิดพันธุ์ปลา"
+  ) +
+  theme_minimal()
+```
+
+ระยะห่างในแนวดิ่งระหว่างเส้นขนานทั้งสองเส้น คือ **ผลต่างของค่าเฉลี่ยปรับปรุง (Difference in Adjusted Means)** ซึ่งสะท้อนความแตกต่างที่แท้จริงระหว่างชนิดพันธุ์ หลังจากหักล้างอิทธิพลของขนาดความยาวลำตัวออกไปแล้วนั่นเอง

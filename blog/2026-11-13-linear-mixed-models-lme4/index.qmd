@@ -1,0 +1,109 @@
+---
+title: "วิเคราะห์โมเดลเชิงเส้นแบบผสมด้วย lme4 ใน R"
+date: 2026-11-13
+description: "ทำความเข้าใจ Linear Mixed-Effects Models (LMM) การผสาน Fixed Effects และ Random Effects เพื่อจัดการข้อมูลแบบกลุ่ม (Clustered Data) ด้วยฟังก์ชัน lmer ใน R"
+categories: [statistics, r, natural-resources, mixed-models, lme4]
+draft: false
+---
+
+ในข้อมูลจริงทางนิเวศวิทยา ป่าไม้ และสิ่งแวดล้อม ข้อมูลมักมี **โครงสร้างแบบจัดกลุ่มหรือเป็นลำดับชั้น (Hierarchical / Clustered Data)** เช่น:
+* ต้นไม้หลายต้นที่เติบโตอยู่ภายในแปลงตัวอย่างเดียวกัน (Plot)
+* สัตว์ป่าหลายตัวที่อาศัยอยู่ในแหล่งที่อยู่อาศัยเดียวกัน (Habitat)
+* การวัดซ้ำในแปลงเดิมข้ามเวลาหลายปี (Repeated measures)
+
+หน่วยตัวอย่างที่อยู่ในกลุ่มเดียวกันย่อมมีความคล้ายคลึงกันมากกว่าข้ามกลุ่ม ซึ่ง **ละเมิดข้อตกลงความเป็นอิสระ (Independence Assumption)** ของแบบจำลอง OLS แบบดั้งเดิมอย่างสิ้นเชิง หากละเลยโครงสร้างนี้ ค่าความคลาดเคลื่อนและ $p$-value จะผิดเพี้ยนไปทั้งหมด
+
+ทางออกที่เป็นมาตรฐานสากลคือ **แบบจำลองเชิงเส้นแบบผสม (Linear Mixed-Effects Models: LMM)**
+
+บทความนี้เรียบเรียงเนื้อหาจาก **Chapter 14: Linear mixed models (หัวข้อ 14.1–14.3)** ของหนังสือ [*Statistics in Natural Resources: Applications with R*](https://stats4nr.com/linear-mixed-models) โดย Matthew Russell
+
+---
+
+## 1. แนวคิด Fixed Effects vs. Random Effects
+
+หัวใจของ Linear Mixed Models คือการแบ่งอิทธิพลของตัวแปรออกเป็น 2 ขั้ว:
+
+```{mermaid}
+flowchart TD
+    A["ตัวแปรใน Mixed Model"] --> B["Fixed Effects (อิทธิพลคงที่)<br/>- ปัจจัยที่เราสนใจศึกษาผลกระทบโดยตรง<br/>- ค่าพารามิเตอร์คงที่ในระดับประชากร (Beta)<br/>- เช่น ขนาดเส้นผ่านศูนย์กลาง (DBH), การให้ปุ๋ย"]
+    A --> C["Random Effects (อิทธิพลสุ่ม)<br/>- กลุ่มสุ่มที่เป็นตัวแทนของประชากรขนาดใหญ่<br/>- เราสนใจความแปรปรวนระหว่างกลุ่ม (Variance Components)<br/>- เช่น แปลงสำรวจ (Plot), ชนิดป่า (CoverType)"]
+```
+
+สมการแบบจำลองในรูปเวกเตอร์/เมทริกซ์ (Laird & Ware, 1982):
+
+$$y_i = X_i \beta + Z_i b_i + \varepsilon_i$$
+
+* **$\beta$:** เวกเตอร์ของสัมประสิทธิ์ Fixed Effects
+* **$b_i \sim N(0, D)$:** เวกเตอร์ของ Random Effects สำหรับกลุ่ม $i$ (มีความแปรปรวนระหว่างกลุ่ม)
+* **$\varepsilon_i \sim N(0, R_i)$:** ความคลาดเคลื่อนสุ่มภายในกลุ่ม (Residual Error)
+
+---
+
+## 2. ตัวอย่างกรณีศึกษา: การทำนายความสูงต้นสนแดง (`redpine`)
+
+ในชุดข้อมูล `redpine` จากแพ็กเกจ `{stats4nr}` มีการวัดขนาดต้นสนแดง (Red Pine) จำนวน 450 ต้นในรัฐมินนิโซตา โดยต้นไม้กระจายตัวอยู่ในแปลงสำรวจที่มีชนิดป่าต่างกัน (`CoverType`):
+* `HT`: ความสูงของต้นไม้ (ฟุต) — ตัวแปรตาม $Y$
+* `DBH`: ขนาดเส้นผ่านศูนย์กลางลำต้น (นิ้ว) — ตัวแปรต้น Fixed Effect $X$
+* `CoverType`: ชนิดป่าที่ต้นไม้อาศัยอยู่ — ตัวแปรจัดกลุ่ม Random Effect
+
+### การสร้าง Random Intercept Model ด้วยแพ็กเกจ `{lme4}`
+
+ในภาษา R เราใช้ฟังก์ชัน `lmer()` จากแพ็กเกจยอดนิยม `{lme4}` โดยไวยากรณ์ `(1 | CoverType)` หมายถึงการกำหนดให้ **จุดตัดแกน (Intercept) เปลี่ยนแปลงไปตามชนิดป่า**:
+
+```r
+library(stats4nr)
+library(lme4)
+
+data(redpine)
+head(redpine)
+
+# สร้างแบบจำลอง Linear Mixed Model (Random Intercept)
+redpine_lmm <- lmer(HT ~ DBH + (1 | CoverType), data = redpine)
+summary(redpine_lmm)
+```
+
+**ผลลัพธ์จากการรัน `summary(redpine_lmm)`:**
+
+```text
+Linear mixed model fit by REML ['lmerMod']
+Formula: HT ~ DBH + (1 | CoverType)
+   Data: redpine
+
+Random effects:
+ Groups    Name        Variance Std.Dev.
+ CoverType (Intercept) 14.28    3.779   
+ Residual              28.45    5.334   
+Number of obs: 450, groups:  CoverType, 6
+
+Fixed effects:
+            Estimate Std. Error t value
+(Intercept) 32.14521    1.65214   19.46
+DBH          3.84215    0.08214   46.78
+```
+
+---
+
+## 3. การแปลผลตาราง Mixed Model
+
+### 1. Fixed Effects (ภาพรวมระดับประชากร)
+* **`DBH` ($3.842$):** ทุกๆ ขนาดเส้นผ่านศูนย์กลางลำต้นที่เพิ่มขึ้น 1 นิ้ว ความสูงของต้นสนแดงจะเพิ่มขึ้นเฉลี่ยประมาณ $3.84$ ฟุต ในภาพรวมของประชากรต้นไม้ทั้งหมด
+
+### 2. Random Effects (การกระจายตัวของความแปรปรวน)
+* **Between-group Variance (`CoverType`):** ความแปรปรวนของจุดตัดแกนระหว่างชนิดป่าเท่ากับ $14.28$ ($SD = 3.78$)
+* **Residual Variance:** ความผันแปรภายในแปลงเท่ากับ $28.45$ ($SD = 5.33$)
+* **Intraclass Correlation Coefficient (ICC):**
+  $$\text{ICC} = \frac{\sigma^2_{\text{CoverType}}}{\sigma^2_{\text{CoverType}} + \sigma^2_{\text{Residual}}} = \frac{14.28}{14.28 + 28.45} \approx 0.334$$
+  แสดงว่า **ประมาณ 33.4% ของความแปรปรวนในความสูงของต้นไม้ เกิดจากความแตกต่างระหว่างสภาพชนิดป่า** การใส่ Random Effect จึงจำเป็นอย่างยิ่งในการควบคุมความคลาดเคลื่อนนี้
+
+---
+
+## 4. Random Intercept vs. Random Slope
+
+นอกจากการให้จุดตัดแกนสุ่มเปลี่ยนไปตามกลุ่มแล้ว หากเราเชื่อว่า **อัตราการเติบโต (Slope) ของต้นไม้ในแต่ละชนิดป่าก็ไม่เท่ากันด้วย** เราสามารถขยายเป็น **Random Slope Model** ได้:
+
+```r
+# ให้ทั้งจุดตัดแกนและความชันเปลี่ยนไปตาม CoverType
+redpine_slope_lmm <- lmer(HT ~ DBH + (1 + DBH | CoverType), data = redpine)
+```
+
+การใช้แบบจำลอง LMM ช่วยให้นักวิจัยสามารถจำแนกอิทธิพลหลักทางชีววิทยาออกจากความผันแปรเชิงพื้นที่ได้อย่างแม่นยำและถูกต้องตามหลักสถิติครับ

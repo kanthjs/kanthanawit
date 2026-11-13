@@ -1,0 +1,96 @@
+---
+title: "วิเคราะห์การถดถอยแบบพหุนามและอันดับใน R"
+date: 2026-11-13
+description: "ทำความเข้าใจการขยายขอบเขตจาก Binary สู่ Multinomial Logistic Regression ด้วยแพ็กเกจ nnet และ Ordinal Regression ด้วย polr ใน MASS สำหรับข้อมูลหลายกลุ่มและจัดลำดับ"
+categories: [statistics, r, natural-resources, logistic-regression]
+draft: false
+---
+
+ในการสำรวจและวิจัยภาคสนาม ตัวแปรตามเชิงกลุ่มไม่ได้จำกัดอยู่เพียงแค่ 2 สถานะ (0 หรือ 1) เสมอไป บ่อยครั้งที่เราต้องรับมือกับตัวแปรที่มี **ตั้งแต่ 3 กลุ่มขึ้นไป** เช่น:
+* **ตัวแปรเชิงกลุ่มแบบนามบัญญัติ (Nominal / Unordered):** เช่น ชนิดพันธุ์สัตว์ป่า (กวาง, หมาป่า, หมี) หรือชนิดการใช้ประโยชน์ที่ดิน
+* **ตัวแปรเชิงกลุ่มแบบเรียงลำดับ (Ordinal / Ordered):** เช่น ระดับความรุนแรงของโรคพืช (น้อย, ปานกลาง, รุนแรง) หรือระดับชั้นเรือนยอดไม้ (Dominant, Codominant, Intermediate, Suppressed)
+
+บทความนี้เรียบเรียงเนื้อหาจาก **Chapter 12: Logistic regression (หัวข้อ 12.3)** ของหนังสือ [*Statistics in Natural Resources: Applications with R*](https://stats4nr.com/logistic-regression) โดย Matthew Russell
+
+---
+
+## 1. การจำแนกประเภทแบบจำลองสำหรับข้อมูลหลายกลุ่ม
+
+```{mermaid}
+flowchart TD
+    A["ตัวแปรตามเชิงกลุ่ม (Categorical Response Y)"] --> B{"มีกี่กลุ่ม (Categories) ?"}
+    B -- "2 กลุ่ม (Binary)" --> C["Binary Logistic Regression<br/>(glm family = binomial)"]
+    B -- ">= 3 กลุ่ม" --> D{"เรียงลำดับได้หรือไม่ (Ordered) ?"}
+    D -- "ไม่ได้ (Nominal / Unordered)" --> E["Multinomial Logistic Regression<br/>(multinom ใน nnet)"]
+    D -- "ได้ (Ordinal / Ranked)" --> F["Ordinal Logistic Regression / Proportional Odds<br/>(polr ใน MASS)"]
+```
+
+---
+
+## 2. Multinomial Logistic Regression ด้วยแพ็กเกจ `{nnet}`
+
+เมื่อตัวแปรตามไม่มีลำดับชั้น เราจะใช้ **Multinomial Logistic Regression** ซึ่งมีหลักการคือการกำหนดกลุ่มใดกลุ่มหนึ่งเป็น **กลุ่มฐานอ้างอิง (Baseline / Reference category)** แล้วสร้างสมการ Logit เปรียบเทียบกลุ่มที่เหลือแต่ละกลุ่มกับกลุ่มอ้างอิงนั้น
+
+### ตัวอย่างการวิเคราะห์ใน R
+สมมติว่าเราต้องการทำนายชนิดพันธุ์ปลา 3 ชนิด (`Species`: Bream, Pike, Perch) จากขนาดความยาวลำตัว (`Length1`) ในชุดข้อมูล `fish`:
+
+```r
+library(stats4nr)
+library(dplyr)
+library(nnet)
+
+data(fish)
+fish_3sp <- fish %>% filter(Species %in% c("Bream", "Pike", "Perch"))
+fish_3sp$Species <- as.factor(fish_3sp$Species)
+
+# สร้างแบบจำลอง Multinomial Regression
+multinom_model <- multinom(Species ~ Length1, data = fish_3sp)
+summary(multinom_model)
+```
+
+**การแปลผล:**
+แบบจำลองจะรายงานสัมประสิทธิ์ของ `Pike` vs. `Bream` และ `Perch` vs. `Bream` แยกกัน ทำให้เราประเมินได้ว่าขนาดลำตัวที่เพิ่มขึ้น ส่งผลต่อโอกาสสัมพัทธ์ (Relative Risk Ratio) ที่จะพบปลาชนิดต่างๆ เทียบกับปลาอ้างอิงอย่างไร
+
+---
+
+## 3. Ordinal Logistic Regression ด้วยคำสั่ง `polr()` จากแพ็กเกจ `{MASS}`
+
+เมื่อตัวแปรตามมีลำดับขั้นชัดเจน การใช้ Multinomial จะสูญเสียข้อมูลเรื่องอันดับไป วิธีที่ถูกต้องตามทฤษฎีคือ **Cumulative Link Models** หรือ **Proportional Odds Model** ผ่านฟังก์ชัน `polr()`
+
+### ตัวอย่าง: ระดับชั้นเรือนยอดของต้นไม้ (`CROWN_CLASS_CD`)
+ในชุดข้อมูล `elm` ตัวแปรระดับชั้นเรือนยอดไม้ประกอบด้วย 4 ลำดับชั้นจากสูงสุดไปต่ำสุด:
+1. Open-grown (ได้รับแสงแดดเต็มที่ทุกทิศทาง)
+2. Dominant (เรือนยอดเด่น)
+3. Codominant (เรือนยอดร่วม)
+4. Intermediate / Suppressed (เรือนยอดถูกบดบัง)
+
+```r
+library(MASS)
+
+# กำหนดให้ตัวแปรเป็น Ordered Factor
+data(elm)
+elm$crown_ordered <- factor(
+  elm$CROWN_CLASS_CD, 
+  levels = c(1, 2, 3, 4), 
+  ordered = TRUE
+)
+
+# สร้างแบบจำลอง Ordinal Regression
+ordinal_model <- polr(crown_ordered ~ DIA, data = elm, Hess = TRUE)
+summary(ordinal_model)
+```
+
+### ข้อสมมติ Proportional Odds
+โมเดลนี้สมมติว่า อิทธิพลของตัวแปรต้น (`DIA`) ต่ออัตราต่อรองสะสม (Cumulative Odds) มีค่าเท่ากันในทุกจุดตัดระดับขั้น (Thresholds) ทำให้มีค่าความชันเพียงค่าเดียว แต่มีจุดตัดแกน (Intercepts/Cutpoints) หลายจุดตามจำนวนระดับขั้น
+
+---
+
+## สรุปเกณฑ์การเลือกใช้งาน
+
+| ลักษณะตัวแปรตาม | โครงสร้างข้อมูล | ฟังก์ชันและแพ็กเกจใน R |
+| :--- | :--- | :--- |
+| **Binary (2 กลุ่ม)** | ตาย/รอด, พบ/ไม่พบ | `glm(..., family = binomial)` ใน base R |
+| **Multinomial (>= 3 กลุ่ม ไม่เรียงลำดับ)** | ชนิดสัตว์, แบบแผนการใช้ที่ดิน | `multinom(...)` จากแพ็กเกจ `{nnet}` |
+| **Ordinal (>= 3 กลุ่ม เรียงลำดับได้)** | ระดับความรุนแรง, ชั้นเรือนยอด | `polr(...)` จากแพ็กเกจ `{MASS}` |
+
+การเลือกใช้แบบจำลองที่ตรงกับธรรมชาติของการวัดตัวแปรตาม จะช่วยให้ผลการอนุมานทางสถิติมีความเที่ยงตรงและสะท้อนความจริงในธรรมชาติได้ดีที่สุดครับ
