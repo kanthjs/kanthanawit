@@ -34,7 +34,9 @@ flowchart TD
 ### ตัวอย่างการวิเคราะห์ใน R
 สมมติว่าเราต้องการทำนายชนิดพันธุ์ปลา 3 ชนิด (`Species`: Bream, Pike, Perch) จากขนาดความยาวลำตัว (`Length1`) ในชุดข้อมูล `fish`:
 
-```r
+```{r}
+#| message: false
+#| warning: false
 library(stats4nr)
 library(dplyr)
 library(nnet)
@@ -44,7 +46,7 @@ fish_3sp <- fish %>% filter(Species %in% c("Bream", "Pike", "Perch"))
 fish_3sp$Species <- as.factor(fish_3sp$Species)
 
 # สร้างแบบจำลอง Multinomial Regression
-multinom_model <- multinom(Species ~ Length1, data = fish_3sp)
+multinom_model <- multinom(Species ~ Length1, data = fish_3sp, trace = FALSE)
 summary(multinom_model)
 ```
 
@@ -64,7 +66,9 @@ summary(multinom_model)
 3. Codominant (เรือนยอดร่วม)
 4. Intermediate / Suppressed (เรือนยอดถูกบดบัง)
 
-```r
+```{r}
+#| message: false
+#| warning: false
 library(MASS)
 
 # กำหนดให้ตัวแปรเป็น Ordered Factor

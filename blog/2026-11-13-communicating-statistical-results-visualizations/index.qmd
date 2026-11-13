@@ -42,7 +42,9 @@ flowchart TD
 
 ### ตัวอย่าง: การนำเสนอผลการทดลองพร้อมแถบความเชื่อมั่น
 
-```r
+```{r}
+#| message: false
+#| warning: false
 library(ggplot2)
 
 # ตัวอย่างการสร้างกราฟแสดงค่าเฉลี่ยพร้อมช่วงความเชื่อมั่น 95%
@@ -73,9 +75,9 @@ ggplot(iris, aes(x = Species, y = Sepal.Length, fill = Species)) +
 
 การใช้แพ็กเกจสมัยใหม่ใน R เช่น `{gt}` หรือ `{modelsummary}` ช่วยจัดตารางให้อยู่ในมาตรฐานเดียวกับวารสารวิชาการ:
 
-```r
-# ตัวอย่างการสร้างตารางสรุปแบบจำลองด้วย modelsummary
-# install.packages("modelsummary")
+```{r}
+#| message: false
+#| warning: false
 library(modelsummary)
 
 model1 <- lm(mpg ~ wt, data = mtcars)

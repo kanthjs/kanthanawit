@@ -68,10 +68,9 @@ $$H_0: \mu = 18 \quad \text{vs.} \quad H_A: \mu \neq 18$$
 
 ### การวิเคราะห์ด้วย R
 
-```r
-# ติดตั้งแพ็กเกจ (กรณีใช้งานครั้งแรก)
-# remotes::install_github("mbrussell/stats4nr")
-
+```{r}
+#| message: false
+#| warning: false
 library(stats4nr)
 data(chirps)
 
@@ -80,21 +79,6 @@ summary(chirps$cps)
 
 # ทำการทดสอบ One-sample t-test
 t.test(chirps$cps, mu = 18)
-```
-
-**ผลลัพธ์ที่ได้จากการรัน:**
-
-```text
-	One Sample t-test
-
-data:  chirps$cps
-t = -2.6074, df = 14, p-value = 0.02069
-alternative hypothesis: true mean is not equal to 18
-95 percent confidence interval:
- 15.65688 17.64978
-sample estimates:
-mean of x 
- 16.65333 
 ```
 
 ### การแปลผล
@@ -119,16 +103,14 @@ $$H_0: \mu_1 - \mu_2 = 0 \quad \text{vs.} \quad H_A: \mu_1 - \mu_2 \neq 0$$
 
 ### การวิเคราะห์ด้วย R
 
-สมมติว่าเรามีข้อมูลการร้องของจิ้งหรีด 2 กลุ่มย่อย (`cps` และ `cps_2`):
-
-```r
+```{r}
 # เปรียบเทียบค่าเฉลี่ยสองกลุ่มอิสระด้วย Welch's t-test
 t.test(chirps$cps, chirps$cps_2)
 ```
 
 หากต้องการบังคับให้เป็น Equal variance test แบบคลาสสิก สามารถกำหนดพารามิเตอร์ `var.equal = TRUE`:
 
-```r
+```{r}
 t.test(chirps$cps, chirps$cps_2, var.equal = TRUE)
 ```
 
@@ -147,7 +129,7 @@ $$H_0: \mu_d = 0 \quad \text{vs.} \quad H_A: \mu_d \neq 0$$
 ### ตัวอย่าง: การสำรวจพฤติกรรมพรานล่าสัตว์ (`hunt`)
 ในชุดข้อมูล `hunt` มีการเก็บข้อมูลจำนวนวันที่ออกล่าสัตว์ของพรานแต่ละคน ก่อนและหลังเข้าร่วมการอบรมให้ความรู้:
 
-```r
+```{r}
 data(hunt)
 
 # ดูตัวอย่างข้อมูล

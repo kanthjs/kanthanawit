@@ -46,7 +46,9 @@ $$F = \frac{MS_{\text{Treatment}}}{MS_{\text{Error}}}$$
 
 ในชุดข้อมูล `iron` จากแพ็กเกจ `{stats4nr}` มีการบันทึกปริมาณธาตุเหล็กในน้ำ (`iron_content`) ที่ระดับความลึก 3 ระดับ (`depth`: Surface, Medium, Deep):
 
-```r
+```{r}
+#| message: false
+#| warning: false
 library(stats4nr)
 library(ggplot2)
 
@@ -63,16 +65,6 @@ iron_aov <- aov(iron_content ~ depth, data = iron)
 summary(iron_aov)
 ```
 
-**ผลลัพธ์จากการรัน:**
-
-```text
-            Df Sum Sq Mean Sq F value  Pr(>F)   
-depth        2  42.51  21.255   6.812 0.00381 **
-Residuals   27  84.25   3.120                   
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-```
-
 ### การแปลผล ANOVA Table
 1. **$F$-statistic = 6.812**, $p$-value = $0.00381$ ($p < 0.01$)
 2. **การตัดสินใจ:** ปฏิเสธ $H_0$ สรุปว่า ระดับความลึกของน้ำมีผลต่อปริมาณธาตุเหล็กอย่างมีนัยสำคัญทางสถิติที่ระดับ $\alpha = 0.05$
@@ -87,13 +79,13 @@ Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’
 ### วิธีที่ 1: Tukey's Honestly Significant Difference (Tukey's HSD)
 เป็นวิธีมาตรฐานที่นิยมใช้มากที่สุดเมื่อขนาดตัวอย่างในแต่ละกลุ่มเท่ากันหรือใกล้เคียงกัน:
 
-```r
+```{r}
 TukeyHSD(iron_aov)
 ```
 
 ### วิธีที่ 2: Pairwise $t$-test with Bonferroni Correction
 
-```r
+```{r}
 pairwise.t.test(iron$iron_content, iron$depth, p.adjust.method = "bonferroni")
 ```
 

@@ -29,7 +29,9 @@ flowchart TD
 
 ต่อยอดจากชุดข้อมูล `redpine` และแบบจำลองความสูงต้นไม้ `redpine_lmm`:
 
-```r
+```{r}
+#| message: false
+#| warning: false
 library(stats4nr)
 library(lme4)
 
@@ -46,14 +48,14 @@ new_trees <- data.frame(
 ### การทำนายระดับกลุ่มย่อย (Subject-specific: รวม Random Effects)
 โดยค่าเริ่มต้น ฟังก์ชัน `predict()` จะดึงค่า Random Intercept ของแต่ละ `CoverType` มาบวกกับสมการเส้นตรงให้โดยอัตโนมัติ:
 
-```r
+```{r}
 predict(redpine_lmm, newdata = new_trees)
 ```
 
 ### การทำนายระดับประชากร (Population-level: ไม่รวม Random Effects)
 หากเราต้องการทำนายในภาพรวม หรือมีต้นไม้ที่อยู่ใน `CoverType` ใหม่ที่ไม่เคยปรากฏในชุดข้อมูลฝึกสอน ให้กำหนด `re.form = NA`:
 
-```r
+```{r}
 predict(redpine_lmm, newdata = new_trees, re.form = NA)
 ```
 
@@ -65,18 +67,8 @@ predict(redpine_lmm, newdata = new_trees, re.form = NA)
 
 เราสามารถเรียกดูค่าชดเชยของแต่ละกลุ่มได้ด้วยคำสั่ง `ranef()`:
 
-```r
+```{r}
 ranef(redpine_lmm)
-```
-
-**ผลลัพธ์:**
-```text
-$CoverType
-           (Intercept)
-Jack Pine    -2.145
-Red Pine      1.821
-White Pine    0.324
-...
 ```
 แสดงว่าต้นสนแดงที่เติบโตในสภาพป่าแบบ `Jack Pine` จะมีความสูงเฉลี่ยเตี้ยกว่าระดับประชากรประมาณ $2.15$ ฟุต ในขณะที่ป่า `Red Pine` แท้จะเติบโตได้สูงกว่าค่าเฉลี่ย $1.82$ ฟุต
 

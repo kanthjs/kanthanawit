@@ -37,7 +37,9 @@ flowchart TD
 
 เราสามารถใช้ฟังก์ชัน `regsubsets()` จากแพ็กเกจ `{leaps}` ใน R:
 
-```r
+```{r}
+#| message: false
+#| warning: false
 library(stats4nr)
 library(leaps)
 
@@ -70,12 +72,12 @@ data.frame(
 
 ในโปรแกรม R เราสามารถใช้คำสั่ง `step()` ซึ่งใช้เกณฑ์ **AIC** ในการคัดเลือกตัวแปรโดยอัตโนมัติ:
 
-```r
+```{r}
 # 1. กำหนดโมเดลเต็มรูป (Full Model)
 full_model <- lm(wingspan ~ weight + tail + sex, data = falcon)
 
 # 2. รัน Stepwise Regression แบบทั้งสองทิศทาง (Both)
-step_model <- step(full_model, direction = "both")
+step_model <- step(full_model, direction = "both", trace = 0)
 
 # สรุปผลแบบจำลองสุดท้ายที่ถูกเลือก
 summary(step_model)

@@ -51,7 +51,9 @@ flowchart TD
 
 ### ขั้นตอนที่ 1: สร้าง Poisson Regression ด้วย `glm()`
 
-```r
+```{r}
+#| message: false
+#| warning: false
 library(stats4nr)
 
 data(fishing)
@@ -79,7 +81,9 @@ $$\text{Variance} = \mu + \frac{\mu^2}{\theta}$$
 
 เราสามารถรันโมเดลนี้ได้อย่างง่ายดายด้วยคำสั่ง `glm.nb()` จากแพ็กเกจ `{MASS}`:
 
-```r
+```{r}
+#| message: false
+#| warning: false
 library(MASS)
 
 # สร้างแบบจำลอง Negative Binomial

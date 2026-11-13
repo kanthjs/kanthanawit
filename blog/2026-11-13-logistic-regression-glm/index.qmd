@@ -44,7 +44,9 @@ $$p = \frac{1}{1 + e^{-(\beta_0 + \beta_1 x)}} = \frac{e^{\beta_0 + \beta_1 x}}{
 
 ในชุดข้อมูล `elm` จากแพ็กเกจ `{stats4nr}` มีการบันทึกข้อมูลต้น Cedar Elm โดยเราสนใจทำนายว่าต้นไม้นั้นจัดอยู่ในกลุ่มเรือนยอดที่ถูกบดบังอย่างรุนแรง (Suppressed Crown: รหัส 4) หรือไม่ จากขนาดเส้นผ่านศูนย์กลางลำต้น (`DIA`, นิ้ว):
 
-```r
+```{r}
+#| message: false
+#| warning: false
 library(stats4nr)
 library(ggplot2)
 
@@ -60,30 +62,13 @@ elm_glm <- glm(suppressed ~ DIA, data = elm, family = binomial(link = "logit"))
 summary(elm_glm)
 ```
 
-**ผลลัพธ์จากการรัน `summary(elm_glm)`:**
-
-```text
-Coefficients:
-            Estimate Std. Error z value Pr(>|z|)    
-(Intercept)  1.82415    0.34211   5.332 9.71e-08 ***
-DIA         -0.24512    0.04153  -5.902 3.59e-09 ***
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-(Dispersion parameter for binomial family taken to be 1)
-
-    Null deviance: 374.22  on 332  degrees of freedom
-Residual deviance: 325.10  on 331  degrees of freedom
-AIC: 329.1
-```
-
 ---
 
 ## 3. การแปลผลทางสถิติและอัตราส่วนอัตราต่อรอง (Odds Ratio)
 
 ค่าสัมประสิทธิ์ที่ได้จากตารางสรุป ($b_1 = -0.2451$) อยู่ในมาตราส่วนของ **Log-odds** ซึ่งยากต่อการทำความเข้าใจโดยตรง ในทางวิชาการจึงนิยมแปลงกลับเป็น **Odds Ratio (OR)** ด้วยการยกกำลัง $e^{b_1}$:
 
-```r
+```{r}
 # คำนวณ Odds Ratio
 exp(coef(elm_glm))
 
@@ -100,7 +85,7 @@ exp(confint(elm_glm))
 
 หากต้องการนำโมเดลไปทำนายความน่าจะเป็นจริง ($p$) ในช่วง $[0, 1]$ เราต้องระบุอาร์กิวเมนต์ `type = "response"` ในฟังก์ชัน `predict()`:
 
-```r
+```{r}
 # พล็อตกราฟเส้นโค้ง Sigmoid ด้วย ggplot2
 ggplot(elm, aes(x = DIA, y = suppressed)) +
   geom_point(alpha = 0.3, size = 2) +

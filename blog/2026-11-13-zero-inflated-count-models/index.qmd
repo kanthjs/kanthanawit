@@ -46,7 +46,9 @@ flowchart TD
 
 เราใช้ชุดข้อมูล `fishing` จากแพ็กเกจ `{stats4nr}` โดยทำนายจำนวนปลาที่ตกได้ (`count`) จากจำนวนคน (`persons`), เด็ก (`child`), และรถบ้าน (`camper`) ในส่วนของการนับ และใช้การใช้เหยื่อสด (`livebait`) มาช่วยทำนายโอกาสที่จะเป็นศูนย์:
 
-```r
+```{r}
+#| message: false
+#| warning: false
 library(stats4nr)
 library(pscl)
 
@@ -63,7 +65,7 @@ summary(m_zip)
 
 หากต้องการใช้แบบจำลอง **Zero-Inflated Negative Binomial (ZINB)** เพียงเพิ่มอาร์กิวเมนต์ `dist = "negbin"`:
 
-```r
+```{r}
 # สร้างแบบจำลอง Zero-Inflated Negative Binomial (ZINB)
 m_zinb <- zeroinfl(count ~ persons + child + camper | livebait, data = fishing, dist = "negbin")
 summary(m_zinb)
@@ -89,7 +91,9 @@ summary(m_zinb)
 
 เราสามารถทดสอบอย่างเป็นทางการว่าการใช้แบบจำลอง Zero-Inflated ให้ผลดีกว่าแบบจำลองมาตรฐานทั่วไป (เช่น ZINB ดีกว่า Negative Binomial ธรรมดาหรือไม่) ด้วยการทดสอบ **Vuong Test**:
 
-```r
+```{r}
+#| message: false
+#| warning: false
 # เปรียบเทียบระหว่าง Negative Binomial ธรรมดา กับ ZINB
 library(MASS)
 m_nb <- glm.nb(count ~ persons + child + camper, data = fishing)

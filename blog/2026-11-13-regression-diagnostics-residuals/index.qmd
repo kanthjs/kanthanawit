@@ -37,7 +37,9 @@ flowchart TD
 
 โปรแกรม R มีเครื่องมือวินิจฉัยแบบจำลองในตัว เพียงแค่ส่งโมเดลที่ได้จาก `lm()` เข้าไปในฟังก์ชัน `plot()`:
 
-```r
+```{r}
+#| message: false
+#| warning: false
 library(stats4nr)
 
 # สร้างแบบจำลอง
@@ -88,7 +90,7 @@ par(mfrow = c(1, 1))
 ### 1. Log Transformation ($\ln(y)$)
 เหมาะมากเมื่อข้อมูลเป็นบวกและมีการแจกแจงแบบเบ้ขวาอย่างรุนแรง หรือเมื่อความแปรปรวนเพิ่มขึ้นตามขนาดค่าทำนาย:
 
-```r
+```{r}
 # ใส่ log ที่ตัวแปรตามโดยตรงในสูตร lm
 cwd_log_lm <- lm(log(cwd_obs) ~ TreeDensity, data = cwd)
 summary(cwd_log_lm)
@@ -96,6 +98,7 @@ summary(cwd_log_lm)
 # ตรวจสอบกราฟ Residuals ใหม่อีกครั้ง
 par(mfrow = c(2, 2))
 plot(cwd_log_lm)
+par(mfrow = c(1, 1))
 ```
 
 ### 2. Square Root Transformation ($\sqrt{y}$)

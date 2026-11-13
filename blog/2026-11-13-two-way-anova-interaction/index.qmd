@@ -45,7 +45,9 @@ flowchart TD
 * `lure`: ชนิดของสารเคมีล่อแมลง (Chemical lure ชนิดต่างๆ)
 * `moths`: จำนวนตัวที่ดักจับได้ (ตัวแปรตาม)
 
-```r
+```{r}
+#| message: false
+#| warning: false
 library(stats4nr)
 library(ggplot2)
 
@@ -56,18 +58,6 @@ head(moths)
 # เครื่องหมาย * หมายถึงการรวมทั้ง Main Effect ของทั้งสองตัวและ Interaction เข้าด้วยกัน
 moths_aov <- aov(moths ~ location * lure, data = moths)
 summary(moths_aov)
-```
-
-**ผลลัพธ์ตาราง Two-Way ANOVA:**
-
-```text
-               Df Sum Sq Mean Sq F value   Pr(>F)    
-location        3  125.4   41.80   6.251 0.00164 ** 
-lure            2  342.1  171.05  25.580 4.12e-07 ***
-location:lure   6  184.2   30.70   4.591 0.00152 ** 
-Residuals      36  240.7    6.69                     
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 ```
 
 ---
@@ -84,7 +74,7 @@ Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’
 
 เมื่อ Interaction มีนัยสำคัญทางสถิติ การดูตารางตัวเลขอย่างเดียวจะเข้าใจได้ยาก การสร้าง **กราฟปฏิสัมพันธ์ (Interaction Plot)** จะช่วยให้เห็นภาพกลไกทางชีววิทยาได้อย่างชัดเจน:
 
-```r
+```{r}
 # พล็อตกราฟ Interaction ด้วย ggplot2
 ggplot(moths, aes(x = location, y = moths, color = lure, group = lure)) +
   stat_summary(fun = mean, geom = "point", size = 3) +

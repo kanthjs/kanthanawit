@@ -70,7 +70,7 @@ flowchart TD
 
 เราสามารถสร้างเมทริกซ์ของตารางการณ์จร แล้วส่งเข้าไปยังฟังก์ชัน `chisq.test()` ได้โดยตรง:
 
-```r
+```{r}
 # 1. สร้างตารางการณ์จร
 grouse <- matrix(
   c(185, 28,   # Michigan
@@ -90,34 +90,10 @@ grouse
 # 2. ทำการทดสอบ Chi-Square Test
 chi_result <- chisq.test(grouse)
 chi_result
-```
 
-**ผลลัพธ์ที่ได้จากการรัน:**
-
-```text
-	Pearson's Chi-squared test
-
-data:  grouse
-X-squared = 28.094, df = 2, p-value = 7.935e-07
-```
-
-### การตรวจสอบค่า Expected Counts และ Residuals ใน R
-หนึ่งในข้อได้เปรียบของการเก็บผลลัพธ์ไว้ในตัวแปร (`chi_result`) คือเราสามารถเรียกดูค่าทางสถิติเบื้องหลังได้:
-
-```r
-# ดูค่า Expected Counts
+# 3. ดูค่า Expected Counts และ Pearson Residuals
 chi_result$expected
-
-# ดูค่า Pearson Residuals (เพื่อดูว่าช่องไหนเป็นตัวขับเคลื่อนความสัมพันธ์)
 chi_result$residuals
-```
-
-**ผลลัพธ์ Expected Counts:**
-```text
-               Neg       Pos
-Michigan  174.6006  38.39945
-Minnesota 223.7767  49.22330
-Wisconsin 192.6227  42.37725
 ```
 
 ---

@@ -37,7 +37,9 @@ $$\hat{y}_i = b_0 + b_1 x_{1i} + b_2 x_{2i} + \dots + b_k x_{ki}$$
 * `tail`: ความยาวหาง (มม.) — ตัวแปรต้น $X_2$
 * `sex`: เพศ (`Female`, `Male`) — ตัวแปรจัดประเภท $X_3$
 
-```r
+```{r}
+#| message: false
+#| warning: false
 library(stats4nr)
 
 # โหลดข้อมูลตัวอย่าง
@@ -47,23 +49,6 @@ head(falcon)
 # สร้างแบบจำลอง Multiple Linear Regression
 falcon_lm <- lm(wingspan ~ weight + tail + sex, data = falcon)
 summary(falcon_lm)
-```
-
-**ผลลัพธ์จากการรัน `summary(falcon_lm)`:**
-
-```text
-Coefficients:
-             Estimate Std. Error t value Pr(>|t|)    
-(Intercept) 545.18241   48.21934  11.306  < 2e-16 ***
-weight        0.18342    0.04128   4.443 1.42e-05 ***
-tail          1.42150    0.28431   5.000 1.25e-06 ***
-sexMale     -42.31502   12.15421  -3.482 0.000604 ***
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-Residual standard error: 22.45 on 96 degrees of freedom
-Multiple R-squared:  0.7842,	Adjusted R-squared:  0.7775 
-F-statistic: 116.3 on 3 and 96 DF,  p-value: < 2.2e-16
 ```
 
 ---
@@ -90,7 +75,9 @@ F-statistic: 116.3 on 3 and 96 DF,  p-value: < 2.2e-16
 
 เราสามารถตรวจสอบได้ด้วยค่า **Variance Inflation Factor (VIF)** ผ่านแพ็กเกจ `{car}`:
 
-```r
+```{r}
+#| message: false
+#| warning: false
 library(car)
 vif(falcon_lm)
 ```

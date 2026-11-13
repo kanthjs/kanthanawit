@@ -53,7 +53,9 @@ flowchart LR
 ### ตัวอย่าง: เปรียบเทียบความแปรปรวนของเสียงร้องจิ้งหรีด
 จากชุดข้อมูล `chirps` ในแพ็กเกจ `{stats4nr}` เราต้องการทดสอบว่า ความแปรปรวนของจำนวนเสียงร้องต่อวินาทีระหว่างกลุ่มที่ 1 (`cps`) และกลุ่มที่ 2 (`cps_2`) แตกต่างกันอย่างมีนัยสำคัญหรือไม่
 
-```r
+```{r}
+#| message: false
+#| warning: false
 library(stats4nr)
 data(chirps)
 
@@ -63,21 +65,6 @@ var(chirps$cps_2)
 
 # ทำการทดสอบ Two-sample F-test
 var.test(chirps$cps, chirps$cps_2)
-```
-
-**ผลลัพธ์ที่ได้จากการรัน:**
-
-```text
-	F test to compare two variances
-
-data:  chirps$cps and chirps$cps_2
-F = 0.8415, num df = 14, denom df = 14, p-value = 0.7491
-alternative hypothesis: true ratio of variances is not equal to 1
-95 percent confidence interval:
- 0.2825126 2.5064893
-sample estimates:
-ratio of variances 
-         0.8415012 
 ```
 
 ### การแปลผล

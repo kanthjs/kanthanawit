@@ -34,7 +34,7 @@ $$Z = \frac{\hat{p} - p_0}{\sqrt{\frac{p_0(1-p_0)}{n}}}$$
 
 $$H_0: p = 0.50 \quad \text{vs.} \quad H_A: p > 0.50$$
 
-```r
+```{r}
 # ทดสอบ One-sample proportion test ใน R
 prop.test(
   x = 18, 
@@ -43,21 +43,6 @@ prop.test(
   alternative = "greater", 
   conf.level = 0.90
 )
-```
-
-**ผลลัพธ์จากการรัน:**
-
-```text
-	1-sample proportions test with continuity correction
-
-data:  18 out of 30, null probability 0.5
-X-squared = 0.83333, df = 1, p-value = 0.1807
-alternative hypothesis: true p is greater than 0.5
-90 percent confidence interval:
- 0.4442125 1.0000000
-sample estimates:
-    p 
-  0.6 
 ```
 
 ### การแปลผล
@@ -79,28 +64,13 @@ $$H_0: p_1 - p_2 = 0 \quad \text{vs.} \quad H_A: p_1 - p_2 \neq 0$$
 * **แปลงที่ 1:** รอดตาย 215 ต้น จากทั้งหมด 250 ต้น ($\hat{p}_1 = 86.0\%$)
 * **แปลงที่ 2:** รอดตาย 165 ต้น จากทั้งหมด 175 ต้น ($\hat{p}_2 = 94.3\%$)
 
-```r
+```{r}
 # กำหนดเวกเตอร์ของจำนวนความสำเร็จและขนาดตัวอย่างทั้งหมด
 successes <- c(215, 165)
 trials <- c(250, 175)
 
 # ทดสอบความเท่ากันของสัดส่วน 2 กลุ่ม
 prop.test(x = successes, n = trials, alternative = "two.sided", conf.level = 0.95)
-```
-
-**ผลลัพธ์จากการรัน:**
-
-```text
-	2-sample test for equality of proportions with continuity correction
-
-data:  successes out of trials
-X-squared = 7.1522, df = 1, p-value = 0.007487
-alternative hypothesis: two.sided
-95 percent confidence interval:
- -0.1432247 -0.0224896
-sample estimates:
-   prop 1    prop 2 
-0.8600000 0.9428571 
 ```
 
 ### การแปลผล

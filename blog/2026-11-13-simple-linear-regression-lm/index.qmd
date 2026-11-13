@@ -53,7 +53,9 @@ $$\hat{y}_i = b_0 + b_1 x_i$$
 
 ในงานวิจัยของ Christensen et al. (1996) ได้ศึกษาความหนาแน่นของเศษซากไม้หยาบ (Coarse Woody Debris: `cwd_obs`, หน่วย $\text{m}^2/\text{km}$) เทียบกับความหนาแน่นของต้นไม้ริมชายฝั่งทะเลสาบ (`TreeDensity`, หน่วย ต้น/เฮกแตร์) ในทะเลสาบ 16 แห่ง:
 
-```r
+```{r}
+#| message: false
+#| warning: false
 library(stats4nr)
 library(ggplot2)
 
@@ -66,21 +68,6 @@ cwd_lm <- lm(cwd_obs ~ TreeDensity, data = cwd)
 
 # สรุปผลการประมาณค่าพารามิเตอร์
 summary(cwd_lm)
-```
-
-**ผลลัพธ์จากการรัน `summary(cwd_lm)`:**
-
-```text
-Coefficients:
-             Estimate Std. Error t value Pr(>|t|)   
-(Intercept) -96.48934   60.13456  -1.605  0.13092   
-TreeDensity   0.11624    0.03572   3.254  0.00571 **
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-Residual standard error: 46.22 on 14 degrees of freedom
-Multiple R-squared:  0.4307,	Adjusted R-squared:  0.3901 
-F-statistic: 10.59 on 1 and 14 DF,  p-value = 0.005708
 ```
 
 ---
@@ -101,7 +88,7 @@ $$\widehat{\text{cwd\_obs}} = -96.49 + 0.1162 \times \text{TreeDensity}$$
 
 ## 5. การพล็อตและทำนายค่า (Visualization & Prediction)
 
-```r
+```{r}
 # พล็อตกราฟจุดกระจายพร้อมเส้นการถดถอย
 ggplot(cwd, aes(x = TreeDensity, y = cwd_obs)) +
   geom_point(size = 3, color = "darkgreen") +
@@ -116,7 +103,7 @@ ggplot(cwd, aes(x = TreeDensity, y = cwd_obs)) +
 
 หากต้องการนำแบบจำลองไปทำนายปริมาณเศษซากไม้ในทะเลสาบแห่งใหม่ที่มีความหนาแน่นต้นไม้ $1,500$ ต้น/เฮกแตร์:
 
-```r
+```{r}
 new_data <- data.frame(TreeDensity = 1500)
 
 # ทำนายค่าพร้อมช่วงความเชื่อมั่น (Confidence Interval)

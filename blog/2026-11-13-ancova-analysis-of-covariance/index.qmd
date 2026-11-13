@@ -43,7 +43,9 @@ flowchart LR
 ### ขั้นตอนที่ 1: ทดสอบ Homogeneity of Slopes ใน R
 ใช้ชุดข้อมูล `fish` ในแพ็กเกจ `{stats4nr}` เปรียบเทียบน้ำหนัก (`Weight`) ระหว่างปลา 2 ชนิด (`Species`: Bream และ Pike) โดยมีตัวแปรควบคุมคือความยาวปลา (`Length1`):
 
-```r
+```{r}
+#| message: false
+#| warning: false
 library(stats4nr)
 library(dplyr)
 library(ggplot2)
@@ -69,27 +71,13 @@ summary(slope_test)
 
 เมื่อผ่านการทดสอบความชันเท่ากัน เราจะรันแบบจำลองแบบ Additive Model (`Weight ~ Length1 + Species`):
 
-```r
+```{r}
 # รัน ANCOVA ด้วยคำสั่ง lm()
 ancova_lm <- lm(Weight ~ Length1 + Species, data = fish_sub)
 summary(ancova_lm)
 
 # หรือแสดงตาราง ANOVA Table แบบทางการ
 anova(ancova_lm)
-```
-
-**ผลลัพธ์ตาราง ANCOVA:**
-
-```text
-Analysis of Variance Table
-
-Response: Weight
-          Df  Sum Sq Mean Sq F value    Pr(>F)    
-Length1    1 4185204 4185204  248.62 < 2.2e-16 ***
-Species    1  215840  215840   12.82 0.0007204 ***
-Residuals 50  841672   16833                      
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 ```
 
 ### การแปลผล
@@ -103,7 +91,7 @@ Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’
 
 หัวใจเชิงเรขาคณิตของ ANCOVA คือการสร้างเส้นถดถอยที่มี **ความชันเท่ากัน (Parallel Lines)** แต่มี **จุดตัดแกนต่างกัน (Different Intercepts)**:
 
-```r
+```{r}
 # พล็อตกราฟ ANCOVA แสดงเส้นขนานระหว่างกลุ่ม
 ggplot(fish_sub, aes(x = Length1, y = Weight, color = Species)) +
   geom_point(size = 3, alpha = 0.7) +
