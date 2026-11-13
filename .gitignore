@@ -5,6 +5,7 @@ node_modules/
 /_site/
 /.quarto/
 /.quarto_local/
+/site_libs/
 **/*.quarto_ipynb
 *.knit.md
 *.utf8.md
