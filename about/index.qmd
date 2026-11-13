@@ -1,13 +1,13 @@
 ---
 title: "Kanthanawit"
 pagetitle: "About — Kanthanawit"
-subtitle: "นักวิชาการเกษตร ระบาดวิทยาโรคพืช ภาษา R"
-image: ../images/profile.jpg
-image-alt: "Portrait of Kanthanawit"
+subtitle: "นักวิชาการเกษตร ศูนย์วิจัยข้าวปทุมธานี"
+image: ../images/profile-full.jpg
+image-alt: "Kanthanawit ยืนข้างรูปปั้น Totoro"
 comments: false
 about:
   template: trestles
-  image-width: 15em
+  image-width: 16em
   image-shape: rectangle
   id: hero-heading
   links:
@@ -28,10 +28,101 @@ page-layout: full
 ---
 
 <div class="quarto-title">
-<h1 class="title"> Hello! Sa-Wad-Di-Krub!</h1>
+<h1 class="title">สวัสดีครับ</h1>
 </div>
 
-ผมชื่อ Kanthanawit (กันต์) เป็นนักวิชาการเกษตร หรือ นักวิจัยด้านการเกษตร ทำงานอยู่ที่ศูนย์วิจัยข้าวปทุมธานี
+ผมชื่อกันต์ (Kanthanawit) เป็นนักวิชาการเกษตรที่ศูนย์วิจัยข้าวปทุมธานี งานหลักคือติดตามและศึกษาโรคและศัตรูข้าว ว่าระบาดเมื่อไหร่ ที่ไหน และเพราะอะไร
 
-ทำวิจัยโดยใช้ภาษา R และ พัฒนา [R packages และ หนังสือ](../r-packages/index.qmd) เพื่อการวิจัย และ ยินดีที่จะแชร์ สิ่งที่รู้ และ นี่คือ [GitHub](https://github.com/kanthjs) ของผม
+ข้อมูลจากแปลงทดลองและการสำรวจมีเยอะ แต่จะมีประโยชน์ก็ต่อเมื่อวิเคราะห์ได้ถูกต้องและส่งต่อถึงคนใช้ได้จริง ผมจึงใช้ภาษา R ทั้งวิเคราะห์ข้อมูล สร้าง [R packages](../r-packages/index.qmd) และทำ app พยากรณ์การระบาดให้คนอื่นใช้ต่อได้
 
+[เติม: ย่อหน้าส่วนตัวสั้นๆ เช่น งานอดิเรก หรือเหตุผลที่เริ่มเขียน blog]{.todo}
+
+::: {.home-section}
+
+[ความสนใจ]{.home-sec}
+
+::: {.home-list}
+::: {.home-row}
+[โรคพืช]{.home-key}
+[โรคและศัตรูข้าว การสำรวจและติดตามการระบาด]{.home-val}
+:::
+::: {.home-row}
+[ระบาดวิทยา]{.home-key}
+[แบบจำลองพยากรณ์การระบาดจากข้อมูลสภาพอากาศ]{.home-val}
+:::
+::: {.home-row}
+[สถิติ]{.home-key}
+[การวางแผนและวิเคราะห์การทดลองทางการเกษตร]{.home-val}
+:::
+::: {.home-row}
+[R]{.home-key}
+[R packages, Shiny apps และเครื่องมือที่ใช้งานได้จริง]{.home-val}
+:::
+:::
+
+:::
+
+::: {.home-section}
+
+[การศึกษา]{.home-sec}
+
+::: {.home-list}
+::: {.home-row}
+[ปี]{.home-key .todo}
+[เติม: ปริญญา สาขา มหาวิทยาลัย]{.home-val .todo}
+:::
+::: {.home-row}
+[ปี]{.home-key .todo}
+[เติม: ปริญญา สาขา มหาวิทยาลัย]{.home-val .todo}
+:::
+:::
+
+:::
+
+::: {.home-section}
+
+[ประสบการณ์]{.home-sec}
+
+::: {.home-list}
+::: {.home-row}
+[ปี – ปัจจุบัน]{.home-key .todo}
+[นักวิชาการเกษตร ศูนย์วิจัยข้าวปทุมธานี]{.home-val}
+:::
+::: {.home-row}
+[ปี – ปี]{.home-key .todo}
+[เติม: ตำแหน่ง หน่วยงาน]{.home-val .todo}
+:::
+:::
+
+:::
+
+::: {.home-section}
+
+[ผลงานเด่น]{.home-sec}
+
+::: {.home-list}
+::: {.home-row}
+[ปี]{.home-key .todo}
+[เติม: ชื่อผลงาน, วารสาร]{.home-val .todo}
+:::
+::: {.home-row}
+[ปี]{.home-key .todo}
+[เติม: ชื่อผลงาน, วารสาร]{.home-val .todo}
+:::
+::: {.home-row}
+[ปี]{.home-key .todo}
+[เติม: ชื่อผลงาน, วารสาร]{.home-val .todo}
+:::
+:::
+
+[ผลงานทั้งหมดใน Google Scholar →](https://scholar.google.com/citations?user=XB4u66sAAAAJ&hl=en){.home-more}
+
+:::
+
+::: {.home-section}
+
+[ติดต่อ]{.home-sec}
+
+ยินดีคุยเรื่องโรคข้าว การวิเคราะห์ข้อมูลเกษตร หรือ R ส่งอีเมลมาได้ที่ [kanthanawit.j@rice.mail.go.th](mailto:kanthanawit.j@rice.mail.go.th)
+
+:::

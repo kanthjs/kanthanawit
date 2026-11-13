@@ -1,0 +1,10 @@
+```{=html}
+<div class="home-list">
+<% for (const item of items) { %>
+<div class="home-row" <%= metadataAttrs(item) %>>
+  <span class="home-key"><%= item.date %></span>
+  <a class="home-val" href="<%- item.path %>"><%= item.title %></a>
+</div>
+<% } %>
+</div>
+```

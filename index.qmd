@@ -1,28 +1,71 @@
 ---
 title: "Kanthanawit"
 pagetitle: "Kanthanawit"
-subtitle: "นักวิชาการเกษตร โรคและศัตรูข้าว ระบาดวิทยา และ ภาษา R"
+subtitle: "นักวิชาการเกษตร · โรคและศัตรูข้าว · ระบาดวิทยา · R"
 image: images/profile.jpg
 image-alt: "Kanthanawit"
 page-layout: article
 toc: false
 back-to-top-navigation: false
 
+listing:
+  id: latest-posts
+  contents: "blog/*/index.qmd"
+  sort: "date desc"
+  template: _home-list.ejs
+  max-items: 5
+  fields: [date, title]
+  date-format: "D MMM YYYY"
+  categories: false
+  sort-ui: false
+  filter-ui: false
+
 about:
   template: jolla
-  image-width: 18em
+  image-width: 9em
   image-shape: round
-  links:
-    - icon: github
-      text: GitHub
-      aria-label: GitHub
-      href: https://github.com/kanthjs
-    - icon: mortarboard
-      text: Scholar
-      aria-label: "Google Scholar"
-      href: https://scholar.google.com/citations?user=XB4u66sAAAAJ&hl=en
-    - icon: envelope
-      text: Email
-      aria-label: Email
-      href: mailto:kanthanawit.j@rice.mail.go.th
 ---
+
+::: {.home-links}
+[GitHub](https://github.com/kanthjs) · [Scholar](https://scholar.google.com/citations?user=XB4u66sAAAAJ&hl=en) · [Email](mailto:kanthanawit.j@rice.mail.go.th)
+:::
+
+::: {.home-bio}
+ทำงานที่ศูนย์วิจัยข้าวปทุมธานี วิจัยโรคและศัตรูข้าว ใช้ R วิเคราะห์ข้อมูล และพัฒนา R packages เพื่องานวิจัย
+:::
+
+::: {.home-section}
+
+[ล่าสุด]{.home-sec}
+
+::: {#latest-posts}
+:::
+
+[บทความทั้งหมด →](blog/index.qmd){.home-more}
+
+:::
+
+::: {.home-section}
+
+[Software]{.home-sec}
+
+::: {.home-list}
+::: {.home-row}
+[ricecooker](https://github.com/kanthjs/ricecooker){.home-key}
+[วิเคราะห์การทดลองในแปลง CRD, RCBD, split-plot]{.home-val}
+:::
+
+::: {.home-row}
+[talatThaiR](https://github.com/kanthjs/talatThaiR){.home-key}
+[ข้อมูลราคาและผลผลิตเกษตรไทยใน R]{.home-val}
+:::
+
+::: {.home-row}
+[RBTool](https://kanthjs.github.io/RBTool/){.home-key}
+[วิเคราะห์ปรับปรุงพันธุ์บน browser]{.home-val}
+:::
+:::
+
+[software ทั้งหมด →](r-packages/index.qmd){.home-more}
+
+:::

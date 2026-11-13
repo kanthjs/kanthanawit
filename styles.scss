@@ -216,23 +216,16 @@ div.quarto-about-jolla {
   // Circular Avatar Image
   .about-image {
     border-radius: 50% !important;
-    border: 4px solid #FFFFFF;
-    box-shadow: 0 8px 30px rgba(66, 112, 89, 0.18);
+    border: 3px solid #FFFFFF;
     object-fit: cover;
-    margin-bottom: 1.8rem;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-
-    &:hover {
-      transform: scale(1.02);
-      box-shadow: 0 12px 36px rgba(66, 112, 89, 0.24);
-    }
+    margin-bottom: 1.1rem;
   }
 
   // Name / Title
   .quarto-title h1.title {
     font-family: $font-family-serif;
     font-weight: 600;
-    font-size: clamp(2.8rem, 6vw, 4.2rem);
+    font-size: clamp(2.2rem, 5vw, 2.6rem);
     color: $headingColorCustom;
     line-height: 1.15;
     margin-bottom: 0.35rem;
@@ -271,40 +264,35 @@ div.quarto-about-jolla {
     opacity: 0.85;
   }
 
-  // Social / Outbound Links
+  // Social / Outbound Links: plain text separated by a middle dot
   .about-links {
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
-    gap: 0.75rem;
-    margin-top: 1.5rem;
+    gap: 0;
+    margin-top: 0.75rem;
 
     .about-link {
       display: inline-flex;
       align-items: center;
-      gap: 0.45rem;
-      padding: 0.5rem 1.15rem;
-      border: 1px solid $borderColorCustom;
-      border-radius: 9999px;
-      background-color: #FAFAF5;
+      padding: 0;
+      border: 0;
+      background: none;
       color: $headingColorCustom;
       text-decoration: none;
       font-size: 0.95rem;
-      font-weight: 400;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-      transition: all 0.2s ease-in-out;
 
-      i {
-        font-size: 1.15rem;
-        line-height: 1;
+      i { display: none; }
+
+      & + .about-link::before {
+        content: "·";
+        color: #B4B2A9;
+        margin: 0 0.6rem;
       }
 
-      &:hover {
-        background-color: $headingColorCustom;
-        border-color: $headingColorCustom;
-        color: #FAFAF5;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(66, 112, 89, 0.22);
+      &:hover .about-link-text {
+        text-decoration: underline;
+        text-underline-offset: 3px;
       }
     }
   }
@@ -594,6 +582,152 @@ div.quarto-post {
     margin-left: 0;
     margin-right: auto;
   }
+}
+
+// Homepage (about: jolla) — center the name and subtitle
+body:has(.quarto-about-jolla) {
+  #title-block-header,
+  #title-block-header.quarto-title-block.default {
+    text-align: center;
+
+    .quarto-title,
+    h1.title,
+    .subtitle,
+    p.subtitle,
+    .description,
+    p.description {
+      text-align: center;
+    }
+
+    .subtitle,
+    p.subtitle,
+    .description,
+    p.description {
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+}
+
+// Homepage: editorial minimal (bio, latest posts, software)
+$homeMuted: #6B7A6F;
+
+// Social links sit right under the subtitle (jolla would put them at the bottom)
+.home-links {
+  text-align: center;
+  font-size: 0.95rem;
+  color: #B4B2A9;
+
+  p { margin: 0; }
+
+  a {
+    color: $headingColorCustom;
+    text-decoration: none;
+    margin: 0 0.35rem;
+
+    &:hover {
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+  }
+}
+
+// Tighten the hero: avatar -> name -> subtitle -> links
+body:has(.quarto-about-jolla) #title-block-header.quarto-title-block.default {
+  margin: 0 0 0.6rem;
+
+  p.subtitle { margin-bottom: 0; }
+}
+
+.home-bio {
+  max-width: 440px;
+  margin: 1.5rem auto 0;
+  text-align: center;
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.home-section {
+  max-width: 560px;
+  margin: 2.5rem auto 0;
+  text-align: left;
+
+  .home-sec {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.4rem;
+    font-size: 0.85rem;
+    letter-spacing: 0.04em;
+    color: $homeMuted;
+
+    &::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: $borderColorCustom;
+    }
+  }
+
+  .home-row {
+    display: grid;
+    grid-template-columns: 7rem minmax(0, 1fr);
+    gap: 0.75rem;
+    padding: 0.4rem 0;
+    line-height: 1.5;
+
+    // Pandoc wraps markdown rows in <p>; let its children join the grid
+    > p { display: contents; }
+  }
+
+  .home-key {
+    font-size: 0.85rem;
+    color: $homeMuted;
+    padding-top: 0.15rem;
+  }
+
+  a.home-key {
+    color: $headingColorCustom;
+    font-size: 0.92rem;
+    padding-top: 0.05rem;
+  }
+
+  .home-val { font-size: 1rem; }
+
+  a {
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-thickness: 1px;
+    }
+  }
+
+  .home-more {
+    display: block;
+    text-align: right;
+    margin-top: 0.4rem;
+    font-size: 0.85rem;
+  }
+
+  @media (max-width: 575.98px) {
+    .home-row { grid-template-columns: 5.5rem minmax(0, 1fr); }
+  }
+}
+
+// About page reuses the homepage rows, aligned to the content column
+.about-contents .home-section {
+  max-width: 620px;
+  margin: 2.25rem 0 0;
+
+  > p { margin: 0.4rem 0 0; }
+}
+
+// Placeholder text still to be filled in
+.todo {
+  color: #A0731E;
+  font-style: italic;
 }
 
 // Images throughout the site
