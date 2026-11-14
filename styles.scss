@@ -1069,3 +1069,13 @@ body:has(.post-list) {
     }
   }
 }
+
+// On small screens a table wider than the page scrolls inside itself,
+// instead of making the whole page scroll sideways.
+@media (max-width: 767.98px) {
+  main.content table:not(.sourceCode table) {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+}
