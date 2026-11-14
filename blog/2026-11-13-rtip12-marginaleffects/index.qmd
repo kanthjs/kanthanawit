@@ -6,15 +6,9 @@ categories: [r, r-tip, statistics, modeling, marginaleffects, glm, machine-learn
 draft: false
 ---
 
-ในยุค 2026 เวลาเราสั่งให้ AI ช่วยสร้างโมเดลทางสถิติหรือ Machine Learning ใน R ไม่ว่าจะเป็น Logistic Regression ทำนายโอกาสเกิดโรคระบาดในแปลงนา, Generalized Additive Models (GAM), Mixed-Effects Models (`lme4` / `glmmTMB`), หรือแม้แต่โมเดลสาย `tidymodels` และ `xgboost`... AI จะเขียนโค้ดฟิตโมเดลให้เราได้เร็วมากในเสี้ยววินาที และมักจะปิดท้ายอย่างสวยงามด้วยคำสั่งคุ้นเคย:
+การสร้างโมเดลทางสถิติหรือ Machine Learning ใน R ไม่ว่าจะเป็น Logistic Regression, Generalized Additive Models (GAM), Mixed-Effects Models (`lme4` / `glmmTMB`), หรือ `tidymodels` และ `xgboost` เรามักสรุปผลด้วยคำสั่งคุ้นเคยอย่าง `summary(model)` หรือ `broom::tidy(model)`
 
-```r
-summary(model)
-# หรือ
-broom::tidy(model)
-```
-
-แต่ปัญหาคลาสสิกระดับตำนานที่คนทำงานวิจัยและนักวิเคราะห์ข้อมูลทุกคนต้องเคยเจอคือ: **"ค่าสัมประสิทธิ์ (Coefficients / Log-odds / Spline terms) ที่ได้มา มันอ่านเข้าใจยากมาก และเอาไปตอบคำถามหน้างานจริงตรงๆ แทบไม่ได้!"**
+แต่ปัญหาใหญ่ที่คนทำงานวิจัยและนักวิเคราะห์ข้อมูลเจอบ่อยคือ: **"ค่าสัมประสิทธิ์ (Coefficients / Log-odds / Spline terms) ที่ได้มา อ่านเข้าใจยาก และนำไปตอบคำถามหน้างานจริงตรงๆ แทบไม่ได้"**
 
 ลองนึกภาพสถานการณ์จริง: เมื่อโมเดลของเรามีทั้ง **Interaction term** (ตัวแปรปฏิสัมพันธ์) และ **Non-linear term** (เช่น พหุนามกำลังสอง หรือ Smoothing splines) ค่า Coefficient ในตารางสรุปจะกลายเป็นตัวเลขติดลบหรือตัวเลขแปลกๆ ที่ตีความด้วยตาเปล่าไม่ได้เลย 
 
@@ -231,10 +225,10 @@ hypotheses(mod, hypothesis = "b3 / b2 = 1")
 
 ---
 
-## 6. ทำไมเทคนิคและ Repo นี้ถึงมีประโยชน์มากในยุค 2026
+## 6. ข้อดีหลักของ `marginaleffects`
 
 1. **เรียนรู้ครั้งเดียว ใช้ได้กับกว่า 100 แพ็กเกจ (Unified Syntax):**
-   ไม่ว่า AI จะเขียนโค้ดให้คุณด้วย `glm`, `mgcv::gam`, `lme4::glmer`, `survival::coxph`, `brms` (Bayesian Regression), หรือโมเดล Machine Learning ใน `tidymodels` คุณไม่ต้องมานั่งเปิด Help ดูว่าแต่ละแพ็กเกจมีวิธีดึงค่า Marginal Effects อย่างไร เพราะคุณสามารถใช้คำสั่ง `avg_comparisons()`, `predictions()`, และ `plot_predictions()` ชุดเดียวกันเป๊ะได้กับทุกโมเดล
+   ไม่ว่าจะฟิตโมเดลด้วย `glm`, `mgcv::gam`, `lme4::glmer`, `survival::coxph`, `brms` (Bayesian Regression), หรือโมเดล Machine Learning ใน `tidymodels` คุณไม่ต้องมานั่งเปิด Help ดูว่าแต่ละแพ็กเกจมีวิธีดึงค่า Marginal Effects อย่างไร เพราะคุณสามารถใช้คำสั่ง `avg_comparisons()`, `predictions()`, และ `plot_predictions()` ชุดเดียวกันเป๊ะได้กับทุกโมเดล
 
 2. **รองรับทั้ง Analytic Delta Method, Simulation และ Bootstrap ในบรรทัดเดียว:**
    นอกจากการคำนวณผ่าน C++ Delta Method ที่เร็วระดับเสี้ยววินาทีแล้ว หากคุณต้องการความแม่นยำสูงในโมเดลขนาดเล็ก คุณสามารถเปลี่ยนวิธีคำนวณความคลาดเคลื่อนเป็น Bootstrap หรือ Simulation-based Inference ได้ทันทีผ่านฟังก์ชัน `inferences()`:
@@ -247,7 +241,7 @@ hypotheses(mod, hypothesis = "b3 / b2 = 1")
    แพ็กเกจ `marginaleffects` มีชุด Test Suite ทางคณิตศาสตร์นับหมื่นรายการที่ตรวจสอบเทียบเคียงผลลัพธ์กับคำสั่ง `margins` ของโปรแกรม Stata และแพ็กเกจ `emmeans` ใน R จึงมั่นใจได้ในความถูกต้องสำหรับการตีพิมพ์ในวารสารวิชาการระดับนานาชาติ
 
 4. **เปลี่ยนนักวิเคราะห์ให้เป็นนักสื่อสารเชิงกลยุทธ์:**
-   ในโลกที่ AI สร้างโมเดลให้ใครก็ได้ คุณค่าที่แท้จริงของนักวิจัยและ Data Scientist คือ **"การแปลผลโมเดลให้กลายเป็นความรู้และการตัดสินใจที่จับต้องได้"** การรายงานว่า "ความเสี่ยงเพิ่มขึ้น 8.5% เมื่ออุณหภูมิแตะ 32 องศา" มีคุณค่าต่อการวางแผนนโยบายมากกว่าการบอกว่า "Log-odds coefficient คือ 0.412" มหาศาลครับ
+   คุณค่าที่แท้จริงของนักวิจัยและ Data Scientist คือ **"การแปลผลโมเดลให้กลายเป็นความรู้และการตัดสินใจที่จับต้องได้"** การรายงานว่า "ความเสี่ยงเพิ่มขึ้น 8.5% เมื่ออุณหภูมิแตะ 32 องศา" มีคุณค่าต่อการวางแผนนโยบายมากกว่าการบอกว่า "Log-odds coefficient คือ 0.412" มหาศาลครับ
 
 ---
 
