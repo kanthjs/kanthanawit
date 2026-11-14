@@ -1,16 +1,16 @@
 ---
 title: "Kanthanawit"
 pagetitle: "Kanthanawit"
-subtitle: "นักวิชาการเกษตร โรคและศัตรูข้าว ระบาดวิทยา และ ภาษา R"
-image: images/profile.jpg
-image-alt: "Kanthanawit"
+subtitle: "Agricultural Researcher ∙ Rice Pathology & Epidemiology ∙ R Developer"
+image: images/avatar-3d-chibi.jpg
+image-alt: "Kanthanawit Avatar"
 page-layout: article
 toc: false
 back-to-top-navigation: false
 
 about:
   template: jolla
-  image-width: 18em
+  image-width: 14em
   image-shape: round
   links:
     - icon: github
@@ -21,8 +21,18 @@ about:
       text: Scholar
       aria-label: "Google Scholar"
       href: https://scholar.google.com/citations?user=XB4u66sAAAAJ&hl=en
+    - icon: person-badge
+      text: ORCID
+      aria-label: ORCID
+      href: https://orcid.org/0009-0002-3884-1107
     - icon: envelope
       text: Email
       aria-label: Email
       href: mailto:kanthanawit.j@rice.mail.go.th
 ---
+
+ผมเป็นนักวิจัยด้านการเกษตร ทำงานที่ศูนย์วิจัยข้าวปทุมธานี กรมการข้าว สนใจด้านระบาดวิทยาของโรคและศัตรูข้าว (Rice Pathology & Epidemiology), การวางแผนการทดลองทางการเกษตร และการสร้างเครื่องมือวิเคราะห์ข้อมูลด้วย **ภาษา R**
+
+::: {.home-badges}
+`Rstats` `Spatial Analysis` `Mixed Models` `Shiny / Shinylive` `Rice Science`
+:::

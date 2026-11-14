@@ -1,0 +1,92 @@
+---
+title: "Talks & Posters"
+pagetitle: "Talks — Kanthanawit"
+description: "โปสเตอร์วิชาการ งานวิจัย และการนำเสนอผลงานด้านโรคข้าวและสถิติการเกษตร"
+page-layout: full
+---
+
+งานนำเสนอในการประชุมวิชาการ โปสเตอร์วิจัย และเอกสารเผยแพร่ที่ผ่านมา สามารถคลิกที่รูปภาพหรือปุ่มเพื่อดูภาพขนาดเต็มและดาวน์โหลดเอกสาร PDF ได้ครับ
+
+::: {.talks-grid}
+
+::: {.talk-card}
+[![](../images/talks/blast_spatial_distribution_2025.png){.talk-thumb}](https://raw.githubusercontent.com/kanthjs/my_work_done/main/blast_spatial_distribution_RiceVthjoint_poster2025.png){target="_blank"}
+
+::: {.talk-body}
+<div class="talk-meta">
+  <span class="talk-badge">2025</span>
+  <span class="talk-badge-type">Poster</span>
+</div>
+
+### Spatial Distribution of Rice Blast Disease in Thailand
+
+งานวิเคราะห์การกระจายตัวเชิงพื้นที่ของโรคไหม้ข้าว (Rice Blast Disease) ในประเทศไทย นำเสนอในการประชุมวิชาการ Rice Vth Joint Conference 2025
+
+<div class="talk-actions">
+  <a href="https://raw.githubusercontent.com/kanthjs/my_work_done/main/blast_distribution_riceveg_poster2025.pdf" target="_blank" class="talk-btn"><i class="bi bi-file-earmark-pdf"></i> PDF Poster</a>
+  <a href="https://raw.githubusercontent.com/kanthjs/my_work_done/main/blast_spatial_distribution_RiceVthjoint_poster2025.png" target="_blank" class="talk-btn-outline"><i class="bi bi-image"></i> View Full Image</a>
+</div>
+:::
+:::
+
+::: {.talk-card}
+[![](../images/talks/poster_satun_supply_chain_2021.jpg){.talk-thumb}](https://raw.githubusercontent.com/kanthjs/my_work_done/main/poster_Satun_supply_chain.jpg){target="_blank"}
+
+::: {.talk-body}
+<div class="talk-meta">
+  <span class="talk-badge">2021</span>
+  <span class="talk-badge-type">Poster</span>
+</div>
+
+### Satun Rice Supply Chain Analysis
+
+งานศึกษาและวิเคราะห์โซ่อุปทานข้าวและการจัดการผลผลิตในพื้นที่จังหวัดสตูล ปี 2021
+
+<div class="talk-actions">
+  <a href="https://raw.githubusercontent.com/kanthjs/my_work_done/main/poster_Satun_supply_chain2021.pdf" target="_blank" class="talk-btn"><i class="bi bi-file-earmark-pdf"></i> PDF Poster</a>
+  <a href="https://raw.githubusercontent.com/kanthjs/my_work_done/main/poster_Satun_supply_chain.jpg" target="_blank" class="talk-btn-outline"><i class="bi bi-image"></i> View Full Image</a>
+</div>
+:::
+:::
+
+::: {.talk-card}
+[![](../images/talks/poster_rdconf_2020.jpg){.talk-thumb}](https://raw.githubusercontent.com/kanthjs/my_work_done/main/poster%202020%2080120.jpg){target="_blank"}
+
+::: {.talk-body}
+<div class="talk-meta">
+  <span class="talk-badge">2020</span>
+  <span class="talk-badge-type">Poster</span>
+</div>
+
+### Rice Department Annual Conference 2020
+
+โปสเตอร์นำเสนอผลงานวิจัยในการประชุมวิชาการข้าว ประจำปี 2563 (Rice Department Annual Conference 2020)
+
+<div class="talk-actions">
+  <a href="https://raw.githubusercontent.com/kanthjs/my_work_done/main/poster%202020%2080120.pdf" target="_blank" class="talk-btn"><i class="bi bi-file-earmark-pdf"></i> PDF Poster</a>
+  <a href="https://raw.githubusercontent.com/kanthjs/my_work_done/main/poster%202020%2080120.jpg" target="_blank" class="talk-btn-outline"><i class="bi bi-image"></i> View Full Image</a>
+</div>
+:::
+:::
+
+::: {.talk-card}
+[![](../images/talks/poster_rdconf_2019.jpg){.talk-thumb}](https://raw.githubusercontent.com/kanthjs/my_work_done/main/SJ%20rdconf_2019%20poster%20session.jpg){target="_blank"}
+
+::: {.talk-body}
+<div class="talk-meta">
+  <span class="talk-badge">2019</span>
+  <span class="talk-badge-type">Poster</span>
+</div>
+
+### Rice Department Annual Conference 2019
+
+โปสเตอร์นำเสนอผลงานวิจัยในการประชุมวิชาการข้าว ประจำปี 2562 (Poster Session RD Conference 2019)
+
+<div class="talk-actions">
+  <a href="https://raw.githubusercontent.com/kanthjs/my_work_done/main/SJ%20rdconf_2019%20poster%20session.pdf" target="_blank" class="talk-btn"><i class="bi bi-file-earmark-pdf"></i> PDF Poster</a>
+  <a href="https://raw.githubusercontent.com/kanthjs/my_work_done/main/SJ%20rdconf_2019%20poster%20session.jpg" target="_blank" class="talk-btn-outline"><i class="bi bi-image"></i> View Full Image</a>
+</div>
+:::
+:::
+
+:::

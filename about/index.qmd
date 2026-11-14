@@ -1,37 +1,59 @@
 ---
-title: "Kanthanawit"
+title: "About Me"
 pagetitle: "About — Kanthanawit"
-subtitle: "นักวิชาการเกษตร ระบาดวิทยาโรคพืช ภาษา R"
-image: ../images/profile.jpg
+subtitle: "Agricultural Researcher ∙ Rice Pathology & Epidemiology ∙ R Developer"
+image: ../images/about-portrait.jpg
 image-alt: "Portrait of Kanthanawit"
 comments: false
+toc: false
+
 about:
   template: trestles
-  image-width: 15em
-  image-shape: rectangle
+  image-width: 26em
+  image-shape: rounded
   id: hero-heading
   links:
     - icon: github
+      text: GitHub
       aria-label: GitHub
       href: https://github.com/kanthjs
-    - icon: person-badge
-      aria-label: ORCID
-      href: https://orcid.org/0009-0002-3884-1107
     - icon: mortarboard
+      text: Scholar
       aria-label: "Google Scholar"
       href: https://scholar.google.com/citations?user=XB4u66sAAAAJ&hl=en
+    - icon: person-badge
+      text: ORCID
+      aria-label: ORCID
+      href: https://orcid.org/0009-0002-3884-1107
     - icon: envelope
+      text: Email
       aria-label: Email
       href: mailto:kanthanawit.j@rice.mail.go.th
 
 page-layout: full
 ---
 
-<div class="quarto-title">
-<h1 class="title"> Hello! Sa-Wad-Di-Krub!</h1>
-</div>
+::: {#hero-heading}
 
-ผมชื่อ Kanthanawit (กันต์) เป็นนักวิชาการเกษตร หรือ นักวิจัยด้านการเกษตร ทำงานอยู่ที่ศูนย์วิจัยข้าวปทุมธานี
+## สวัสดีครับ ผมกันต์ (Kanthanawit) 👋
 
-ทำวิจัยโดยใช้ภาษา R และ พัฒนา [R packages และ หนังสือ](../r-packages/index.qmd) เพื่อการวิจัย และ ยินดีที่จะแชร์ สิ่งที่รู้ และ นี่คือ [GitHub](https://github.com/kanthjs) ของผม
+ผมเป็น**นักวิชาการเกษตร / นักวิจัย** ประจำอยู่ที่ **ศูนย์วิจัยข้าวปทุมธานี กรมการข้าว**
 
+งานวิจัยหลักของผมเน้นไปที่:
+- **ระบาดวิทยาของโรคและศัตรูข้าว (Rice Pathology & Epidemiology)**: ติดตาม คาดการณ์ และวิเคราะห์การระบาดของโรคไหม้และแมลงศัตรูพืช
+- **การวิเคราะห์ข้อมูลและวางแผนการทดลอง (Agricultural Statistics & Experimental Designs)**: ตั้งแต่ CRD, RCBD, Split-plot จนถึง Linear Mixed Models (LMM/GLMM) และการวิเคราะห์ GxE Interactions
+- **การพัฒนาเครื่องมือด้วยภาษา R**: สร้าง R Packages, Web Application (Shinylive/Shiny) และเขียนคู่มือการวิเคราะห์เพื่อช่วยให้นักวิจัยสายเกษตรทำงานได้รวดเร็วและแม่นยำยิ่งขึ้น
+
+---
+
+### ความสนใจเฉพาะทาง (Interests)
+- **Spatial Analysis & Disease Mapping**: การวิเคราะห์เชิงพื้นที่ แผนที่การระบาดด้วย `sf`, `terra`
+- **Modern R Workflow**: การประมวลผลข้อมูลด้วย Tidyverse, DuckDB, และการจัดการข้อมูลขนาดใหญ่
+- **Open Science & Reproducible Research**: การทำงานวิจัยที่ตรวจสอบและทำซ้ำได้ด้วย Quarto
+
+---
+
+### ผลงาน & การแบ่งปัน
+คุณสามารถดูผลงาน R packages และ Web Apps ที่ผมพัฒนาได้ที่หน้า [Software](../r-packages/index.qmd) หรืออ่านบทความทางสถิติและเทคนิคการเขียน R ได้ที่หน้า [Blog](../blog/index.qmd) ครับ
+
+:::

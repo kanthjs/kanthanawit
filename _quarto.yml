@@ -36,9 +36,11 @@ website:
         href: blog/index.qmd
       - text: "Software"
         href: r-packages/index.qmd
+      - text: "Talks"
+        href: talks/index.qmd
 
   page-footer:
-    left: "© 2026 Kanthanawit ∙ Made with [Quarto](https://quarto.org)"
+    center: "© 2026 Kanthanawit ∙ Made with [Quarto](https://quarto.org)"
 
 format:
   html:
