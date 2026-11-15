@@ -1321,3 +1321,8 @@ div.quarto-about-trestles .about-entity .about-links {
 
   .work-grid { max-width: 640px; margin-left: auto; margin-right: auto; }
 }
+
+// Long URLs and inline code in prose wrap instead of widening the page
+main.content :is(p, li, td, dd) {
+  overflow-wrap: anywhere;
+}
