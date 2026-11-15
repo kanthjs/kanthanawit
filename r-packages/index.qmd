@@ -12,19 +12,19 @@ R package, หนังสือ และ เครื่องมือต่�
 
 ## R packages
 
-| Package | What it does |
-|---|---|
-| [**ricecooker**](https://github.com/kanthjs/ricecooker) | Analysis of agricultural field experiments — CRD, RCBD and split-plot designs, CV%, DMRT, data transformations, Type III SS, and ready-made plots |
-| [**talatThaiR**](https://github.com/kanthjs/talatThaiR) | Fetch Thai agricultural price and production index data straight into R |
-| [**kanth_lib**](https://github.com/kanthjs/kanth_lib) | My personal R library |
+::: {.work-grid}
+[**ricecooker**[Analysis of agricultural field experiments — CRD, RCBD and split-plot designs, CV%, DMRT, data transformations, Type III SS, and ready-made plots]{.work-desc}](https://github.com/kanthjs/ricecooker){.work-card}
+[**talatThaiR**[Fetch Thai agricultural price and production index data straight into R]{.work-desc}](https://github.com/kanthjs/talatThaiR){.work-card}
+[**kanth_lib**[My personal R library]{.work-desc}](https://github.com/kanthjs/kanth_lib){.work-card}
+:::
 
 ## Apps
 
-| App | What it does |
-|---|---|
-| [**Rice Blast Forecast**](https://kanthjs.github.io/rice_blast_forcast_app/) | Rice blast disease forecasting tool |
-| [**Rice Pest Warning**](https://kanthjs.github.io/rice_pest_warning_app/) | Rice pest warning based on historical survey data |
-| [**RDstat**](https://kanthjs.github.io/RDstat/) | Statistical analysis in the browser — R runs on your own machine, so uploaded data never leaves your computer |
-| [**RBTool**](https://kanthjs.github.io/RBTool/) | Plant breeding trial analysis in the browser — single-environment, multi-environment, and GxE / stability analyses (IRRI PBTools re-engineered with Shinylive) |
+::: {.work-grid}
+[**Rice Blast Forecast**[Rice blast disease forecasting tool]{.work-desc}](https://kanthjs.github.io/rice_blast_forcast_app/){.work-card}
+[**Rice Pest Warning**[Rice pest warning based on historical survey data]{.work-desc}](https://kanthjs.github.io/rice_pest_warning_app/){.work-card}
+[**RDstat**[Statistical analysis in the browser — R runs on your own machine, so uploaded data never leaves your computer]{.work-desc}](https://kanthjs.github.io/RDstat/){.work-card}
+[**RBTool**[Plant breeding trial analysis in the browser — single-environment, multi-environment, and GxE / stability analyses (IRRI PBTools re-engineered with Shinylive)]{.work-desc}](https://kanthjs.github.io/RBTool/){.work-card}
+:::
 
 ## Details

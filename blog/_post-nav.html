@@ -1,0 +1,53 @@
+<script>
+// Older / newer links at the end of a post, read from the blog's RSS feed.
+// Posts in a numbered series (R Tips, tidyTuesday) link within that series.
+(() => {
+  const main = document.querySelector("main.content");
+  const here = location.pathname.replace(/index\.html$/, "");
+  if (!main || !/\/blog\/[^/]+\/$/.test(here)) return;
+  const series = (t) => ((t.match(/^(R Tips|tidyTuesday)\b/i) || [])[1] || "").toLowerCase();
+  fetch(new URL("../index.xml", location.href))
+    .then((r) => (r.ok ? r.text() : Promise.reject()))
+    .then((xml) => {
+      const doc = new DOMParser().parseFromString(xml, "application/xml");
+      // newest first
+      let posts = [...doc.querySelectorAll("item")].map((it) => {
+        const title = it.querySelector("title");
+        const link = it.querySelector("link");
+        return {
+          title: title ? title.textContent.trim() : "",
+          path: new URL(link ? link.textContent.trim() : "", location.href)
+            .pathname.replace(/index\.html$/, ""),
+        };
+      });
+      const me = posts.find((p) => p.path === here);
+      if (!me) return;
+      const s = series(me.title);
+      if (s) posts = posts.filter((p) => series(p.title) === s);
+      const i = posts.indexOf(me);
+      const older = posts[i + 1];
+      const newer = posts[i - 1];
+      if (!older && !newer) return;
+      const nav = document.createElement("nav");
+      nav.className = "post-nav";
+      nav.setAttribute("aria-label", "บทความก่อนหน้าและถัดไป");
+      const add = (p, cls, label) => {
+        const a = document.createElement("a");
+        a.className = cls;
+        a.href = p.path;
+        const l = document.createElement("span");
+        l.className = "post-nav-label";
+        l.textContent = label;
+        const t = document.createElement("span");
+        t.className = "post-nav-title";
+        t.textContent = p.title;
+        a.append(l, t);
+        nav.append(a);
+      };
+      if (older) add(older, "post-nav-prev", "← ก่อนหน้า");
+      if (newer) add(newer, "post-nav-next", "ถัดไป →");
+      main.append(nav);
+    })
+    .catch(() => {});
+})();
+</script>

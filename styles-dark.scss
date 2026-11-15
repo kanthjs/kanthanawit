@@ -1,0 +1,51 @@
+/*-- scss:defaults --*/
+
+// Dark palette. Listed after styles.scss in _quarto.yml, so these values win
+// over the `!default` ones there; every rule in styles.scss is reused as is.
+$siteBgColorCustom:       #151B17;
+$sidebarBgColorCustom:    #1B221D;
+$textColorCustom:         #E3E8E0;
+$sidebarTextColorCustom:  #DCE3D9;
+
+$headlineColorCustom:     #CDE2D2;
+$headingColorCustom:      #8FC3A4;
+$bodyLinkColorCustom:     #8FC3A4;
+$navLinkColorCustom:      #8FC3A4;
+$sidebarLinkColorCustom:  #8FC3A4;
+$footerTextColorCustom:   #8FC3A4;
+
+$buttonTextColorCustom:      #1F2722;
+$buttonHoverTextColorCustom: #242D27;
+$buttonBgColorCustom:        #5A9175;
+$buttonHoverBgColorCustom:   #6BA487;
+$borderColorCustom:          #2F3A33;
+$cardBgColorCustom:          #1B221D;
+
+$surfaceColorCustom:      #2A332D;
+$inlineCodeTextCustom:    #D5E6D9;
+$mutedTextColorCustom:    #94A398;
+$thumbBgColorCustom:      #222A25;
+$onAccentColorCustom:     #121814;
+$accentWarmColorCustom:   #E0A07A;
+
+/*-- scss:rules --*/
+
+// The logo is drawn in the light theme's dark green
+.navbar-brand img,
+.navbar-brand .navbar-logo {
+  filter: brightness(1.9) saturate(0.75);
+}
+
+// Hover states in styles.scss darken the green; on a dark page go lighter
+a:hover,
+.listing-title a:hover,
+.nav-footer a:hover {
+  color: #B4DCC3;
+}
+
+// Plots and screenshots are made for a white page: give them a light mat
+main.content .cell-output-display img,
+main.content figure img {
+  background-color: #F5F4EE;
+  border-radius: 6px;
+}

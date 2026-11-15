@@ -10,7 +10,7 @@ page-layout: full
 ::: {.talks-grid}
 
 ::: {.talk-card}
-[![](../images/talks/blast_spatial_distribution_2025.png){.talk-thumb}](https://raw.githubusercontent.com/kanthjs/my_work_done/main/blast_spatial_distribution_RiceVthjoint_poster2025.png){target="_blank"}
+[![](../images/talks/blast_spatial_distribution_2025.jpg){.talk-thumb}](https://raw.githubusercontent.com/kanthjs/my_work_done/main/blast_spatial_distribution_RiceVthjoint_poster2025.png){target="_blank"}
 
 ::: {.talk-body}
 <div class="talk-meta">

@@ -1,0 +1,119 @@
+---
+title: "R Tips 14: แปลง Nested Lists และ JSON ให้เป็น Tibble ด้วย tibblify"
+date: 2026-11-15
+description: "แก้ปัญหาการแปลง Nested List และ API Responses ที่ช้าและพังง่ายเมื่อเจอข้อมูลแหว่ง ด้วยแพ็กเกจ tibblify ที่ประมวลผลระดับ C พร้อมระบบกำหนด Schema แบบตายตัว"
+categories: [r, r-tip, tidyverse, data-wrangling, json]
+draft: false
+---
+
+เวลาดึงข้อมูลจาก Web API เช่น ข้อมูลพยากรณ์อากาศรายชั่วโมง พิกัดภูมิศาสตร์ (GeoJSON) หรือผลลัพธ์จากระบบเซนเซอร์ ข้อมูลที่ได้รับเกือบทั้งหมดจะอยู่ในรูปแบบ **Nested List** (ลิสต์ซ้อนลิสต์หลายชั้น) หรือ JSON
+
+การแปลง Nested List ให้กลายเป็น Data Frame ด้วยวิธีดั้งเดิม เช่น `purrr::map_dfr()` หรือใช้ `tidyr::unnest_wider()` และ `unnest_longer()` ซ้อนกันหลายชั้น มักพบข้อจำกัดสำคัญ 2 ประการ:
+
+1. **ความเร็วและหน่วยความจำ**: ทำงานช้าและใช้ RAM สูงเมื่อต้องจัดการลิสต์ขนาดใหญ่ระดับหมื่นรายการขึ้นไป
+2. **ความเปราะบางของโครงสร้าง**: สคริปต์หยุดทำงานทันทีเมื่อพบแถวที่ข้อมูลขาดหาย (Missing fields) หรือลำดับคอลัมน์สลับไปมาในแต่ละออบเจกต์
+
+แพ็กเกจ **`tibblify`** (พัฒนาโดย Maximilian Girlich ร่วมกับทีม r-lib) เข้ามาแก้ปัญหานี้โดยตรงด้วยเอนจินภาษา C ที่ทำหน้าที่แปลง Nested List ให้เป็น Tibble ในขั้นตอนเดียว (**One-shot Rectangling**) ช่วยเพิ่มความเร็วขึ้นอย่างมีนัยสำคัญ และบังคับโครงสร้างตารางล่วงหน้าอย่างแม่นยำ (**Schema-first**)
+
+---
+
+## 1. สำรวจโครงสร้าง List ด้วย `guess_tspec()`
+
+ปัญหาสำคัญของการจัดการ JSON หรือ Nested List คือการไม่ทราบโครงสร้างที่แน่ชัดว่ามีฟิลด์ใดซ่อนอยู่ในแต่ละชั้น แทนที่จะต้องใช้ `str()` ไล่ตรวจสอบทีละระดับ ฟังก์ชัน `guess_tspec()` จะสแกนโครงสร้างของลิสต์ทั้งหมด แล้วสร้างโค้ดแม่แบบ Specification สำหรับดึงข้อมูลทุกระดับออกมาให้โดยอัตโนมัติ
+
+```{r}
+#| message: false
+# ติดตั้งแพ็กเกจ: pak::pkg_install("tibblify")
+library(tibblify)
+library(dplyr)
+
+# ตัวอย่าง Nested List จาก API สถานีตรวจวัดอากาศ (บางสถานีมีข้อมูลไม่ครบ)
+api_response <- list(
+  list(
+    station_id = "ST-01",
+    location = list(lat = 14.02, lon = 100.61, province = "ปทุมธานี"),
+    sensors = list(
+      list(type = "temp", value = 32.5),
+      list(type = "humidity", value = 75.0)
+    )
+  ),
+  list(
+    station_id = "ST-02",
+    # สถานีนี้ไม่มี province และไม่มีข้อมูล sensors
+    location = list(lat = 14.35, lon = 100.56)
+  )
+)
+
+# สแกนโครงสร้างและสร้างสเปก (Specification)
+spec <- guess_tspec(api_response)
+spec
+```
+
+ผลลัพธ์จาก `guess_tspec()` จะแสดงคำแนะนำโค้ด `tspec_df()` ที่ระบุชนิดตัวแปรและลำดับชั้นทั้งหมด พร้อมให้นำไปปรับแต่งต่อได้ทันที
+
+---
+
+## 2. กำหนด Schema และจัดการค่าที่หายไปด้วย `tspec_df()`
+
+เมื่อนำ Specification มาใช้งานร่วมกับ `tibblify()` ตัวฟังก์ชันจะดึงตัวแปรที่ซ้อนอยู่ชั้นลึก (เช่น `location$lat`) ออกมาเป็นคอลัมน์ระดับบนสุดโดยตรง หากแถวใดไม่มีฟิลด์นั้น ระบบจะเติมค่า `NA` หรือค่าเริ่มต้น (Default value) ตามที่กำหนดไว้โดยไม่ทำให้สคริปต์หยุดทำงาน
+
+```{r}
+# กำหนดโครงสร้างตารางและค่าเริ่มต้นสำหรับฟิลด์ที่อาจขาดหาย
+station_spec <- tspec_df(
+  station_id = tib_chr("station_id"),
+  
+  # ดึงค่าใน nested list "location" ออกมาเป็นคอลัมน์ระดับบน
+  lat = tib_dbl(c("location", "lat")),
+  lon = tib_dbl(c("location", "lon")),
+  
+  # กรณีไม่มีฟิลด์ province ให้แทนที่ด้วย "ไม่ระบุ"
+  province = tib_chr(c("location", "province"), .required = FALSE, .fill = "ไม่ระบุ"),
+  
+  # แปลงลิสต์ย่อย sensors ให้เป็น Nested Tibble พร้อมสำหรับ unnest
+  sensors = tib_df(
+    "sensors",
+    .required = FALSE,
+    type = tib_chr("type"),
+    value = tib_dbl("value")
+  )
+)
+
+# แปลง Nested List ให้เป็น Tibble
+clean_stations <- tibblify(api_response, station_spec)
+clean_stations
+```
+
+---
+
+## 3. แตก Nested Objects ออกเป็นคอลัมน์ด้วย `unpack_tspec()`
+
+หากไม่ต้องการระบุพาธ `c("location", "lat")` ทีละฟิลด์ สามารถใช้ `tib_row()` ร่วมกับ `unpack_tspec()` เพื่อขยายฟิลด์ย่อยข้างในออกมาเป็นคอลัมน์ระดับบนได้โดยตรงในระดับ C:
+
+```{r}
+# ใช้ tib_row ร่วมกับ unpack_tspec
+row_spec <- tspec_df(
+  station_id = tib_chr("station_id"),
+  tib_row(
+    "location",
+    lat = tib_dbl("lat"),
+    lon = tib_dbl("lon"),
+    province = tib_chr("province", .required = FALSE, .fill = "ไม่ระบุ")
+  )
+) |> 
+  unpack_tspec()
+
+tibblify(api_response, row_spec)
+```
+
+---
+
+## จุดเด่นของ `tibblify`
+
+- **ความเร็วสูง**: จองพื้นที่หน่วยความจำล่วงหน้า (Memory Pre-allocation) ครั้งเดียวตาม Schema ที่กำหนด จึงเร็วกว่าการต่อตารางแบบไดนามิกทีละแถว
+- **ทำงานร่วมกับ `httr2` ได้ราบรื่น**: เมื่อแปลง JSON จาก `httr2::resp_body_json()` การส่งต่อไปยัง `tibblify()` ช่วยป้องกันข้อผิดพลาดจาก API ที่ส่งฟิลด์ข้อมูลมาไม่สม่ำเสมอ
+
+---
+
+## เอกสารอ้างอิงและซอร์สโค้ด
+
+- GitHub Repository: [https://github.com/tidyverse/tibblify](https://github.com/tidyverse/tibblify)

@@ -8,6 +8,20 @@ page-layout: article
 toc: false
 back-to-top-navigation: false
 
+open-graph:
+  image: images/og-default.jpg
+twitter-card:
+  image: images/og-default.jpg
+
+listing:
+  id: home-posts
+  contents: "blog/*/index.qmd"
+  sort: "date desc"
+  max-items: 5
+  template: _templates/home-posts.ejs
+  fields: [date, title, description]
+  date-format: "D MMM YYYY"
+
 about:
   template: jolla
   image-width: 14em
@@ -35,4 +49,25 @@ about:
 
 ::: {.home-badges}
 `Rstats` `Spatial Analysis` `Mixed Models` `Shiny / Shinylive` `Rice Science`
+:::
+
+::: {.home-section}
+## บทความล่าสุด
+
+::: {#home-posts}
+:::
+
+[ดูบทความทั้งหมด →](blog/index.qmd){.home-more}
+:::
+
+::: {.home-section}
+## ผลงานเด่น
+
+::: {.work-grid}
+[**ricecooker**<br>[R package วิเคราะห์งานทดลองเกษตร CRD, RCBD, split-plot]{.work-desc}](https://github.com/kanthjs/ricecooker){.work-card}
+[**RDstat**<br>[วิเคราะห์สถิติบนเบราว์เซอร์ ข้อมูลไม่ออกจากเครื่อง]{.work-desc}](https://kanthjs.github.io/RDstat/){.work-card}
+[**Rice Blast Forecast**<br>[เครื่องมือพยากรณ์โรคไหม้ข้าว]{.work-desc}](https://kanthjs.github.io/rice_blast_forcast_app/){.work-card}
+:::
+
+[ดู Software ทั้งหมด →](r-packages/index.qmd){.home-more}
 :::

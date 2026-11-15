@@ -1,0 +1,19 @@
+---
+title: "ไม่พบหน้านี้"
+pagetitle: "404 — Kanthanawit"
+toc: false
+---
+
+::: {.not-found}
+::: {.not-found-code}
+404
+:::
+
+หน้าที่คุณเปิดไม่มีอยู่ หรืออาจถูกย้ายไปแล้ว ลองเริ่มจากหน้าเหล่านี้ครับ
+
+::: {.work-grid}
+[**Blog**[บทความ R และสถิติการเกษตร]{.work-desc}](/blog/){.work-card}
+[**Software**[R packages และเว็บแอป]{.work-desc}](/r-packages/){.work-card}
+[**หน้าแรก**[กลับไปที่ kanthanawit.in.th]{.work-desc}](/){.work-card}
+:::
+:::

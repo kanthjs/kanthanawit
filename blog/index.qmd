@@ -13,6 +13,10 @@ listing:
   fields: [date, title, description, categories, image]
   date-format: "D MMM YYYY"
   page-size: 10
+  feed:
+    items: 200
+    type: partial
+    title: "Kanth with R"
 ---
 
 ```{=html}

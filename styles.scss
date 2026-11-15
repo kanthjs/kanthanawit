@@ -4,24 +4,32 @@
 // SIMON P. COUCH THEME PALETTE (Warm Forest & Earth)
 // =============================================================================
 
-$siteBgColorCustom:       #F5F4EE; // Warm sunlight paper / linen
-$sidebarBgColorCustom:    #FFFFFF;
-$textColorCustom:         #1B261D; // Deep botanical woodland ink
-$sidebarTextColorCustom:  #1E2E21;
+$siteBgColorCustom:       #F5F4EE !default; // Warm sunlight paper / linen
+$sidebarBgColorCustom:    #FFFFFF !default;
+$textColorCustom:         #1B261D !default; // Deep botanical woodland ink
+$sidebarTextColorCustom:  #1E2E21 !default;
 
-$headlineColorCustom:     #2A4C39; // Deep moss
-$headingColorCustom:      #38664D; // Fresh foliage & Totoro leaf green
-$bodyLinkColorCustom:     #38664D;
-$navLinkColorCustom:      #38664D;
-$sidebarLinkColorCustom:  #38664D;
-$footerTextColorCustom:   #38664D;
+$headlineColorCustom:     #2A4C39 !default; // Deep moss
+$headingColorCustom:      #38664D !default; // Fresh foliage & Totoro leaf green
+$bodyLinkColorCustom:     #38664D !default;
+$navLinkColorCustom:      #38664D !default;
+$sidebarLinkColorCustom:  #38664D !default;
+$footerTextColorCustom:   #38664D !default;
 
-$buttonTextColorCustom:      #FAFAF5;
-$buttonHoverTextColorCustom: #FAF9F0;
-$buttonBgColorCustom:       #4D8065;
-$buttonHoverBgColorCustom:  #3E6A53;
-$borderColorCustom:         #DDDCD2;
-$cardBgColorCustom:         #FAF9F4;
+$buttonTextColorCustom:      #FAFAF5 !default;
+$buttonHoverTextColorCustom: #FAF9F0 !default;
+$buttonBgColorCustom:       #4D8065 !default;
+$buttonHoverBgColorCustom:  #3E6A53 !default;
+$borderColorCustom:         #DDDCD2 !default;
+$cardBgColorCustom:         #FAF9F4 !default;
+
+// Colours that used to be hard-coded; named so the dark theme can swap them
+$surfaceColorCustom:      #FFFFFF !default; // photo frames, thumbnail cards
+$inlineCodeTextCustom:    #1F3329 !default;
+$mutedTextColorCustom:    #6B7A6F !default;
+$thumbBgColorCustom:      #EFEFEA !default;
+$onAccentColorCustom:     #FAFAF5 !default; // text on a filled green button
+$accentWarmColorCustom:   #B55D2B !default;
 
 // Typography ------------------------------------------------------------------
 $font-size-root: 16px;
@@ -100,7 +108,7 @@ blockquote, .blockquote {
   border-left: 3px solid $headingColorCustom;
   padding-left: 1.25rem;
   margin: 1.5rem 0;
-  color: #1F3329 !important;
+  color: $inlineCodeTextCustom !important;
   font-style: italic;
 }
 
@@ -112,7 +120,7 @@ hr {
 // Code & Pre ------------------------------------------------------------------
 p code:not(.sourceCode), li code:not(.sourceCode), td code:not(.sourceCode) {
   background-color: $buttonTextColorCustom !important;
-  color: #1F3329;
+  color: $inlineCodeTextCustom;
   border: 1px solid rgba(221, 221, 207, 0.7);
   padding: 0.15em 0.35em;
   border-radius: 4px;
@@ -216,7 +224,7 @@ div.quarto-about-jolla {
   // Circular Avatar Image
   .about-image {
     border-radius: 50% !important;
-    border: 4px solid #FFFFFF;
+    border: 4px solid $surfaceColorCustom;
     box-shadow: 0 8px 30px rgba(66, 112, 89, 0.18);
     object-fit: cover;
     margin-left: auto;
@@ -296,7 +304,7 @@ div.quarto-about-jolla {
 
         &:hover {
           background-color: $headingColorCustom !important;
-          color: #FAFAF5 !important;
+          color: $onAccentColorCustom !important;
           border-color: $headingColorCustom !important;
         }
       }
@@ -327,7 +335,7 @@ div.quarto-about-jolla {
       padding: 0.5rem 1.15rem;
       border: 1px solid $borderColorCustom;
       border-radius: 9999px;
-      background-color: #FAFAF5;
+      background-color: $buttonTextColorCustom;
       color: $headingColorCustom;
       text-decoration: none;
       font-size: 0.95rem;
@@ -343,7 +351,7 @@ div.quarto-about-jolla {
       &:hover {
         background-color: $headingColorCustom;
         border-color: $headingColorCustom;
-        color: #FAFAF5;
+        color: $onAccentColorCustom;
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(66, 112, 89, 0.22);
       }
@@ -392,7 +400,7 @@ div.quarto-about-trestles {
       margin-left: auto;
       margin-right: auto;
       margin-bottom: 1.5rem;
-      border: 4px solid #FFFFFF;
+      border: 4px solid $surfaceColorCustom;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
 
       &:hover {
@@ -443,7 +451,7 @@ div.quarto-about-trestles {
         padding: 0;
         border: 1px solid $borderColorCustom;
         border-radius: 6px;
-        background-color: #FAFAF5;
+        background-color: $buttonTextColorCustom;
         color: $headingColorCustom;
         text-decoration: none;
         font-size: 1.15rem;
@@ -461,7 +469,7 @@ div.quarto-about-trestles {
         &:hover {
           background-color: $headingColorCustom;
           border-color: $headingColorCustom;
-          color: #FAFAF5;
+          color: $onAccentColorCustom;
           transform: translateY(-2px);
           box-shadow: 0 4px 10px rgba(66, 112, 89, 0.22);
         }
@@ -556,7 +564,7 @@ div.quarto-post {
       overflow: hidden;
       border-radius: 8px;
       border: 1px solid rgba($headingColorCustom, 0.12);
-      background-color: #ffffff;
+      background-color: $surfaceColorCustom;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
       transition: transform 0.2s ease, box-shadow 0.2s ease;
 
@@ -696,7 +704,7 @@ div.quarto-post {
 // =============================================================================
 
 body:has(.post-list) {
-  $mutedText: #6B7A6F;
+  $mutedText: $mutedTextColorCustom;
   $pillBg: rgba($headingColorCustom, 0.08);
 
   // Page header: big title left, description right, rule underneath
@@ -753,7 +761,7 @@ body:has(.post-list) {
 
     &.active {
       background: $headingColorCustom;
-      color: $buttonTextColorCustom;
+      color: $onAccentColorCustom;
     }
   }
 
@@ -913,7 +921,7 @@ body:has(.post-list) {
 
       &.active {
         background: $headingColorCustom;
-        color: $buttonTextColorCustom;
+        color: $onAccentColorCustom;
         .quarto-category-count { color: inherit; opacity: 0.75; }
       }
     }
@@ -962,7 +970,7 @@ body:has(.post-list) {
       height: 220px;
       object-fit: cover;
       object-position: top;
-      background-color: #EFEFEA;
+      background-color: $thumbBgColorCustom;
       border-bottom: 1px solid $borderColorCustom;
       display: block;
       transition: opacity 0.2s ease;
@@ -994,7 +1002,7 @@ body:has(.post-list) {
 
         .talk-badge-type {
           background-color: rgba(201, 123, 74, 0.12);
-          color: #B55D2B;
+          color: $accentWarmColorCustom;
           font-size: 0.8rem;
           font-weight: 600;
           padding: 0.2rem 0.6rem;
@@ -1033,7 +1041,7 @@ body:has(.post-list) {
           align-items: center;
           gap: 0.4rem;
           background-color: $headingColorCustom;
-          color: #FAFAF5 !important;
+          color: $onAccentColorCustom !important;
           padding: 0.45rem 0.95rem;
           border-radius: 6px;
           font-size: 0.85rem;
@@ -1078,4 +1086,238 @@ body:has(.post-list) {
     max-width: 100%;
     overflow-x: auto;
   }
+}
+
+// =============================================================================
+// HOMEPAGE: latest posts and featured work (below the jolla hero)
+// =============================================================================
+div.quarto-about-jolla #quarto-document-content .home-section {
+  text-align: left;
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid $borderColorCustom;
+
+  h2 {
+    font-family: $font-family-serif;
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: $headingColorCustom;
+    margin: 0 0 1rem 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .home-post {
+    display: block;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid $borderColorCustom;
+    text-decoration: none;
+    color: inherit;
+
+    &:last-child { border-bottom: 0; }
+
+    span { display: block; }
+
+    .home-post-date {
+      font-size: 0.8rem;
+      color: rgba($textColorCustom, 0.6);
+    }
+
+    .home-post-title {
+      font-family: $font-family-serif;
+      font-size: 1.08rem;
+      font-weight: 600;
+      line-height: 1.45;
+      color: $headlineColorCustom;
+      transition: color 0.2s ease;
+    }
+
+    .home-post-desc {
+      font-size: 0.92rem;
+      line-height: 1.6;
+      color: rgba($textColorCustom, 0.75);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      max-height: 3.2em; // 2 lines x 1.6, hides any sliver of a third line
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    &:hover .home-post-title { color: $buttonBgColorCustom; text-decoration: underline; }
+  }
+
+  // Five fixed items: no pager or empty-state needed
+  .listing-pagination,
+  .listing-no-matching { display: none !important; }
+
+  .home-more {
+    display: inline-block;
+    margin-top: 1rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
+
+  p { margin-bottom: 0; }
+}
+
+// =============================================================================
+// WORK CARDS (homepage "featured work" and the Software page)
+// =============================================================================
+.work-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 0.85rem;
+  margin: 1rem 0 2rem 0;
+  text-align: left;
+
+  p { display: contents; margin: 0; }
+
+  .work-card {
+    display: block;
+    padding: 0.95rem 1.05rem;
+    background-color: $cardBgColorCustom;
+    border: 1px solid $borderColorCustom;
+    border-radius: 10px;
+    text-decoration: none;
+    color: $headlineColorCustom;
+    line-height: 1.45;
+    transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+
+    strong {
+      display: block;
+      font-family: $font-family-serif;
+      font-size: 1.05rem;
+      color: $headingColorCustom;
+    }
+
+    &:hover {
+      border-color: $headingColorCustom;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(42, 76, 57, 0.1);
+    }
+
+    .work-desc {
+      display: block;
+      margin-top: 0.25rem;
+      font-size: 0.88rem;
+      line-height: 1.55;
+      color: rgba($textColorCustom, 0.75);
+    }
+  }
+}
+
+// =============================================================================
+// TABLE OF CONTENTS (right margin of posts)
+// =============================================================================
+#quarto-margin-sidebar #TOC {
+  > h2 {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: $mutedTextColorCustom;
+    margin-bottom: 0.6rem;
+  }
+
+  ul { margin-bottom: 0; }
+
+  li { line-height: 1.4; }
+
+  a.nav-link {
+    font-size: 0.82rem;
+    line-height: 1.45;
+    padding: 0.32rem 0 0.32rem 0.8rem;
+    color: rgba($textColorCustom, 0.72);
+    overflow-wrap: break-word;
+
+    &:hover { color: $headingColorCustom; }
+    &.active { color: $headingColorCustom; font-weight: 600; }
+  }
+
+  ul ul a.nav-link { padding-left: 1.5rem; font-size: 0.78rem; }
+
+  // code in headings: plain text here, no pill
+  code {
+    font-size: inherit;
+    color: inherit;
+    background: none !important;
+    border: 0;
+    padding: 0;
+    white-space: normal;
+  }
+}
+
+// =============================================================================
+// POST NAVIGATION (older / newer, added by blog/_post-nav.html)
+// =============================================================================
+.post-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 3.5rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid $borderColorCustom;
+
+  a {
+    display: block;
+    padding: 0.9rem 1.05rem;
+    background-color: $cardBgColorCustom;
+    border: 1px solid $borderColorCustom;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+
+    &:hover { border-color: $headingColorCustom; transform: translateY(-2px); }
+  }
+
+  .post-nav-next { text-align: right; grid-column: 2; }
+
+  @media (max-width: 575.98px) {
+    grid-template-columns: 1fr;
+
+    .post-nav-next { grid-column: 1; }
+  }
+
+  .post-nav-label {
+    display: block;
+    font-size: 0.78rem;
+    color: $mutedTextColorCustom;
+    margin-bottom: 0.15rem;
+  }
+
+  .post-nav-title {
+    display: block;
+    font-family: $font-family-serif;
+    font-weight: 600;
+    font-size: 0.98rem;
+    line-height: 1.45;
+    color: $headlineColorCustom;
+  }
+}
+
+// =============================================================================
+// ABOUT PAGE: keep the icon links in one row on small screens
+// =============================================================================
+div.quarto-about-trestles .about-entity .about-links {
+  flex-direction: row !important;
+
+  .about-link { flex: 0 0 auto; }
+}
+
+// =============================================================================
+// 404 PAGE
+// =============================================================================
+.not-found {
+  text-align: center;
+  padding: 3rem 0 2rem 0;
+
+  .not-found-code {
+    font-family: $font-family-serif;
+    font-size: clamp(4rem, 14vw, 7rem);
+    font-weight: 600;
+    line-height: 1;
+    color: $headingColorCustom;
+    margin-bottom: 0.5rem;
+  }
+
+  .work-grid { max-width: 640px; margin-left: auto; margin-right: auto; }
 }

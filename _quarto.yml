@@ -3,6 +3,7 @@ project:
   output-dir: _site
   render:
     - "index.qmd"
+    - "404.qmd"
     - "about/index.qmd"
     - "talks/index.qmd"
     - "r-packages/**/*.qmd"
@@ -21,7 +22,10 @@ website:
   site-url: "https://kanthanawit.in.th"
   description: "Kanthanawit's playground — rice research, R packages, agricultural statistics, and other small things built along the way"
   favicon: images/favicon.svg
-  open-graph: true
+  open-graph:
+    image: "https://kanthanawit.in.th/images/og-default.jpg"
+  twitter-card:
+    image: "https://kanthanawit.in.th/images/og-default.jpg"
 
   navbar:
     logo: images/kjs.svg
@@ -29,6 +33,9 @@ website:
       - icon: github
         aria-label: "GitHub"
         href: https://github.com/kanthjs
+      - icon: rss
+        aria-label: "RSS feed"
+        href: blog/index.xml
     right:
       - text: "About"
         href: about/index.qmd
@@ -45,11 +52,11 @@ website:
 format:
   html:
     theme:
-      - cosmo
-      - styles.scss
+      light: [cosmo, styles.scss]
+      dark: [cosmo, styles.scss, styles-dark.scss]
     include-in-header: header.html
     toc: true
-    toc-title: "Topic"
+    toc-title: "สารบัญ"
     grid:
       body-width: 860px
     html-math-method: mathjax
