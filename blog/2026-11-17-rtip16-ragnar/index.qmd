@@ -1,0 +1,287 @@
+---
+title: "R Tips 16: ค้นหาและจัดกลุ่มข้อมูลด้วย \"ความหมาย\" แทน Regex และ Fuzzy Join ด้วย ragnar"
+date: 2026-11-17
+description: "สร้างระบบค้นหาและจับคู่ข้อมูลข้อความด้วย Semantic Search + BM25 Hybrid Search ในไฟล์ DuckDB ก้อนเดียว ไม่ต้องตั้งเซิร์ฟเวอร์ภายนอก ด้วยแพ็กเกจ ragnar จากทีม Tidyverse"
+categories: [r, r-tip, ragnar, semantic-search, vector-embeddings, duckdb, rag, ellmer, tidyverse, nlp]
+draft: false
+---
+
+เวลาที่เราต้องเชื่อมตารางข้อมูล (Join) หรือค้นหาข้อมูลข้อความที่คนกรอกมาไม่เหมือนกัน เช่น ชื่ออาการของโรคพืช ชื่อพันธุ์พืชท้องถิ่น หรือบันทึกอาการเสียของอุปกรณ์ ที่เขียนด้วยภาษาพูดต่างกันแต่ **"ความหมายเดียวกัน"** (เช่น *"ใบเหลืองส้มเริ่มแห้งจากปลายใบ"* กับ *"อาการโรคใบสีส้มในนาข้าว"*)
+
+ถ้าคุณถาม AI ในยุคนี้ ส่วนใหญ่จะแนะนำให้เขียน Regular Expression (`str_detect`) ยาวเหยียด หรือใช้แพ็กเกจ **`fuzzyjoin`** (`stringdist_join`) ซึ่งนับแค่ "ตัวอักษรที่สะกดคล้ายกัน" (Edit Distance) พอเจอคำพ้องความหมายหรือประโยคที่เขียนคนละแบบแต่แปลเหมือนกัน โค้ดแบบเก่าจะจับคู่ไม่เจอทันที!
+
+แต่ตอนนี้ทีม Tidyverse (นำโดย Tomasz Kalinowski และ Hadley Wickham) ได้พัฒนาแพ็กเกจใหม่ชื่อ **`ragnar`** (`tidyverse/ragnar`) ที่นำระบบ **Vector Database + Hybrid Search (Semantic Embeddings + BM25)** มายัดใส่ไว้ในไฟล์ **DuckDB** ไฟล์เดียวในเครื่องคุณ โดยไม่ต้องตั้งเซิร์ฟเวอร์ฐานข้อมูลภายนอกเลยครับ!
+
+---
+
+## 1. เปรียบเทียบวิธีดั้งเดิม vs Semantic Search ด้วย `ragnar`
+
+:::: {layout-ncol="2"}
+
+::: {}
+**แบบเดิม: Regex / `fuzzyjoin` (Edit Distance)**
+
+```{mermaid}
+flowchart TD
+  A["ข้อความหน้างาน<br/>'ต้นข้าวแห้งตายเป็นวงๆ แถวโคนมีแมลง'"] --> B["str_detect() หรือ stringdist_join()"]
+  B --> C["เทียบแค่ 'ตัวอักษรคล้ายกัน'<br/>(Edit Distance / Regex Pattern)"]
+  C --> D["❌ จับคู่ไม่เจอ!<br/>เพราะไม่มีคำว่า 'เพลี้ย' หรือ 'น้ำตาล'"]
+```
+:::
+
+::: {}
+**แบบใหม่: `ragnar` (Semantic + BM25 Hybrid Search)**
+
+```{mermaid}
+flowchart TD
+  A["ข้อความหน้างาน<br/>'ต้นข้าวแห้งตายเป็นวงๆ แถวโคนมีแมลง'"] --> B["ragnar_retrieve()"]
+  B --> C["Vector Similarity: เปรียบเทียบ<br/>'ความหมาย' ในมิติ Embedding"]
+  C --> D["BM25: จับคำสำคัญเสริม<br/>(แห้ง, ตาย, โคน, แมลง)"]
+  D --> E["✅ ดึง 'เพลี้ยกระโดดสีน้ำตาล' ขึ้นมา<br/>อันดับ 1 แม้ไม่มีคำตรง!"]
+```
+:::
+
+::::
+
+---
+
+## 2. ความว้าวที่คนรู้น้อย: สร้างระบบค้นหาด้วย "ความหมาย" ในไฟล์ DuckDB ก้อนเดียว
+
+ด้วยแพ็กเกจ `ragnar` คุณสามารถแปลงข้อความในตาราง R ให้กลายเป็น **Vector Embeddings** แล้วค้นหาด้วยฟังก์ชัน `ragnar_retrieve()` ที่ผสมผสานทั้ง **การค้นหาด้วยคำสำคัญ (BM25)** และ **การค้นหาด้วยความหมาย (Vector Similarity)** พร้อมกันในคำสั่งเดียว:
+
+### ติดตั้งแพ็กเกจ
+
+```r
+# ติดตั้งจาก CRAN (Stable)
+install.packages("ragnar")
+
+# หรือติดตั้ง Development version จาก GitHub ผ่าน pak
+pak::pkg_install("tidyverse/ragnar")
+```
+
+### โค้ดตัวอย่าง: ค้นหาอาการโรคพืชด้วยภาษาพูดหน้างาน
+
+```r
+library(ragnar)
+library(dplyr)
+
+# สมมติมีตารางฐานความรู้หรือรายการมาตรฐาน (Knowledge Base / Master Data)
+master_kb <- tibble(
+  text = c(
+    "โรคใบขีดสีน้ำตาล: เกิดจากเชื้อรา แผลมีลักษณะเป็นขีดยาวขนานกับเส้นใบ มักระบาดช่วงอากาศชื้น",
+    "เพลี้ยกระโดดสีน้ำตาล: ดูดกินน้ำเลี้ยงบริเวณโคนต้น ทำให้ต้นข้าวแห้งตายเป็นหย่อมๆ เรียกว่าอาการไหม้ (Hopperburn)",
+    "อาการขาดธาตุไนโตรเจน: ใบล่างจะมีสีเหลืองซีดสม่ำเสมอทั้งใบ ต้นแคระแกร็น แตกกอน้อย"
+  )
+)
+
+# 1. สร้างคลังข้อมูล Vector Store (เก็บเป็นไฟล์ DuckDB ในเครื่อง หรือ ":memory:" ก็ได้)
+# เลือกใช้โมเดล Embedding จาก Ollama (ฟรีในเครื่อง) หรือ embed_openai()
+store <- ragnar_store_create(
+  location = ":memory:",
+  embed = embed_ollama(model = "bge-m3") # bge-m3 รองรับภาษาไทยแม่นยำมาก!
+)
+
+# 2. โยนตารางข้อมูลเข้าไปฝัง Vector ลงฐานข้อมูล
+ragnar_store_insert(store, master_kb)
+
+# 3. สร้างดัชนีค้นหา (ทั้ง Vector Index และ Full-text BM25 Index)
+ragnar_store_build_index(store)
+
+# 4. ความว้าว: ค้นหาด้วยภาษาพูดหน้างานที่ไม่มีคำศัพท์ตรงกับฐานข้อมูลเลย!
+query_text <- "ต้นข้าวที่แปลงแห้งตายเป็นวงๆ แถวโคนต้นมีแมลงตัวเล็กๆ เกาะอยู่"
+
+results <- ragnar_retrieve(
+  store,
+  text = query_text,
+  top_k = 2
+)
+
+print(results)
+#> ดึง "เพลี้ยกระโดดสีน้ำตาล" ขึ้นมาเป็นอันดับ 1 ทันที
+#> แม้ในคำค้นจะไม่มีคำว่า "เพลี้ย" หรือ "น้ำตาล" เลย!
+```
+
+ผลลัพธ์ที่ได้จาก `ragnar_retrieve()` เป็น **Tibble ปกติ** ที่มีทั้งคอลัมน์ `text` (เนื้อหาที่จับคู่ได้) และคะแนนความเหมือน ทำให้คุณสามารถใช้ `dplyr` เข้าไปตรวจสอบ กรอง หรือปรับแต่งได้ทุกจุด ไม่มีกล่องดำ!
+
+::: {.callout-tip}
+## เลือกโมเดล Embedding ที่เหมาะกับภาษาไทย
+**`bge-m3`** จาก BAAI เป็นโมเดล Embedding หลายภาษาที่รองรับภาษาไทยได้ดีมากและรันฟรีในเครื่องผ่าน Ollama หากต้องการความสะดวกโดยไม่ต้องติดตั้ง Ollama สามารถเปลี่ยนมาใช้ `embed_openai()` หรือ Embedding Gemma ของ Google (`embed_ollama(model = "embeddinggemma:300m")`) ได้ทันทีโดยไม่ต้องแก้โค้ดส่วนอื่นเลย
+:::
+
+---
+
+## 3. ตัวอย่างประยุกต์: Semantic Join เชื่อมตารางที่คนกรอกไม่ตรงกัน
+
+ในงานจริง เรามักมี 2 ตาราง: ตารางมาตรฐาน (Master) กับตารางที่คนกรอกมาจากหน้างาน (Field Report) ปัญหาคือ **คำอธิบายเขียนไม่ตรงกันเลย** แต่ความหมายเดียวกัน:
+
+```r
+# ตารางรายงานจากหน้างาน (ภาษาพูด ไม่เป็นทางการ)
+field_reports <- tibble(
+  report_id = c("RPT-01", "RPT-02", "RPT-03"),
+  description = c(
+    "ข้าวในแปลงเหลืองซีดทั้งแปลง ต้นเตี้ยมาก ไม่ค่อยแตกกอ",
+    "ใบข้าวมีรอยขีดยาวๆ สีน้ำตาล ระบาดหนักช่วงฝนตก",
+    "ต้นข้าวเหี่ยวแห้งตายเป็นกลุ่มๆ ตรงโคนมีตัวอะไรเล็กๆ เกาะ"
+  )
+)
+
+# ใช้ ragnar_retrieve() จับคู่แต่ละแถวกับฐานความรู้
+matched_results <- field_reports |>
+  rowwise() |>
+  mutate(
+    matched = list(ragnar_retrieve(store, text = description, top_k = 1))
+  ) |>
+  tidyr::unnest(matched, names_sep = "_")
+
+# ดูผลลัพธ์: จับคู่ถูกต้องทุกแถวแม้ใช้คำพูดต่างกันสิ้นเชิง!
+matched_results |> 
+  select(report_id, description, matched_text)
+#> RPT-01 → "อาการขาดธาตุไนโตรเจน..."    (เหลืองซีด/ต้นเตี้ย = ขาดไนโตรเจน ✅)
+#> RPT-02 → "โรคใบขีดสีน้ำตาล..."         (รอยขีดยาว/ช่วงฝน = ใบขีดสีน้ำตาล ✅)
+#> RPT-03 → "เพลี้ยกระโดดสีน้ำตาล..."     (แห้งตายเป็นกลุ่ม/ตัวเล็กๆ = เพลี้ย ✅)
+```
+
+สังเกตว่า:
+
+- **RPT-01**: คำว่า "เหลืองซีดทั้งแปลง" กับ "ต้นเตี้ยมาก ไม่แตกกอ" ไม่มีคำว่า "ไนโตรเจน" เลย แต่ Semantic Search เข้าใจว่าอาการเหล่านี้ตรงกับ "ขาดธาตุไนโตรเจน"
+- **RPT-03**: คำว่า "ตัวอะไรเล็กๆ เกาะ" ไม่มีคำว่า "เพลี้ย" เลย แต่ Vector Embedding จับความหมาย "แมลงดูดน้ำเลี้ยงบริเวณโคนต้น" ได้ตรง
+
+ถ้าใช้ `fuzzyjoin::stringdist_join()` หรือ `str_detect()` จะจับคู่ไม่เจอแม้แต่แถวเดียวครับ!
+
+---
+
+## 4. เกร็ดลับระดับ Pro: เปลี่ยนเอกสารคู่มือทั้งโฟลเดอร์เป็นเครื่องมือค้นหาของ AI
+
+นอกจากใช้จับคู่ข้อความในตารางแล้ว `ragnar` ยังมีฟังก์ชันที่ถูกสร้างมาเพื่อแก้ปัญหา **AI ตอบมั่ว (Hallucination)** เวลาอ่านเอกสารวิชาการหรือคู่มือองค์กรโดยเฉพาะ:
+
+### 4.1 `read_as_markdown()` + `markdown_chunk()` — แปลงเอกสารเป็น Chunk อัจฉริยะ
+
+ฟังก์ชัน `read_as_markdown()` รองรับการแปลงเอกสารหลายรูปแบบ (PDF, Word, HTML, หน้าเว็บ, YouTube Transcript, หรือแม้แต่รูปภาพผ่าน OCR) ให้กลายเป็น Markdown แล้ว `markdown_chunk()` จะหั่นแบ่งส่วนตามโครงสร้างหัวข้อของเอกสารอย่างฉลาด (**Context-aware Chunking**) โดยไม่ตัดประโยคขาดครึ่งมั่วๆ:
+
+```r
+# แปลงเอกสาร PDF + หั่น Chunk ตามหัวข้อ ในบรรทัดเดียว!
+chunks <- "คู่มือการจัดการศัตรูพืชข้าว.pdf" |>
+  read_as_markdown() |>
+  markdown_chunk()
+
+# ผลลัพธ์เป็น Data Frame ที่มีคอลัมน์ text และ context (หัวข้อต้นทาง)
+print(chunks)
+#> # A tibble: 42 × 3
+#>    text                              context                        origin
+#>    <chr>                             <chr>                          <chr>
+#>  1 "โรคใบไหม้ (Blast): เกิดจาก..."  "บทที่ 3 > โรคเชื้อรา"        คู่มือฯ.pdf
+#>  2 "เพลี้ยกระโดดสีน้ำตาล..."        "บทที่ 4 > แมลงศัตรูพืช"      คู่มือฯ.pdf
+#>  …
+
+# โยน Chunk ทั้งหมดลง Vector Store
+ragnar_store_insert(store, chunks)
+ragnar_store_build_index(store)
+```
+
+### 4.2 `ragnar_register_tool_retrieve()` — ผูกคลังข้อมูลเข้ากับ AI Chat ในบรรทัดเดียว
+
+เมื่อรวมกับแพ็กเกจ `ellmer` (จาก [R Tips 04](../2026-11-05-rtip4/index.qmd)) คุณสามารถสร้างระบบ **RAG (Retrieval-Augmented Generation)** ที่ AI จะค้นหาเฉพาะย่อหน้าที่เกี่ยวข้องจากเอกสารในเครื่องของคุณขึ้นมาอ้างอิงก่อนตอบ **โดยอัตโนมัติ** ในบรรทัดเดียว:
+
+```r
+library(ellmer)
+
+# สร้าง Chat ที่เชื่อมต่อกับ Gemini (หรือ Ollama สำหรับรันฟรีในเครื่อง)
+chat <- chat_google_gemini(
+  system_prompt = "คุณเป็นผู้เชี่ยวชาญโรคพืชข้าว ตอบจากเอกสารอ้างอิงเท่านั้น"
+)
+
+# ผูกคลัง ragnar เข้ากับ Chat ในบรรทัดเดียว!
+ragnar_register_tool_retrieve(chat, store)
+
+# ถามคำถาม: AI จะค้นหา Chunk ที่เกี่ยวข้องจาก store มาอ้างอิงก่อนตอบ
+chat$chat("ข้าวในแปลงแห้งตายเป็นกลุ่มๆ จะเป็นโรคอะไร ต้องจัดการยังไง?")
+#> AI จะเรียก ragnar_retrieve() อัตโนมัติ ดึง Chunk เกี่ยวกับ
+#> เพลี้ยกระโดดสีน้ำตาลมาอ้างอิงก่อนตอบ ไม่ตอบมั่วจากความรู้ทั่วไป!
+```
+
+::: {.callout-note}
+## ทำไม Tool-based RAG ถึงดีกว่า Static RAG
+ต่างจากระบบ RAG ทั่วไปที่ยัด Chunk เข้า Prompt ทุกครั้งแบบไม่เลือก `ragnar_register_tool_retrieve()` ให้ LLM ตัดสินใจเองว่า **เมื่อไรที่ต้องค้นหา** และ **ค้นด้วยคำถามอะไร** ทำให้ AI สามารถปรับคำค้น หรือค้นหาซ้ำหลายรอบในเทิร์นเดียวได้อัจฉริยะกว่ามาก
+:::
+
+---
+
+## 5. บันทึกและแชร์ Vector Store เป็นไฟล์เดียว
+
+```r
+# สร้าง Store แบบเก็บไฟล์ถาวร (ไม่ใช่ :memory:)
+store <- ragnar_store_create(
+  location = "rice_pest_kb.ragnar.duckdb",
+  embed = embed_ollama(model = "bge-m3")
+)
+
+ragnar_store_insert(store, master_kb)
+ragnar_store_build_index(store)
+
+# ไฟล์ rice_pest_kb.ragnar.duckdb ถูกสร้างในเครื่องของคุณ
+# คุณสามารถ:
+# - ส่งไฟล์นี้ให้เพื่อนร่วมงาน หรืออัปโหลดขึ้น OneDrive / Google Drive
+# - นำไปเปิดใช้บนเครื่องอื่นได้ทันทีด้วย ragnar_store_connect()
+# - คอมมิทเก็บใน Git Repository ไว้ใช้ร่วมกับทีม
+
+# เปิดใช้ Store จากไฟล์ที่มีอยู่แล้ว (บนเครื่องอื่น)
+existing_store <- ragnar_store_connect("rice_pest_kb.ragnar.duckdb")
+ragnar_retrieve(existing_store, text = "ใบข้าวมีจุดสีน้ำตาล", top_k = 3)
+```
+
+---
+
+## 6. ทำไมเทคนิคและ Repo นี้ถึงมีประโยชน์มากในยุค 2026
+
+1. **ไม่ต้องง้อ Cloud Vector DB ราคาแพง:** ทุกอย่างถูกเก็บอยู่ในไฟล์ `.ragnar.duckdb` ไฟล์เดียว ไม่ต้องตั้ง Pinecone, Weaviate, Qdrant หรือ Chroma Server ให้ยุ่งยาก คุณสามารถส่งไฟล์นี้ให้เพื่อนร่วมงานหรือเอาขึ้น Git ไปเปิดรันบนเครื่องอื่นได้ทันที
+
+2. **โปร่งใสและตรวจสอบได้ (No Blackbox):** ต่างจากเครื่องมือ RAG สำเร็จรูปทั่วไปที่ซ่อนกระบวนการไว้เบื้องหลัง `ragnar` ออกแบบให้ทุกขั้นตอนคืนค่าออกมาเป็น **Tibble/Data Frame ปกติ** ทำให้คุณใช้ `dplyr`, `View()`, หรือ `glimpse()` เข้าไปเช็กดูคะแนนความเหมือน (Similarity Score) และปรับแต่งการค้นหาได้เองทุกจุด
+
+3. **เปลี่ยน Embedding Provider ได้ในบรรทัดเดียว:** เหมือนปรัชญา `ellmer` (จาก [R Tips 04](../2026-11-05-rtip4/index.qmd)) คุณเปลี่ยนโมเดล Embedding ได้ทันทีโดยไม่ต้องแก้โค้ดส่วนอื่น:
+   ```r
+   # Ollama (ฟรี/ในเครื่อง)
+   embed = embed_ollama(model = "bge-m3")
+   
+   # OpenAI API
+   embed = embed_openai()
+   ```
+
+4. **เชื่อมต่อกับ `ellmer` ได้ไร้รอยต่อ:** `ragnar` ถูกออกแบบมาให้เป็นชิ้นส่วนเสริมของ `ellmer` ทำให้ Pipeline "อ่านเอกสาร → หั่น Chunk → ฝัง Embedding → ค้นหา → ป้อนให้ AI ตอบ" เขียนได้สั้นกระชับภายไม่กี่บรรทัดของ R
+
+---
+
+## ตารางสรุปคำสั่งสำคัญที่ควรมีติดตัว (Cheatsheet)
+
+| คำสั่ง | หน้าที่หลัก | ตัวอย่างการใช้งาน |
+|---|---|---|
+| `ragnar_store_create()` | สร้าง Vector Store ใหม่บน DuckDB | `ragnar_store_create(location = "kb.duckdb", embed = embed_ollama(model = "bge-m3"))` |
+| `ragnar_store_connect()` | เชื่อมต่อกับ Store ที่มีอยู่แล้ว | `ragnar_store_connect("kb.duckdb")` |
+| `ragnar_store_insert()` | เพิ่มข้อมูลเข้า Store พร้อมสร้าง Embedding | `ragnar_store_insert(store, chunks_df)` |
+| `ragnar_store_build_index()` | สร้างดัชนี Vector + BM25 | `ragnar_store_build_index(store)` |
+| `ragnar_retrieve()` | ค้นหาแบบ Hybrid (Vector + BM25) | `ragnar_retrieve(store, text = "คำค้น", top_k = 5)` |
+| `read_as_markdown()` | แปลง PDF/HTML/Word เป็น Markdown | `read_as_markdown("document.pdf")` |
+| `markdown_chunk()` | หั่นเอกสารเป็น Chunk ตามหัวข้อ | `read_as_markdown("doc.pdf") \|> markdown_chunk()` |
+| `embed_ollama()` | สร้าง Embedding ด้วย Ollama (Local/ฟรี) | `embed_ollama(model = "bge-m3")` |
+| `embed_openai()` | สร้าง Embedding ด้วย OpenAI API | `embed_openai()` |
+| `ragnar_register_tool_retrieve()` | ผูก Store เข้ากับ `ellmer` Chat เป็น Tool | `ragnar_register_tool_retrieve(chat, store)` |
+
+---
+
+## ตารางเปรียบเทียบ: Regex vs Fuzzy Join vs Semantic Search
+
+| คุณสมบัติ | `stringr` + Regex | `fuzzyjoin` (Edit Distance) | `ragnar` (Semantic + BM25) |
+|---|---|---|---|
+| **จับคำพ้องความหมาย** | ❌ ต้องเขียน Pattern ครบทุกคำ | ❌ เทียบแค่ตัวอักษรคล้าย | **✅ เข้าใจความหมายเดียวกัน** |
+| **ภาษาไทย (ไม่เว้นวรรค)** | ⚠️ ยากมาก ต้องมี Word Segmentation | ⚠️ ผลไม่ดี | **✅ Embedding รองรับโดยตรง** |
+| **ประโยคเขียนคนละแบบ** | ❌ Pattern แตก | ⚠️ บางครั้งเจอ บางครั้งไม่ | **✅ จับคู่ได้แม่นยำ** |
+| **ค่าใช้จ่าย** | **✅ ฟรี** | **✅ ฟรี** | ✅ ฟรี (Ollama) / ⚠️ Token (API) |
+| **ความเร็ว (ล้านแถว)** | **✅ เร็วมาก** | ⚠️ ช้าเมื่อตารางใหญ่ | ⚠️ ต้องสร้าง Index ก่อน แต่ค้นเร็ว |
+| **ผลลัพธ์ตรวจสอบได้** | ✅ | ✅ | **✅ Tibble พร้อมคะแนน** |
+
+---
+
+## ลิงก์ GitHub Repo และเอกสารน่าส่องวันนี้
+
+* **tidyverse/ragnar**: [https://github.com/tidyverse/ragnar](https://github.com/tidyverse/ragnar) — แพ็กเกจจัดการ Vector Store, Semantic Search และ RAG บนพื้นฐาน DuckDB จากทีม Tidyverse
+* **ragnar Documentation**: [https://ragnar.tidyverse.org](https://ragnar.tidyverse.org) — เอกสารประกอบ Vignettes และ API Reference ฉบับสมบูรณ์
+* **tidyverse/ellmer**: [https://github.com/tidyverse/ellmer](https://github.com/tidyverse/ellmer) — แพ็กเกจเชื่อมต่อ LLM ที่ทำงานร่วมกับ `ragnar` ได้ไร้รอยต่อ (ดู [R Tips 04](../2026-11-05-rtip4/index.qmd))
