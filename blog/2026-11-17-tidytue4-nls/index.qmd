@@ -1,0 +1,780 @@
+---
+title: "tidyTuesday EP.4: ทำไมสมการ Quadratic ถึงหลอกเราเรื่องผลผลิตพืช — ก้าวสู่ Nonlinear Regression (Mitscherlich, Linear-Plateau & Cate–Nelson)"
+date: 2026-11-17
+description: "หาค่าวิกฤตของโพแทสเซียมในดินจาก agridat::cate.potassium และความหนาแน่นปลูกที่เหมาะสมจาก agridat::mead.turnip ด้วย Nonlinear Least Squares (NLS) เปรียบเทียบ Mitscherlich, Linear-Plateau, Cate–Nelson และ Michaelis–Menten กับพหุนามกำลังสอง (Quadratic Polynomial)"
+categories: [research, statistics, r, tidytuesday, agriculture, nonlinear-regression, nls]
+draft: false
+---
+
+ยินดีต้อนรับสู่ **tidyTuesday EP.4** ซีรีส์ผ่าโครงสร้างข้อมูลและสถิติระเบียบวิธี (Methodological Statistics) ทางการเกษตรและชีววิทยาด้วยภาษา R
+
+ในสัปดาห์นี้ ผมสุ่มเลือกชุดข้อมูลการตอบสนองของผลผลิตพืชต่อความหนาแน่นของการปลูกและธาตุอาหารที่คลาสสิกมากจากแพ็กเกจ `{agridat}` คือ **`cate.potassium`** (Cate & Nelson, 1971) และ **`mead.turnip`** (Mead, 1970) เพื่อเจาะลึกเรื่อง **"การวิเคราะห์การถดถอยไม่เชิงเส้น (Nonlinear Regression: NLS) ด้วยสมการอิงกลไกทางชีววิทยา (Mechanistic Asymptotic & Yield-Density Models)"** แทนการฝืนใช้สมการพหุนามกำลังสอง (Quadratic Polynomial) ที่มักสร้างข้อผิดพลาดทางสรีรวิทยาของพืช
+
+---
+
+## 1. ที่มาและโครงสร้างของข้อมูล (The Datasets)
+
+ในการทดลองทางการเกษตรเพื่อหา "อัตราปุ๋ยที่เหมาะสม" หรือ "ความหนาแน่นของต้นพืชต่อพื้นที่" เรามักพบข้อมูลที่เมื่อเพิ่มปัจจัยการผลิตเข้าไปในช่วงแรก ผลผลิตจะพุ่งขึ้นอย่างรวดเร็ว จากนั้นอัตราการเพิ่มจะค่อยๆ ชะลอตัวลงจนเข้าสู่ระดับอิ่มตัว (Plateau / Asymptote) ชุดข้อมูลที่เราใช้สาธิตในสัปดาห์นี้มาจากแพ็กเกจ `{agridat}` ซึ่งมีโครงสร้างตัวแปรดังนี้:
+
+### ชุดข้อมูลที่ 1: `cate.potassium` — ผลผลิตฝ้ายสัมพัทธ์กับโพแทสเซียมในดิน
+
+ข้อมูลจากงานของ **Cate & Nelson (1971)** ซึ่งเป็นต้นกำเนิดของวิธี **Cate–Nelson Partitioning** ที่ห้องปฏิบัติการวิเคราะห์ดินทั่วโลกใช้กำหนด "ค่าวิกฤตของธาตุอาหารในดิน (Critical Soil Test Level)" ข้อมูลมาจากแปลงทดลองฝ้าย 24 แปลง ($n = 24$) และมีเพียง 2 คอลัมน์:
+
+* **`potassium` (Soil Test K):** ปริมาณโพแทสเซียมที่สกัดได้ในดิน (ppm) มีค่าตั้งแต่ 26 ถึง 211 ppm
+* **`yield` (Relative Yield):** ผลผลิตฝ้ายสัมพัทธ์ (%) เทียบกับแปลงที่ได้รับธาตุอาหารเพียงพอ
+
+::: {.callout-note}
+### ข้อควรรู้ก่อนเริ่ม
+ตัวแปรต้นของชุดนี้คือ **ค่าวิเคราะห์ดิน** ไม่ใช่ **อัตราปุ๋ยที่ใส่** ค่าวิกฤตที่ได้จึงตอบคำถามว่า "ดินที่มี K เท่าไรขึ้นไปจึงไม่ตอบสนองต่อปุ๋ยแล้ว" ไม่ใช่ "ต้องใส่ปุ๋ยกี่กิโลกรัม" นอกจากนี้หน้า help ของ `agridat` ระบุว่าการคำนวณจากข้อมูลชุดนี้ให้ผลไม่ตรงกับ Table 1 ของบทความต้นฉบับทุกจุด (ข้อมูลที่ตีพิมพ์อาจถูกปัดเศษ) ตัวเลขในโพสต์นี้จึงเป็นผลจากข้อมูลใน `agridat` ไม่ใช่ตัวเลขจากบทความ
+:::
+
+### ชุดข้อมูลที่ 2: `mead.turnip` — การตอบสนองต่อความหนาแน่นของการปลูก
+
+ข้อมูลจาก **Mead (1970)** ศึกษาความสัมพันธ์ระหว่างความหนาแน่นของต้นหัวผักกาด (Turnip) กับน้ำหนักผลผลิตต่อพื้นที่ จำนวน 60 แปลง:
+
+* **`density` (Plant Density):** จำนวนต้นพืชต่อหน่วยพื้นที่ (ต้น/ตารางฟุต) มี 5 ระดับ คือ 0.5, 2, 8, 20 และ 32
+* **`spacing` (Row Spacing):** ระยะระหว่างแถว 4 ระดับ (4, 8, 16, 32 นิ้ว) จัดแบบ factorial กับ `density`
+* **`block`:** บล็อกทดลอง 3 บล็อก (B1–B3)
+* **`yield` (Yield per Plot):** ผลผลิตรวมต่อแปลง (ปอนด์)
+
+ในโพสต์นี้เราจะดูเฉพาะผลของ `density` โดยรวมข้อมูลทุก `spacing` และ `block` เข้าด้วยกัน เพื่อให้โฟกัสอยู่ที่รูปร่างของเส้นโค้ง
+
+```
+[โครงสร้างข้อมูลสำหรับ Nonlinear Regression ทั้ง 2 ชุด]
+  │
+  ├── cate.potassium (Soil Test Calibration Curve)
+  │     ├── ปัจจัยป้อน: potassium (K ในดิน, ppm)
+  │     ├── ผลผลิต: yield (ผลผลิตฝ้ายสัมพัทธ์, %)
+  │     └── คาดหวัง: ไต่ขึ้นเร็วแล้วเข้าสู่เพดาน → หาค่าวิกฤต (Critical Level)
+  │
+  └── mead.turnip (Yield-Density Curve)
+        ├── ปัจจัยป้อน: density (ต้น/ตร.ฟุต)
+        ├── ผลผลิต: yield (ปอนด์/แปลง)
+        └── คาดหวัง: Asymptotic + อาจลดลงเมื่อแน่นเกินไป (Competition)
+```
+
+เราเริ่มต้นด้วยการโหลดไลบรารีและเตรียมข้อมูลทั้งสองชุด:
+
+```{r}
+#| label: setup-data
+#| message: false
+#| warning: false
+library(agridat)
+library(tidyverse)
+library(broom)
+
+# --- ชุดข้อมูลที่ 1: Cate & Nelson Soil Potassium ---
+data("cate.potassium", package = "agridat")
+k_df <- cate.potassium
+
+glimpse(k_df)
+```
+
+```{r}
+#| label: inspect-k
+# สำรวจช่วงของข้อมูลโพแทสเซียมในดิน
+k_df |>
+  summarise(
+    n_obs = n(),
+    min_k = min(potassium),
+    max_k = max(potassium),
+    min_yield = round(min(yield), 2),
+    mean_yield = round(mean(yield), 2),
+    max_yield = round(max(yield), 2)
+  )
+```
+
+```{r}
+#| label: setup-turnip
+#| message: false
+# --- ชุดข้อมูลที่ 2: Mead Turnip Yield-Density ---
+data("mead.turnip", package = "agridat")
+turnip_df <- mead.turnip
+
+glimpse(turnip_df)
+```
+
+```{r}
+#| label: inspect-turnip
+turnip_df |>
+  summarise(
+    n_obs = n(),
+    min_density = min(density),
+    max_density = max(density),
+    min_yield = round(min(yield), 2),
+    mean_yield = round(mean(yield), 2),
+    max_yield = round(max(yield), 2)
+  )
+```
+
+---
+
+## 2. ทำไมสมการพหุนามกำลังสอง (Quadratic) ถึงไม่เหมาะกับกฎการลดน้อยถอยลงทางชีววิทยา?
+
+นักวิเคราะห์ข้อมูลจำนวนมากเมื่อเห็นกราฟโค้งงอ มักคุ้นชินกับการใส่สมการพหุนามกำลังสอง `lm(yield ~ x + I(x^2))` เพราะรันง่ายด้วย Linear Model ปกติ แต่ในทางสรีรวิทยาพืชและปฐพีวิทยา (Cerrato & Blackmer, 1990; Archontoulis & Miguez, 2015) สมการกำลังสองมีข้อบกพร่องร้ายแรง 3 ประการ:
+
+::: {.callout-warning}
+### 3 ข้อบกพร่องร้ายแรงของสมการพหุนามกำลังสอง ($Y = \beta_0 + \beta_1 X + \beta_2 X^2$)
+
+1. **บังคับให้กราฟต้องโค้งหัวตกอย่างสมมาตร (Forced Symmetry & Unrealistic Decline):**
+   พาราโบลาบังคับว่าเมื่อเลยจุดสูงสุดไปแล้ว ผลผลิตต้องลดลงด้วยอัตราเร่งเท่ากับตอนขาขึ้น ทั้งที่ในความเป็นจริง ปุ๋ยฟอสฟอรัสหรือโพแทสเซียมเมื่อใส่เกินความต้องการของพืช ผลผลิตจะแค่ **"คงที่ในระดับอิ่มตัว (Plateau)"** ไม่ได้เป็นพิษจนผลผลิตร่วงลงแบบพาราโบลา
+
+2. **ประเมินจุดสูงสุด (Optimum Rate) สูงเกินจริงเสมอ (Overestimation Bias):**
+   เนื่องจากปลายกราฟพาราโบลาต้องงอลง ช่วงยอดโค้งจึงถูกดึงให้เบ้ไปทางขวามือของจุดเริ่มอิ่มตัวจริง ส่งผลให้คำแนะนำการใส่ปุ๋ยจากสมการกำลังสองสูงกว่าความต้องการจริงของพืชถึง 20–35% (Cerrato & Blackmer, 1990)
+
+3. **พารามิเตอร์ไม่มีความหมายทางชีววิทยา:**
+   สัมประสิทธิ์ $\beta_1$ และ $\beta_2$ ในสมการพหุนามไม่สามารถแปลผลเป็น "ผลผลิตสูงสุดที่เป็นไปได้ตามพันธุกรรม" หรือ "ประสิทธิภาพการใช้ธาตุอาหารต่อหน่วย" ได้โดยตรง
+:::
+
+**ทางออกที่ถูกต้อง:** ใช้ **Nonlinear Least Squares (`nls`)** ด้วยสมการ **Mitscherlich Law of Diminishing Returns** (หรือ Asymptotic Regression `SSasymp` ใน R):
+
+$$Y = A - (A - Y_0) \cdot e^{-k X}$$
+
+โดยทุกพารามิเตอร์มีความหมายทางชีววิทยาชัดเจน:
+
+* **$A$ (Asymptote / Maximum Potential Yield):** เพดานผลผลิตสูงสุดเมื่อธาตุอาหารไม่เป็นปัจจัยจำกัด
+* **$Y_0$ (Intercept / Unfertilized Yield):** ผลผลิตพื้นฐานที่ได้จากธาตุอาหารเดิมในดินเมื่อไม่ใส่ปุ๋ย ($X = 0$)
+* **$k$ (Rate Constant / Efficiency Factor):** อัตราความเร็วในการเข้าใกล้เพดานผลผลิต (ยิ่ง $k$ สูง พืชยิ่งตอบสนองต่อปุ๋ยเร็วในอัตราต่ำ)
+
+นอกจาก Mitscherlich แล้ว งานปฐพีวิทยายังนิยมอีก 2 วิธีที่ให้ "ค่าวิกฤต" ออกมาตรงๆ:
+
+* **Linear-Plateau:** เส้นตรงที่ไต่ขึ้นจนถึงจุดหักเห ($X_c$) แล้วคงที่เป็นเส้นแนวนอน
+  $$Y = \beta_0 + \beta_1 \cdot \min(X, X_c)$$
+* **Cate–Nelson Partitioning (1971):** หาเส้นแบ่งแนวตั้ง $X_c$ ที่แยกข้อมูลเป็น 2 กลุ่ม ("ดินขาด K ตอบสนองต่อปุ๋ย" กับ "ดินพอแล้ว ไม่ตอบสนอง") โดยเลือก $X_c$ ที่ทำให้ $R^2$ ของการแบ่งกลุ่มสูงที่สุด (หรือเทียบเท่า ผลรวมกำลังสองของส่วนเหลือภายในกลุ่มต่ำที่สุด)
+
+---
+
+## 3. ส่วนที่ 1 — หาค่าวิกฤตของโพแทสเซียมในดิน (`cate.potassium`)
+
+### 3.1 ดูข้อมูลดิบก่อน
+
+```{r}
+#| label: plot-k-raw
+#| fig-width: 8
+#| fig-height: 4.5
+ggplot(k_df, aes(x = potassium, y = yield)) +
+  geom_point(size = 3, alpha = 0.75, color = "grey20") +
+  labs(
+    title = "ผลผลิตฝ้ายสัมพัทธ์ตามระดับโพแทสเซียมในดิน",
+    x = "โพแทสเซียมในดิน (ppm)",
+    y = "ผลผลิตฝ้ายสัมพัทธ์ (%)",
+    caption = "Data: agridat::cate.potassium (n = 24)"
+  ) +
+  theme_minimal(base_size = 12)
+```
+
+กราฟแสดงรูปแบบคลาสสิกของ soil test calibration: เมื่อ K ในดินต่ำกว่าราว 45 ppm ผลผลิตสัมพัทธ์ส่วนใหญ่อยู่ที่ 40–80% แต่เมื่อ K สูงกว่านั้น ผลผลิตส่วนใหญ่กระโดดขึ้นไปแกว่งอยู่ราว 85–107% (มีจุดเดียวที่ 68 ppm ให้ 66.5%) และไม่เพิ่มต่ออีกแม้ K จะสูงถึง 211 ppm
+
+### 3.2 ฟิตโมเดลทั้ง 4 แบบ
+
+```{r}
+#| label: fit-models-k
+# --- โมเดลที่ 1: สมการพหุนามกำลังสอง (Quadratic Polynomial) ---
+mod_quad <- lm(yield ~ potassium + I(potassium^2), data = k_df)
+
+# --- โมเดลที่ 2: Mitscherlich (Asymptotic Exponential Regression) ---
+# SSasymp() = Self-Starting Function ที่คำนวณค่าเริ่มต้นอัตโนมัติ
+# Y = Asym + (R0 - Asym) * exp(-exp(lrc) * x)
+# ซึ่งเทียบเท่ากับ Y = A - (A - Y0) * exp(-k * x)
+mod_mitsch <- nls(yield ~ SSasymp(potassium, Asym, R0, lrc), data = k_df)
+
+# --- โมเดลที่ 3: Linear-Plateau ---
+# nls() กับ ifelse() หรือ pmin() มักไม่ลู่เข้า เพราะ gradient ไม่ต่อเนื่องที่จุดหักเห
+# จึงใช้ profile grid search: ลองทุกค่า Xc แล้วเลือกค่าที่ RSS ต่ำสุด
+lp_grid <- tibble(xc = seq(30, 150, by = 0.5)) |>
+  mutate(rss = map_dbl(xc, \(x) deviance(lm(yield ~ pmin(potassium, x), data = k_df))))
+
+xc_lp  <- lp_grid$xc[which.min(lp_grid$rss)]
+mod_lp <- lm(yield ~ pmin(potassium, xc_lp), data = k_df)
+b0_lp  <- coef(mod_lp)[[1]]
+b1_lp  <- coef(mod_lp)[[2]]
+plateau_lp <- b0_lp + b1_lp * xc_lp
+
+# --- โมเดลที่ 4: Cate–Nelson Partitioning ---
+# ลองเส้นแบ่งที่จุดกึ่งกลางระหว่างค่า K ที่ติดกัน แล้วเลือกจุดที่ R² สูงสุด
+k_sorted <- sort(unique(k_df$potassium))
+cn_search <- tibble(xc = (head(k_sorted, -1) + tail(k_sorted, -1)) / 2) |>
+  mutate(r2 = map_dbl(xc, \(x) summary(lm(yield ~ I(potassium >= x), data = k_df))$r.squared))
+
+best_cn <- cn_search |> slice_max(r2, n = 1, with_ties = FALSE)
+xc_cn   <- best_cn$xc
+r2_cn   <- best_cn$r2
+
+cn_groups <- k_df |>
+  mutate(group = if_else(potassium >= xc_cn, "สูงกว่าค่าวิกฤต", "ต่ำกว่าค่าวิกฤต")) |>
+  group_by(group) |>
+  summarise(n = n(), mean_yield = mean(yield), .groups = "drop")
+
+cn_groups
+```
+
+::: {.callout-tip}
+### ทำไมไม่ใช้ `nls()` ตรงๆ กับ Linear-Plateau?
+ถ้าลองเขียน `nls(yield ~ ifelse(potassium < Xc, b0 + b1 * potassium, b0 + b1 * Xc), ...)` กับข้อมูลชุดนี้ จะได้ error `step factor ... reduced below 'minFactor'` เพราะ RSS เปลี่ยนแบบไม่ต่อเนื่องเมื่อ $X_c$ เลื่อนข้ามจุดข้อมูล วิธี profile grid search ด้านบนเสถียรกว่า หรือจะใช้ `SSlinp()` จากแพ็กเกจ `{nlraa}` ก็ได้
+:::
+
+### 3.3 เปรียบเทียบความเหมาะสมของโมเดลด้วย AIC
+
+`lm()` ของ Linear-Plateau ไม่รู้ว่าเราประมาณ $X_c$ มาด้วย จึงต้องปรับ `sigma` และ `AIC` ให้นับพารามิเตอร์เพิ่มอีก 1 ตัว เพื่อให้เทียบกับโมเดลอื่นได้อย่างยุติธรรม:
+
+```{r}
+#| label: model-comparison-k
+n_k <- nrow(k_df)
+
+model_comp <- bind_rows(
+  glance(mod_quad)   |> mutate(Model = "1. Quadratic Polynomial (lm)"),
+  glance(mod_mitsch) |> mutate(Model = "2. Mitscherlich Asymptotic (nls)"),
+  glance(mod_lp) |>
+    mutate(
+      Model = "3. Linear-Plateau (grid search)",
+      sigma = sqrt(deviance(mod_lp) / (n_k - 3)),
+      AIC   = AIC + 2,
+      BIC   = BIC + log(n_k)
+    )
+) |>
+  select(Model, sigma, AIC, BIC, logLik)
+
+model_comp
+```
+
+Cate–Nelson ไม่อยู่ในตารางนี้ เพราะเป็นการแบ่งกลุ่ม 2 ระดับ ไม่ใช่เส้นโค้งต่อเนื่อง จึงใช้ $R^2$ ของการแบ่งกลุ่มแทน (ได้ $R^2$ = `r round(r2_cn, 3)`)
+
+### 3.4 ค่าวิกฤตจากแต่ละวิธี
+
+```{r}
+#| label: calc-critical
+A_hat  <- coef(mod_mitsch)[["Asym"]]
+Y0_hat <- coef(mod_mitsch)[["R0"]]
+k_hat  <- exp(coef(mod_mitsch)[["lrc"]])
+
+X_90 <- -(1 / k_hat) * log((0.10 * A_hat) / (A_hat - Y0_hat))
+X_95 <- -(1 / k_hat) * log((0.05 * A_hat) / (A_hat - Y0_hat))
+
+x_opt_quad <- -coef(mod_quad)[["potassium"]] / (2 * coef(mod_quad)[["I(potassium^2)"]])
+
+critical_tbl <- tribble(
+  ~Method,                         ~`Critical K (ppm)`, ~Note,
+  "Cate–Nelson",                   xc_cn,      sprintf("R² = %.3f", r2_cn),
+  "Linear-Plateau",                xc_lp,      sprintf("plateau = %.1f%%", plateau_lp),
+  "Mitscherlich (90% ของ A)",      X_90,       sprintf("A = %.1f%%", A_hat),
+  "Mitscherlich (95% ของ A)",      X_95,       sprintf("A = %.1f%%", A_hat),
+  "Quadratic (จุดยอดพาราโบลา)",    x_opt_quad, "สูงเกินจริง"
+) |>
+  mutate(`Critical K (ppm)` = round(`Critical K (ppm)`, 1))
+
+critical_tbl
+```
+
+```{r}
+#| label: mitsch-params
+# ค่าพารามิเตอร์ Mitscherlich พร้อมช่วงความเชื่อมั่น 95%
+tidy(mod_mitsch, conf.int = TRUE)
+```
+
+::: {.callout-note}
+### การอ่านค่าพารามิเตอร์จาก `SSasymp` ใน R
+
+ฟังก์ชัน `SSasymp(potassium, Asym, R0, lrc)` ประมาณค่าพารามิเตอร์ออกมา 3 ตัว:
+
+* **`Asym` ($A$):** เพดานผลผลิตสัมพัทธ์เมื่อ K ในดินไม่เป็นปัจจัยจำกัด (ได้ `r round(A_hat, 1)`%)
+* **`R0` ($Y_0$):** ค่าที่เส้นโค้งตัดแกน Y เมื่อ K = 0 (ได้ `r round(Y0_hat, 1)`%) ค่านี้ **ติดลบ** และไม่มีความหมายทางชีววิทยา เพราะข้อมูลเริ่มที่ 26 ppm และไม่มีดินที่ K = 0 จริง จึงเป็นแค่การ extrapolate ออกนอกช่วงข้อมูล
+* **`lrc` ($\ln(k)$):** ลอการิทึมของค่าคงที่อัตราการตอบสนอง โดย $k = e^{\text{lrc}}$ (ได้ $k$ = `r round(k_hat, 4)`)
+
+ระดับ K ในดินที่ให้ผลผลิต 95% ของเพดาน ($X_{95}$) คำนวณจาก:
+
+$$X_{95} = -\frac{1}{k} \ln\left(\frac{0.05 \times A}{A - Y_0}\right)$$
+:::
+
+### 3.5 กราฟเปรียบเทียบเส้นโค้ง
+
+```{r}
+#| label: plot-k-comparison
+#| fig-width: 9
+#| fig-height: 6
+grid_k <- tibble(potassium = seq(min(k_df$potassium), max(k_df$potassium), length.out = 300)) |>
+  mutate(
+    Quadratic        = predict(mod_quad,   newdata = pick(everything())),
+    Mitscherlich     = predict(mod_mitsch, newdata = pick(everything())),
+    `Linear-Plateau` = predict(mod_lp,     newdata = pick(everything()))
+  ) |>
+  pivot_longer(-potassium, names_to = "model_type", values_to = "pred_yield") |>
+  mutate(
+    model_type = factor(
+      model_type,
+      levels = c("Quadratic", "Mitscherlich", "Linear-Plateau"),
+      labels = c(
+        "Quadratic (พาราโบลา — หัวกลับลง)",
+        "Mitscherlich (เข้าสู่จุดอิ่มตัว)",
+        "Linear-Plateau (หักเข้าเพดาน)"
+      )
+    )
+  )
+
+ggplot() +
+  # เส้นแบ่ง Cate–Nelson
+  geom_vline(xintercept = xc_cn, linetype = "longdash", color = "#e7298a", linewidth = 0.7) +
+  annotate(
+    "text", x = xc_cn + 3, y = min(k_df$yield),
+    label = paste0("Cate–Nelson = ", round(xc_cn, 1), " ppm"),
+    color = "#e7298a", fontface = "bold", size = 3.5, hjust = 0
+  ) +
+  # เพดานผลผลิตจาก Mitscherlich
+  geom_hline(yintercept = A_hat, linetype = "dotted", color = "grey40", linewidth = 0.8) +
+  geom_point(
+    data = k_df, aes(x = potassium, y = yield),
+    size = 3, alpha = 0.7, color = "grey20"
+  ) +
+  geom_line(
+    data = grid_k,
+    aes(x = potassium, y = pred_yield, color = model_type, linetype = model_type),
+    linewidth = 1.2
+  ) +
+  scale_color_brewer(palette = "Dark2", name = "รูปแบบสมการ (Model)") +
+  scale_linetype_manual(
+    values = c("solid", "dashed", "dotdash"),
+    name = "รูปแบบสมการ (Model)"
+  ) +
+  labs(
+    title = "ผลผลิตฝ้ายสัมพัทธ์ต่อโพแทสเซียมในดิน: Quadratic vs. Mitscherlich vs. Linear-Plateau",
+    subtitle = paste0(
+      "Quadratic ขึ้นยอดที่ ", round(x_opt_quad), " ppm แล้วโค้งลง ",
+      "ส่วน Linear-Plateau หักเข้าเพดานที่ ", round(xc_lp), " ppm\n",
+      "เส้นจุดสีเทา = เพดาน Mitscherlich (A = ", round(A_hat, 1), "%)"
+    ),
+    x = "โพแทสเซียมในดิน (ppm)",
+    y = "ผลผลิตฝ้ายสัมพัทธ์ (%)",
+    caption = "Data: Cate & Nelson (1971) via agridat::cate.potassium (n = 24)\ntidyTuesday EP.4 | Nonlinear Regression in R"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    legend.position = "top",
+    legend.title = element_text(face = "bold"),
+    plot.title = element_text(face = "bold", size = 14, color = "#1B261D"),
+    plot.subtitle = element_text(size = 11, color = "#555555", margin = margin(b = 10)),
+    panel.grid.minor = element_blank(),
+    plot.caption = element_text(color = "grey40", size = 9, margin = margin(t = 12))
+  )
+```
+
+### 3.6 การตีความผลทางสถิติและปฐพีวิทยา
+
+::: {.callout-important}
+### ค่าวิกฤตที่ใช้แนะนำได้จริง
+
+* **Mitscherlich และ Linear-Plateau ฟิตได้ดีกว่า Quadratic:** AIC ของสองโมเดลนี้ (`r round(AIC(mod_mitsch), 1)` และ `r round(model_comp$AIC[3], 1)`) ใกล้กันมาก และต่ำกว่า Quadratic (`r round(AIC(mod_quad), 1)`) ชัดเจน ข้อมูล 24 จุดไม่พอจะบอกว่าโมเดลไหนในสองตัวนี้ดีกว่ากัน
+* **ช่วงค่าวิกฤตอยู่ที่ราว `r round(xc_cn, 1)`–`r round(X_95)` ppm:** Cate–Nelson ให้ค่าต่ำสุด (`r round(xc_cn, 1)` ppm) Linear-Plateau ให้ `r round(xc_lp, 1)` ppm และ Mitscherlich ที่ 95% ของเพดานให้ `r round(X_95, 1)` ppm ดินที่มี K สูงกว่าช่วงนี้แทบไม่ตอบสนองต่อปุ๋ยโพแทสเซียมแล้ว
+* **Quadratic ให้ค่าสูงเกินจริงราว 2 เท่า:** จุดยอดพาราโบลาอยู่ที่ `r round(x_opt_quad, 1)` ppm ทั้งที่ข้อมูลที่ 193 และ 211 ppm ยังให้ผลผลิต 106.8% และ 97.5% ถ้าใช้จุดยอดนี้เป็นเกณฑ์ เกษตรกรที่ดินมี K 80–150 ppm จะถูกแนะนำให้ใส่ปุ๋ยโดยไม่จำเป็น
+* **Linear-Plateau แปลผลง่ายที่สุด:** ในช่วงที่ K ต่ำกว่า `r round(xc_lp)` ppm ทุก 1 ppm ที่เพิ่มขึ้นจะเพิ่มผลผลิตสัมพัทธ์ราว `r round(b1_lp, 2)`% จนชนเพดานที่ `r round(plateau_lp, 1)`%
+* **Cate–Nelson ไม่ได้ให้ค่าเดียวที่แน่นอน:** เส้นแบ่งใดๆ ระหว่าง 44 กับ 49 ppm ให้ $R^2$ เท่ากัน เพราะไม่มีข้อมูลอยู่ในช่วงนั้น โพสต์นี้รายงานจุดกึ่งกลาง (`r round(xc_cn, 1)` ppm)
+:::
+
+### 3.7 กราฟ Residual Diagnostics เปรียบเทียบ
+
+```{r}
+#| label: residual-compare
+#| fig-width: 9
+#| fig-height: 4.5
+resid_df <- bind_rows(
+  tibble(model = "Quadratic", potassium = k_df$potassium, residual = residuals(mod_quad)),
+  tibble(model = "Mitscherlich (NLS)", potassium = k_df$potassium, residual = residuals(mod_mitsch)),
+  tibble(model = "Linear-Plateau", potassium = k_df$potassium, residual = residuals(mod_lp))
+) |>
+  mutate(model = factor(model, levels = c("Quadratic", "Mitscherlich (NLS)", "Linear-Plateau")))
+
+ggplot(resid_df, aes(x = potassium, y = residual)) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "grey50") +
+  geom_point(size = 2.5, alpha = 0.7, color = "#d95f02") +
+  geom_smooth(method = "loess", formula = y ~ x, se = FALSE, linewidth = 0.9, color = "#7570b3") +
+  facet_wrap(~ model) +
+  labs(
+    title = "Residual Diagnostics: Quadratic vs. Mitscherlich vs. Linear-Plateau",
+    subtitle = "ดูว่า residual ของแต่ละโมเดลมี pattern ตามระดับ K หรือกระจายสุ่มรอบศูนย์",
+    x = "โพแทสเซียมในดิน (ppm)",
+    y = "ค่าเหลือ (Residuals)",
+    caption = "เส้นสีม่วง = LOESS smoother ของ residuals"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    strip.text = element_text(face = "bold", size = 12),
+    plot.title = element_text(face = "bold", size = 13),
+    plot.subtitle = element_text(size = 10, color = "#555555")
+  )
+```
+
+---
+
+## 4. ส่วนที่ 2 — วิเคราะห์ Mead Turnip Yield-Density Curve
+
+### 4.1 ทำไมต้องใช้สมการ Yield-Density แบบ Mechanistic?
+
+เมื่อเพิ่มจำนวนต้นพืชต่อหน่วยพื้นที่ ผลผลิตรวมต่อพื้นที่จะเพิ่มขึ้น **แต่จะเข้าสู่เพดาน** เนื่องจากต้นพืชแต่ละต้นแข่งขันกันใช้แสง น้ำ และธาตุอาหาร (Bleasdale & Nelder, 1960; Holliday, 1960)
+
+สมการ **Asymptotic** (`SSasymp`) เป็นทางเลือกที่เหมาะสมกว่าพหุนามกำลังสอง เพราะจับภาพของ **กฎผลตอบแทนลดน้อยถอยลง** ที่เส้นโค้งลู่เข้าเพดานโดยไม่หักหัวลง
+
+สำหรับกรณีที่ผลผลิตรวม *อาจ* ลดลงจริงเมื่อแน่นเกินไป (เช่น ต้นพืชตายเพราะแออัด) สมการ **Inverse Polynomial** หรือ **Bleasdale–Nelder** จะเหมาะกว่า แต่สำหรับข้อมูล `mead.turnip` ที่ผลผลิตรวมยังไม่แสดงสัญญาณลดลง `SSasymp` เป็นจุดเริ่มต้นที่ดี
+
+### 4.2 ฟิตโมเดลเปรียบเทียบ
+
+```{r}
+#| label: fit-turnip-models
+# --- โมเดลที่ 1: Quadratic ---
+mod_turnip_quad <- lm(yield ~ density + I(density^2), data = turnip_df)
+
+# --- โมเดลที่ 2: Mitscherlich / Asymptotic ---
+mod_turnip_asym <- nls(
+  yield ~ SSasymp(density, Asym, R0, lrc),
+  data = turnip_df
+)
+
+# --- โมเดลที่ 3: Michaelis-Menten (SSmicmen) ---
+mod_turnip_mm <- nls(
+  yield ~ SSmicmen(density, Vm, K),
+  data = turnip_df
+)
+```
+
+### 4.3 เปรียบเทียบ Goodness-of-Fit
+
+```{r}
+#| label: model-comparison-turnip
+model_comp_turnip <- bind_rows(
+  glance(mod_turnip_quad) |> mutate(Model = "1. Quadratic Polynomial"),
+  glance(mod_turnip_asym) |> mutate(Model = "2. Asymptotic (SSasymp)"),
+  glance(mod_turnip_mm)   |> mutate(Model = "3. Michaelis-Menten (SSmicmen)")
+) |>
+  select(Model, sigma, AIC, BIC, logLik)
+
+print(model_comp_turnip)
+```
+
+### 4.4 พารามิเตอร์ของ Asymptotic Model สำหรับ Turnip
+
+```{r}
+#| label: turnip-params
+tidy(mod_turnip_asym, conf.int = TRUE)
+
+# สกัดค่าพารามิเตอร์
+A_turnip  <- coef(mod_turnip_asym)[["Asym"]]
+Y0_turnip <- coef(mod_turnip_asym)[["R0"]]
+k_turnip  <- exp(coef(mod_turnip_asym)[["lrc"]])
+
+cat("\nเพดานผลผลิตรวมสูงสุด (Asym):", round(A_turnip, 2), "ปอนด์/แปลง\n")
+cat("ผลผลิตที่ density → 0 (R0):", round(Y0_turnip, 2), "ปอนด์/แปลง\n")
+cat("ค่าคงที่ k:", round(k_turnip, 4), "\n")
+
+# หาความหนาแน่นที่ให้ผลผลิต 90% ของเพดาน
+D_90 <- -(1 / k_turnip) * log((0.10 * A_turnip) / (A_turnip - Y0_turnip))
+D_95 <- -(1 / k_turnip) * log((0.05 * A_turnip) / (A_turnip - Y0_turnip))
+cat("ความหนาแน่นที่ให้ 90% ของเพดาน (D₉₀):", round(D_90, 1), "ต้น/ตร.ฟุต\n")
+cat("ความหนาแน่นที่ให้ 95% ของเพดาน (D₉₅):", round(D_95, 1), "ต้น/ตร.ฟุต\n")
+```
+
+### 4.5 กราฟ Turnip Yield-Density Curve
+
+```{r}
+#| label: plot-turnip-comparison
+#| fig-width: 9
+#| fig-height: 6
+grid_turnip <- tibble(density = seq(0.5, max(turnip_df$density) * 1.3, length.out = 300)) |>
+  mutate(
+    Quadratic          = predict(mod_turnip_quad, newdata = pick(everything())),
+    Asymptotic         = predict(mod_turnip_asym, newdata = pick(everything())),
+    `Michaelis-Menten` = predict(mod_turnip_mm,   newdata = pick(everything()))
+  ) |>
+  pivot_longer(-density, names_to = "model_type", values_to = "pred_yield") |>
+  mutate(
+    model_type = factor(
+      model_type,
+      levels = c("Quadratic", "Asymptotic", "Michaelis-Menten"),
+      labels = c(
+        "Quadratic (พาราโบลา)",
+        "Asymptotic (เพดานอิ่มตัว)",
+        "Michaelis-Menten"
+      )
+    )
+  )
+
+ggplot() +
+  geom_point(
+    data = turnip_df,
+    aes(x = density, y = yield),
+    size = 3, alpha = 0.65, color = "grey20"
+  ) +
+  geom_line(
+    data = grid_turnip,
+    aes(x = density, y = pred_yield, color = model_type, linetype = model_type),
+    linewidth = 1.2
+  ) +
+  geom_hline(
+    yintercept = A_turnip,
+    linetype = "dotted", color = "#1b9e77", linewidth = 0.9
+  ) +
+  annotate(
+    "text",
+    x = max(turnip_df$density) * 0.5,
+    y = A_turnip + (max(turnip_df$yield) - min(turnip_df$yield)) * 0.06,
+    label = paste0("เพดานผลผลิต (A = ", round(A_turnip, 2), " lb/plot)"),
+    color = "#1b9e77", fontface = "bold", size = 3.8
+  ) +
+  scale_color_brewer(palette = "Dark2", name = "รูปแบบสมการ (Model)") +
+  scale_linetype_manual(
+    values = c("solid", "dashed", "dotdash"),
+    name = "รูปแบบสมการ (Model)"
+  ) +
+  labs(
+    title = "Mead Turnip: เปรียบเทียบ Yield-Density Curves — Asymptotic NLS vs. Quadratic",
+    subtitle = "Quadratic ทำนายผลผลิตลดลงที่ความหนาแน่นสูง ทั้งที่จริงแล้วผลผลิตรวมแค่นิ่ง (Plateau)",
+    x = "ความหนาแน่นต้นหัวผักกาด (ต้น/ตร.ฟุต)",
+    y = "ผลผลิตรวม (ปอนด์/แปลง)",
+    caption = "Data: mead.turnip จาก {agridat} | tidyTuesday EP.4"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    legend.position = "top",
+    legend.title = element_text(face = "bold"),
+    plot.title = element_text(face = "bold", size = 14, color = "#1B261D"),
+    plot.subtitle = element_text(size = 11, color = "#555555", margin = margin(b = 10)),
+    panel.grid.minor = element_blank(),
+    plot.caption = element_text(color = "grey40", size = 9, margin = margin(t = 12))
+  )
+```
+
+---
+
+## 5. ผลผลิตต่อต้น (Yield per Plant) — เมื่อไหร่ที่ต้นพืชแข่งขันกัน?
+
+มุมมองที่สำคัญอีกอย่างคือ **ผลผลิตต่อต้น** (Yield per Plant = Total Yield / Density) ซึ่งจะ *ลดลง* เมื่อความหนาแน่นเพิ่มขึ้น เพราะแต่ละต้นได้รับทรัพยากรน้อยลง
+
+สมการ **Inverse Yield-Density** ของ Holliday (1960) ทำนายว่า:
+
+$$\frac{1}{w} = a + b \cdot d$$
+
+โดยที่ $w$ = น้ำหนักต่อต้น, $d$ = ความหนาแน่น ซึ่งให้ผลผลิตรวม $Y = d \cdot w = \frac{d}{a + b \cdot d}$ — เป็นสมการ Rectangular Hyperbola ที่เทียบเท่ากับ Michaelis–Menten!
+
+```{r}
+#| label: yield-per-plant
+#| fig-width: 8
+#| fig-height: 5
+# ตัดแปลงที่ yield = 0 ออก (มี 1 แปลง) เพราะจะทำให้ 1/w = Inf และ lm() error
+turnip_per_plant <- turnip_df |>
+  filter(yield > 0) |>
+  mutate(yield_per_plant = yield / density)
+
+# ฟิต Inverse Linear Relationship
+mod_inv <- lm(I(1 / yield_per_plant) ~ density, data = turnip_per_plant)
+
+# สร้างเส้นพยากรณ์ให้ครอบคลุมช่วงข้อมูลทั้งหมด (0.5–32 ต้น/ตร.ฟุต)
+grid_inv <- tibble(density = seq(min(turnip_df$density), max(turnip_df$density), length.out = 200)) |>
+  mutate(
+    inv_pred = predict(mod_inv, newdata = pick(everything())),
+    pred_w = 1 / inv_pred
+  )
+
+ggplot() +
+  geom_point(
+    data = turnip_per_plant,
+    aes(x = density, y = yield_per_plant),
+    size = 3, alpha = 0.65, color = "#d95f02"
+  ) +
+  geom_line(
+    data = grid_inv,
+    aes(x = density, y = pred_w),
+    linewidth = 1.2, color = "#1b9e77"
+  ) +
+  labs(
+    title = "ผลผลิตต่อต้น (Yield per Plant) ลดลงตามความหนาแน่น — Holliday Inverse Model",
+    subtitle = "กฎการแข่งขันภายในประชากรพืช: ยิ่งต้นพืชแน่นขึ้น แต่ละต้นยิ่งได้ทรัพยากรน้อยลง",
+    x = "ความหนาแน่น (ต้น/ตร.ฟุต)",
+    y = "ผลผลิตต่อต้น (ปอนด์/ต้น)",
+    caption = "เส้นสีเขียว = Holliday Inverse Model: 1/w = a + b·d"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    plot.title = element_text(face = "bold", size = 13, color = "#1B261D"),
+    plot.subtitle = element_text(size = 11, color = "#555555"),
+    plot.caption = element_text(color = "grey40", size = 9)
+  )
+```
+
+---
+
+## 6. ตารางสรุปเปรียบเทียบโมเดลทางสถิติ (Combined Summary)
+
+```{r}
+#| label: combined-summary
+#| echo: false
+cat("== ส่วนที่ 1: cate.potassium — Goodness-of-Fit ==\n")
+print(model_comp)
+cat("\n== ส่วนที่ 1: cate.potassium — ค่าวิกฤตของ K ในดิน ==\n")
+print(critical_tbl)
+cat("\n== ส่วนที่ 2: mead.turnip — Goodness-of-Fit ==\n")
+print(model_comp_turnip)
+```
+
+---
+
+## 7. เครื่องมือจำลองสมการไม่เชิงเส้นเปรียบเทียบ (Interactive NLS Simulator)
+
+ปรับค่าพารามิเตอร์ของเส้นโค้ง Mitscherlich ได้แก่ **เพดานผลผลิต ($A$)**, **ค่าตัดแกน Y ($Y_0$)** และ **ค่าคงที่การตอบสนอง ($k$)** ผ่านสไลเดอร์ด้านล่าง ค่าเริ่มต้นตั้งไว้ใกล้กับค่าที่ฟิตได้จาก `cate.potassium` เครื่องมือจะฟิตสมการ Quadratic ด้วย least squares ให้ทับเส้น Mitscherlich ในช่วง 26–211 ppm (ช่วงเดียวกับข้อมูลจริง) เพื่อให้เห็นว่าจุดยอดพาราโบลาอยู่ไกลจาก $X_{95}$ แค่ไหน
+
+```{ojs}
+//| echo: false
+
+viewof A = Inputs.range([60, 120], {
+  value: 96.4,
+  step: 0.1,
+  label: html`<b>เพดานผลผลิต (A, %):</b>`
+})
+
+viewof Y0 = Inputs.range([-60, 80], {
+  value: -47,
+  step: 1,
+  label: html`<b>ค่าตัดแกน Y (Y₀, %):</b>`
+})
+
+viewof k = Inputs.range([0.01, 0.15], {
+  value: 0.046,
+  step: 0.001,
+  label: html`<b>ค่าคงที่การตอบสนอง (k):</b>`
+})
+```
+
+```{ojs}
+//| echo: false
+
+xMin = 26
+xMax = 211
+
+mitsch = x => A - (A - Y0) * Math.exp(-k * x)
+
+calcX95 = {
+  const ratio = (0.05 * A) / (A - Y0);
+  return ratio > 0 ? -(1 / k) * Math.log(ratio) : NaN;
+}
+
+// ฟิต Quadratic ด้วย least squares บนเส้น Mitscherlich ในช่วงข้อมูลจริง
+calcQuad = {
+  const xs = d3.range(xMin, xMax + 0.001, 1);
+  const S = p => d3.sum(xs, x => Math.pow(x, p));
+  const T = p => d3.sum(xs, x => Math.pow(x, p) * mitsch(x));
+  const M = [
+    [S(0), S(1), S(2), T(0)],
+    [S(1), S(2), S(3), T(1)],
+    [S(2), S(3), S(4), T(2)]
+  ];
+  // Gaussian elimination
+  for (let i = 0; i < 3; i++) {
+    for (let j = i + 1; j < 3; j++) {
+      const f = M[j][i] / M[i][i];
+      for (let c = i; c < 4; c++) M[j][c] -= f * M[i][c];
+    }
+  }
+  const b = [0, 0, 0];
+  for (let i = 2; i >= 0; i--) {
+    let s = M[i][3];
+    for (let c = i + 1; c < 3; c++) s -= M[i][c] * b[c];
+    b[i] = s / M[i][i];
+  }
+  const [b0, b1, b2] = b;
+  const x_opt = b2 < 0 ? -b1 / (2 * b2) : NaN;
+  const y_opt = b0 + b1 * x_opt + b2 * x_opt * x_opt;
+  return { b0, b1, b2, x_opt, y_opt };
+}
+
+curveData = {
+  const points = [];
+  for (let x = 0; x <= 250; x += 2) {
+    points.push({ x, yield: mitsch(x), model: "1. Mitscherlich (Plateau)" });
+    points.push({
+      x,
+      yield: calcQuad.b0 + calcQuad.b1 * x + calcQuad.b2 * x * x,
+      model: "2. Quadratic (พาราโบลา)"
+    });
+  }
+  return points.filter(d => d.yield >= 0);
+}
+
+html`
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 15px 0 20px 0;">
+  <div style="background: rgba(27, 158, 119, 0.08); border-left: 4px solid #1b9e77; padding: 12px 14px; border-radius: 4px;">
+    <div style="font-size: 0.82em; font-weight: bold; color: #1b9e77;">ค่าวิกฤต Mitscherlich (X₉₅)</div>
+    <div style="font-size: 1.4em; font-weight: bold; margin: 4px 0;">${calcX95.toFixed(1)} <span style="font-size:0.65em; font-weight:normal;">ppm</span></div>
+    <div style="font-size: 0.78em; opacity: 0.8;">ได้ผลผลิตสัมพัทธ์ ${(A * 0.95).toFixed(1)}%</div>
+  </div>
+  <div style="background: rgba(217, 95, 2, 0.08); border-left: 4px solid #d95f02; padding: 12px 14px; border-radius: 4px;">
+    <div style="font-size: 0.82em; font-weight: bold; color: #d95f02;">จุดยอด Quadratic</div>
+    <div style="font-size: 1.4em; font-weight: bold; margin: 4px 0;">${calcQuad.x_opt.toFixed(1)} <span style="font-size:0.65em; font-weight:normal;">ppm</span></div>
+    <div style="font-size: 0.78em; opacity: 0.8;">บังคับให้กราฟตกหลังจุดนี้</div>
+  </div>
+  <div style="background: rgba(217, 83, 79, 0.08); border-left: 4px solid #d9534f; padding: 12px 14px; border-radius: 4px;">
+    <div style="font-size: 0.82em; font-weight: bold; color: #d9534f;">Quadratic สูงเกินไป</div>
+    <div style="font-size: 1.4em; font-weight: bold; color: #d9534f; margin: 4px 0;">+${(calcQuad.x_opt - calcX95).toFixed(1)} <span style="font-size:0.65em; font-weight:normal;">ppm</span></div>
+    <div style="font-size: 0.78em; opacity: 0.8;">สูงกว่า X₉₅ +${(((calcQuad.x_opt - calcX95) / calcX95) * 100).toFixed(0)}%</div>
+  </div>
+</div>
+`
+
+Plot.plot({
+  width: 760,
+  height: 420,
+  grid: true,
+  x: { label: "โพแทสเซียมในดิน (ppm)", domain: [0, 250] },
+  y: { label: "ผลผลิตฝ้ายสัมพัทธ์ (%)", domain: [0, Math.max(A * 1.18, 100)] },
+  color: {
+    domain: ["1. Mitscherlich (Plateau)", "2. Quadratic (พาราโบลา)"],
+    range: ["#1b9e77", "#d95f02"],
+    legend: true
+  },
+  marks: [
+    Plot.rectX([{ x1: xMin, x2: xMax }], { x1: "x1", x2: "x2", fill: "#999", fillOpacity: 0.06 }),
+    Plot.ruleY([A], { stroke: "#1b9e77", strokeDasharray: "4,4", strokeWidth: 1.5 }),
+    Plot.text([{ x: 235, y: A }], { x: "x", y: "y", text: [`เพดาน A = ${A.toFixed(1)}%`], dy: -8, fill: "#1b9e77", fontWeight: "bold" }),
+    Plot.ruleX([calcX95], { stroke: "#1b9e77", strokeDasharray: "3,3", strokeWidth: 1.2 }),
+    Plot.text([{ x: calcX95, y: 5 }], { x: "x", y: "y", text: [`X₉₅ = ${calcX95.toFixed(1)}`], dx: 38, fill: "#1b9e77", fontWeight: "bold" }),
+    Plot.line(curveData, { x: "x", y: "yield", stroke: "model", strokeWidth: 2.5 }),
+    Plot.dot([calcQuad], { x: "x_opt", y: "y_opt", fill: "#d95f02", r: 5 })
+  ]
+})
+```
+
+แถบสีเทาจางคือช่วงข้อมูลจริง (26–211 ppm) ส่วนเส้นนอกแถบเป็นการ extrapolate
+
+---
+
+## 8. สรุปประเด็นสำคัญ (Key Takeaways)
+
+::: {.callout-important}
+### 6 บทเรียนสำคัญสำหรับ Nonlinear Regression ทางการเกษตร
+
+1. **ตรวจว่าชุดข้อมูลมีอยู่จริงก่อนเขียนโค้ด:**
+   ใช้ `data(package = "agridat")` และ `?cate.potassium` ดูชื่อชุดข้อมูล ชื่อคอลัมน์ และหน่วย ก่อนจะเขียนคำบรรยายหรือแปลผล
+
+2. **เลือกใช้ Self-Starting Functions (`SSasymp`, `SSmicmen`, `SSlogis`) ใน R:**
+   หลายคนกลัวการใช้ `nls()` เพราะไม่รู้จะกำหนดค่าเริ่มต้น (`start = list(...)`) อย่างไร การใช้ฟังก์ชันตระกูล `SS*` ใน Base R หรือแพ็กเกจ `{nlraa}` (Nonlinear Regression for Agricultural Applications) ช่วยคำนวณค่าเริ่มต้นให้อัตโนมัติและลดปัญหาโมเดลไม่ลู่เข้า (Convergence failure)
+
+3. **โมเดลที่มีจุดหักเห ต้องหาจุดหักเหแยกต่างหาก:**
+   Linear-Plateau ที่เขียนด้วย `ifelse()` ใน `nls()` มักไม่ลู่เข้า การทำ profile grid search บน $X_c$ (หรือใช้ `nlraa::SSlinp`) เสถียรกว่ามาก
+
+4. **เปลี่ยนจากการหาจุดสูงสุดลวงตา มาเป็นการหาค่าวิกฤต:**
+   กับ `cate.potassium` จุดยอด Quadratic อยู่ราว `r round(x_opt_quad)` ppm ขณะที่ Cate–Nelson, Linear-Plateau และ Mitscherlich ($X_{95}$) ให้ค่าวิกฤตราว `r round(xc_cn, 1)`–`r round(X_95)` ppm การรายงานหลายวิธีคู่กันช่วยให้เห็นความไม่แน่นอนของค่าวิกฤต
+
+5. **แปลพารามิเตอร์เฉพาะในช่วงข้อมูล:**
+   $A$ และ $k$ ของ Mitscherlich แปลผลได้ แต่ $Y_0$ ที่ติดลบใน `cate.potassium` บอกว่าการ extrapolate ไปที่ K = 0 ไม่มีความหมาย เมื่อข้อมูลไม่มีจุดใกล้ X = 0
+
+6. **ตรวจสอบ Residual Pattern เสมอ:**
+   ถ้า Residuals มี pattern ตามระดับของตัวแปรต้น แปลว่ารูปร่างของสมการยังไม่ตรงกับข้อมูล
+:::
+
+---
+
+## 9. เอกสารอ้างอิง (References)
+
+* **Mitscherlich, E. A. (1909).** Das Gesetz des Minimums und das Gesetz des abnehmenden Bodenertrages. *Landwirtschaftliches Jahrbuch*, 38, 537–552.
+* **Bleasdale, J. K. A., & Nelder, J. A. (1960).** Plant population and crop yield. *Nature*, 188(4747), 342. https://doi.org/10.1038/188342a0
+* **Holliday, R. (1960).** Plant population and crop yield. *Field Crop Abstracts*, 13(3), 159–167 & 247–254.
+* **Mead, R. (1970).** Plant density and crop yield. *Journal of the Royal Statistical Society. Series C (Applied Statistics)*, 19(1), 64–81. https://doi.org/10.2307/2346843
+* **Cerrato, M. E., & Blackmer, A. M. (1990).** Comparison of models for describing corn yield response to nitrogen fertilizer. *Agronomy Journal*, 82(1), 138–143. https://doi.org/10.2134/agronj1990.00021962008200010030x
+* **Archontoulis, S. V., & Miguez, F. E. (2015).** Nonlinear Regression Models and Applications in Agricultural Research. *Agronomy Journal*, 107(2), 786–798. https://doi.org/10.2134/agronj2012.0506
+* **Cate, R. B., & Nelson, L. A. (1971).** A simple statistical procedure for partitioning soil test correlation data into two classes. *Soil Science Society of America Proceedings*, 35(4), 658–660. https://doi.org/10.2136/sssaj1971.03615995003500040048x
+* **Wright, K. (2025).** *agridat: Agricultural Datasets*. R package version 1.26. https://CRAN.R-project.org/package=agridat
+* **Pinheiro, J. C., & Bates, D. M. (2000).** *Mixed-Effects Models in S and S-PLUS*. Springer. https://doi.org/10.1007/b98882
