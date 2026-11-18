@@ -45,10 +45,10 @@ about:
       href: mailto:kanthanawit.j@rice.mail.go.th
 ---
 
-ผมเป็นนักวิจัยด้านการเกษตร ทำงานที่ศูนย์วิจัยข้าวปทุมธานี กรมการข้าว สนใจด้านระบาดวิทยาของโรคและศัตรูข้าว (Rice Pathology & Epidemiology), การวางแผนการทดลองทางการเกษตร และการสร้างเครื่องมือวิเคราะห์ข้อมูลด้วย **ภาษา R**
+ผมเป็นนักวิชาการเกษตร ทำงานที่ศูนย์วิจัยข้าวปทุมธานี สนใจด้านระบาดวิทยาของโรคและศัตรูข้าว (Rice Pathology & Epidemiology) และวิเคราะห์ข้อมูลต่าง ๆ ด้วย **R**
 
 ::: {.home-badges}
-`Rstats` `Spatial Analysis` `Mixed Models` `Shiny / Shinylive` `Rice Science`
+`Rstats` `Spatial Analysis` `Mixed Models` `Shiny / Shinylive` `Plant pathology`
 :::
 
 ::: {.home-section}

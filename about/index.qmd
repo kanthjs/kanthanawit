@@ -1,7 +1,7 @@
 ---
 title: "About Me"
 pagetitle: "About — Kanthanawit"
-subtitle: "Agricultural Researcher ∙ Rice Pathology & Epidemiology ∙ R Developer"
+subtitle: "Agricultural Researcher ∙ Plant Pathology & Epidemiology ∙ R Developer"
 image: ../images/about-portrait.jpg
 image-alt: "Portrait of Kanthanawit"
 comments: false
@@ -35,14 +35,14 @@ page-layout: full
 
 ::: {#hero-heading}
 
-## สวัสดีครับ ผมกันต์ (Kanthanawit) 👋
+## สวัสดีครับ  👋
 
-ผมเป็น**นักวิชาการเกษตร / นักวิจัย** ประจำอยู่ที่ **ศูนย์วิจัยข้าวปทุมธานี กรมการข้าว**
+**กันต์** (Kanthanawit) เป็น**นักวิชาการเกษตร** ประจำอยู่ที่ **ศูนย์วิจัยข้าวปทุมธานี กรมการข้าว**
 
-งานวิจัยหลักของผมเน้นไปที่:
+งานวิจัยเน้นไปที่:
 
 - **ระบาดวิทยาของโรคและศัตรูข้าว (Rice Pathology & Epidemiology)**: ติดตาม คาดการณ์ และวิเคราะห์การระบาดของโรคไหม้และแมลงศัตรูพืช
-- **การวิเคราะห์ข้อมูลและวางแผนการทดลอง (Agricultural Statistics & Experimental Designs)**: ตั้งแต่ CRD, RCBD, Split-plot จนถึง Linear Mixed Models (LMM/GLMM) และการวิเคราะห์ GxE Interactions
+- **การวิเคราะห์ข้อมูลและวางแผนการทดลอง (Agricultural Statistics & Experimental Designs)**: ตั้งแต่ CRD, RCBD, Split-plot จนถึง Linear Mixed Models (LMM/GLMM) และการวิเคราะห์ GxE Interactions ในบริบทของโรคพืช
 - **การพัฒนาเครื่องมือด้วยภาษา R**: สร้าง R Packages, Web Application (Shinylive/Shiny) และเขียนคู่มือการวิเคราะห์เพื่อช่วยให้นักวิจัยสายเกษตรทำงานได้รวดเร็วและแม่นยำยิ่งขึ้น
 
 ---
@@ -54,7 +54,7 @@ page-layout: full
 
 ---
 
-### ผลงาน & การแบ่งปัน
-คุณสามารถดูผลงาน R packages และ Web Apps ที่ผมพัฒนาได้ที่หน้า [Software](../r-packages/index.qmd) หรืออ่านบทความทางสถิติและเทคนิคการเขียน R ได้ที่หน้า [Blog](../blog/index.qmd) ครับ
+### ผลงานต่าง ๆ
+R packages และ Web Apps ที่พัฒนาได้ที่ [Software](../r-packages/index.qmd) หรืออ่านบทความทางสถิติและเทคนิคการเขียน R ได้ที่หน้า [Blog](../blog/index.qmd)
 
 :::
