@@ -1,0 +1,152 @@
+---
+title: "R Tips 18: พัฒนา Modern Shiny Dashboard ด้วย UI และคอมโพเนนต์จาก bslib"
+date: 2026-11-19
+description: "แก้ปัญหาเลย์เอาต์ที่ปรับแต่งยากและไม่ responsive ของ Shiny แบบดั้งเดิม ด้วยการใช้ bslib จัดโครงสร้าง UI แบบ Card-based, Value Box และคอมโพเนนต์อย่าง input_task_button() ช่วยสร้างแดชบอร์ดที่ทันสมัยและรองรับ Dark Mode ได้ทันทีโดยไม่ต้องเขียน CSS"
+categories: [r, r-tip, shiny, bslib, dashboard]
+draft: false
+---
+
+การพัฒนาเว็บแอปหรือ Dashboard ด้วย Shiny ในรูปแบบดั้งเดิม (Shiny Classic) มักประสบปัญหาการจัดวางหน้าตา (UI Layout) ที่ใช้ `sidebarLayout()` หรือการคำนวณกริดผ่าน `fluidRow()` และ `column()` ซึ่งปรับแต่งสไตล์ได้ยาก แสดงผลไม่ยืดหยุ่นบนหน้าจออุปกรณ์พกพา และมักจำเป็นต้องเขียน CSS เพิ่มเติมจำนวนมากเพื่อให้หน้าตาดูทันสมัย
+
+การผสานสถาปัตยกรรม Shiny เข้ากับ **`bslib`** (ทำงานบน Bootstrap 5) ช่วยเปลี่ยนโครงสร้างการออกแบบไปเป็นระบบ **Card-based Layout** ที่รองรับ Responsive อัตโนมัติบนทุกขนาดหน้าจอ พร้อมทั้งมีคอมโพเนนต์ช่วยจัดการ User Experience (UX) ในตัว เช่น ปุ่มประมวลผลพร้อมสถานะโหลด และการสลับโหมด Dark/Light โดยไม่ต้องเขียน JavaScript เสริม
+
+---
+
+## 1. เปรียบเทียบโครงสร้าง: Classic Layout vs Modern Card-Based UI
+
+ระบบ UI ของ Shiny ยุคใหม่ได้ปรับเปลี่ยนฟังก์ชันจัดหน้าหลักเพื่อให้โค้ดมีความเป็นโมดูลและจัดระเบียบง่ายขึ้น:
+
+| มิติการทำงาน | Shiny Classic | Modern Shiny (`bslib`) |
+| :--- | :--- | :--- |
+| **โครงสร้างหลัก** | `fluidPage()`, `sidebarLayout()` | `page_sidebar()`, `page_navbar()`, `page_fillable()` |
+| **การจัดกลุ่มเนื้อหา** | `wellPanel()`, กำหนด `div()` เอง | `card()`, `card_header()`, `card_body()` |
+| **การจัดกริด** | คำนวณความกว้างรวม 12 คอลัมน์ (`fluidRow()`, `column()`) | จัดอัตโนมัติตามขนาด (`layout_column_wrap()`, `layout_columns()`) |
+| **สรุปตัวเลขสถิติ** | สร้างกล่อง HTML เอง หรือพึ่งพา `shinydashboard` | `value_box()` พร้อมไอคอนและสีธีมในตัว |
+| **การปรับแต่ง Theme** | พึ่งพา `shinythemes` หรือเขียน CSS ทับ | `bs_theme()` ปรับแต่งฟอนต์ Google Fonts และ Bootswatch ในคำสั่งเดียว |
+
+---
+
+## 2. ตัวอย่างการสร้าง Smart Agriculture Dashboard
+
+ตัวอย่างแอปพลิเคชันติดตามแปลงเกษตรที่ใช้ความสามารถของ `bslib` ร่วมกับ `shiny` ในการจัด Card Layout, Value Boxes, และการสลับธีม:
+
+```r
+# ติดตั้งแพ็กเกจที่จำเป็น
+pak::pkg_install(c("shiny", "bslib", "bsicons", "ggplot2"))
+
+library(shiny)
+library(bslib)
+library(bsicons)
+library(ggplot2)
+
+# 1. กำหนด Theme ด้วย Bootswatch และปรับฟอนต์
+my_theme <- bs_theme(
+  version = 5,
+  bootswatch = "zephyr",
+  primary = "#2c3e50",
+  base_font = font_google("Inter")
+)
+
+# 2. ออกแบบ UI ด้วย page_sidebar และ Card-based components
+ui <- page_sidebar(
+  theme = my_theme,
+  title = "ระบบติดตามข้อมูลแปลงเกษตรอัจฉริยะ",
+  
+  # แถบควบคุมด้านข้าง (Sidebar)
+  sidebar = sidebar(
+    title = "ตัวกรองข้อมูล",
+    selectInput(
+      "province", 
+      "เลือกจังหวัด:", 
+      choices = c("ปทุมธานี", "อยุธยา", "สุพรรณบุรี")
+    ),
+    sliderInput(
+      "date_range", 
+      "ช่วงอายุพืช (วัน):", 
+      min = 1, 
+      max = 120, 
+      value = c(20, 90)
+    ),
+    input_task_button("btn_run", "ประมวลผลด่วน", class = "btn-primary w-100"),
+    hr(),
+    input_dark_mode(id = "dark_mode") # สลับ Dark / Light mode อัตโนมัติ
+  ),
+  
+  # ส่วนแสดงผลหลัก: จัดวาง Value Boxes ด้วย layout_column_wrap
+  layout_column_wrap(
+    width = "300px",
+    
+    value_box(
+      title = "พื้นที่สำรวจทั้งหมด",
+      value = "1,420 แปลง",
+      showcase = bs_icon("geo-alt-fill"),
+      theme = "primary"
+    ),
+    
+    value_box(
+      title = "อัตราความเสี่ยงเฉลี่ย",
+      value = "12.4%",
+      showcase = bs_icon("exclamation-triangle-fill"),
+      theme = "warning"
+    ),
+    
+    value_box(
+      title = "สถานะการเก็บเกี่ยว",
+      value = "ปกติ",
+      showcase = bs_icon("check-circle-fill"),
+      theme = "success"
+    )
+  ),
+  
+  # ส่วนแสดงกราฟการวิเคราะห์แบบขยายเต็มจอได้ (full_screen = TRUE)
+  card(
+    full_screen = TRUE,
+    card_header("การกระจายตัวของผลผลิตรายสัปดาห์"),
+    plotOutput("main_plot")
+  )
+)
+
+server <- function(input, output, session) {
+  # จำลองการคำนวณเมื่องานถูกเรียกผ่าน input_task_button
+  observeEvent(input$btn_run, {
+    Sys.sleep(1.2) # จำลองระยะเวลาประมวลผลเบื้องหลัง
+  })
+  
+  output$main_plot <- renderPlot({
+    # รองรับการเรนเดอร์กราฟร่วมกับ input ของแอปพลิเคชัน
+    ggplot(mtcars, aes(x = wt, y = mpg)) +
+      geom_point(size = 3.5, color = "#2980b9", alpha = 0.8) +
+      geom_smooth(method = "lm", se = FALSE, color = "#e74c3c", linetype = "dashed") +
+      labs(
+        x = "น้ำหนักเครื่องจักร / ปัจจัยการผลิต",
+        y = "ผลผลิตเฉลี่ย (ตัน/ไร่)"
+      ) +
+      theme_minimal(base_size = 14)
+  })
+}
+
+shinyApp(ui, server)
+```
+
+---
+
+## 3. คอมโพเนนต์เด่นของ `bslib` สำหรับยกระดับ UX
+
+### 1) `input_task_button()`: ป้องกันการกดซ้ำระหว่างประมวลผล
+ในการทำงานกับ Shiny แบบเดิม เมื่อฟังก์ชัน Server มีการคำนวณที่ใช้เวลานาน ผู้ใช้งานมักกดปุ่มซ้ำหลายครั้ง ทำให้เกิด Queue ซ้อนและเซิร์ฟเวอร์ทำงานหนักขึ้น `input_task_button()` ช่วยแก้ปัญหานี้โดย:
+- ปิดการใช้งานปุ่ม (Disable) อัตโนมัติทันทีที่ถูกคลิก
+- แสดงแอนิเมชันสถานะกำลังโหลด (Spinner)
+- คืนค่าปุ่มให้กลับมาคลิกได้อีกครั้งเมื่องานบน Server ทำงานเสร็จสิ้น โดยไม่ต้องเขียนโค้ด JavaScript ควบคุม State เอง
+
+### 2) `card(full_screen = TRUE)`: ขยายกราฟและตารางเต็มจอ
+เพียงกำหนดพารามิเตอร์ `full_screen = TRUE` ไว้ในการ์ด ตัวการ์ดจะมีปุ่มขยายหน้าจอ (Maximize icon) ปรากฏที่มุมขวาบน ช่วยให้ผู้ใช้งานสามารถขยายแผนภูมิที่มีความละเอียดสูงหรือตารางข้อมูลขนาดยาวเพื่อวิเคราะห์ได้อย่างสะดวก
+
+### 3) `input_dark_mode()`: สลับ Dark Mode อัตโนมัติ
+ฟังก์ชันนี้จะเพิ่มตัวสลับธีมสีมืดและสว่าง โดยสามารถอ่านค่า Default ตามการตั้งค่าของระบบปฏิบัติการผู้ใช้งาน (OS Preferred Color Scheme) หรือเปิดให้ผู้ใช้งานคลิกเปลี่ยนสลับธีมได้ทันที และองค์ประกอบทั้งหมดที่ใช้ `bslib` จะปรับสีให้อัตโนมัติ
+
+---
+
+## 4. แหล่งข้อมูลอ้างอิงและเครื่องมือศึกษาเพิ่มเติม
+
+- **GitHub Repository**: [rstudio/bslib](https://github.com/rstudio/bslib) — ซอร์สโค้ดและประวัติการพัฒนาของไลบรารี
+- **Official Documentation**: [bslib Documentation](https://rstudio.github.io/bslib/) — ตัวอย่างการจัดหน้ารูปแบบต่างๆ พร้อม Template ที่สามารถนำไปประยุกต์ใช้ได้ทันที
