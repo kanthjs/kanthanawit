@@ -1,0 +1,157 @@
+---
+title: "R Tips 20: จัดข้อความและสีเฉพาะคำใน ggplot2 ด้วย marquee"
+date: 2026-11-21
+description: "แก้ปัญหาความยุ่งเหยิงของ HTML tag ในการแต่งข้อความกราฟ ด้วยแพ็กเกจ marquee จาก r-lib ที่รองรับ Markdown เต็มรูปแบบ ช่วยให้จัดย่อหน้า ตัดคำอัตโนมัติ และย้อมสีเฉพาะคำใน Title, Subtitle รวมถึง Legend ได้อย่างสวยงามและเป็นระเบียบ"
+categories: [r, r-tip, ggplot2, marquee, data-visualization]
+draft: false
+---
+
+ในการสร้างกราฟด้วย `ggplot2` เพื่อจัดทำรายงานทางสถิติหรือสไลด์นำเสนอ การสื่อสารสาระสำคัญผ่านตัวอักษรมักเป็นจุดชี้วัดว่ากราฟนั้นอ่านเข้าใจได้ทันทีหรือไม่ โดยเฉพาะข้อความหัวเรื่อง (Title), คำอธิบายรอง (Subtitle), และป้ายกำกับข้อมูล (Data Annotation) ที่ต้องการเน้นคำสำคัญ ปรับขนาด หรือย้อมสีให้ตรงกับชุดข้อมูลเพื่อทดแทนกล่องคำอธิบายสัญลักษณ์ (Legend)
+
+เดิมทีแนวทางมาตรฐานในการจัดรูปแบบข้อความแบบผสมสีใน `ggplot2` มักต้องพึ่งพา `ggtext` ร่วมกับแท็ก HTML เช่น `<span style='color:...'>` ซึ่งมีข้อจำกัดชัดเจน:
+
+1. **ไวยากรณ์เทอะทะ**: การแทรกแท็ก HTML ซ้อนกันในสตริงทำให้อ่านโค้ดยาก และเสี่ยงต่อการปิดแท็กผิดพลาด
+2. **การตัดบรรทัด (Line Wrapping) ขาดความยืดหยุ่น**: ข้อความขนาดยาวมักตัดบรรทัดได้ไม่แม่นยำ หรือต้องแทรก `<br>` ควบคุมเองด้วยมือ
+3. **ขาดโครงสร้าง Markdown มาตรฐาน**: ไม่รองรับการจัดย่อหน้า รายการหัวข้อย่อย (Bullet Lists) หรือตารางอย่างเป็นระบบ
+
+แพ็กเกจ **`marquee`** (พัฒนาโดย Thomas Lin Pedersen จาก `r-lib`) ออกแบบมาเพื่อเป็น Markdown Parser และ Renderer ความเร็วสูงสำหรับระบบกราฟิกของ R (`grid` และ `ggplot2`) โดยแปลงไวยากรณ์ CommonMark และระบบกำหนดสไตล์แบบ Span เข้ากับองค์ประกอบต่างๆ ของธีมกราฟได้อย่างราบรื่น
+
+---
+
+## 1. เปรียบเทียบ: HTML Tag (`ggtext`) vs Markdown (`marquee`)
+
+| มิติการทำงาน | สไตล์ดั้งเดิมผ่าน HTML (`ggtext`) | สไตล์ CommonMark (`marquee`) |
+| :--- | :--- | :--- |
+| **การเปลี่ยนสีเฉพาะคำ** | `<span style='color:#16a085'>**Text**</span>` | `{#16a085 **Text**}` หรือ `{.green **Text**}` |
+| **Theme Element** | `element_markdown()` | `element_marquee()` |
+| **Data Annotation** | `geom_richtext()` / `geom_textbox()` | `geom_marquee()` |
+| **การตัดบรรทัด** | ต้องแทรก `<br>` หรือตั้งค่ากล่องข้อความ | กำหนดความกว้าง `width` แล้วตัดคำอัตโนมัติตามแบบอักษร |
+| **Legend แบบฝังเนื้อหา** | ต้องเขียน HTML แปลงในสเกลเอง | มี `guide_marquee()` ดึง Break และ Label มาจัดเป็นเนื้อความได้ทันที |
+
+---
+
+## 2. ย้อมสีเฉพาะคำใน Subtitle ด้วย `element_marquee()`
+
+หนึ่งในเทคนิคการออกแบบกราฟระดับนิตยสาร (Data Storytelling) คือการนำสีของชุดข้อมูลมาไฮไลต์ลงในชื่อเรื่องหรือคำอธิบายรองโดยตรง ช่วยให้ผู้อ่านเข้าใจความหมายของเส้นหรือแท่งกราฟได้ทันทีโดยไม่ต้องกวาดสายตาไปดู Legend ด้านข้าง
+
+ไวยากรณ์ของ `marquee` อนุญาตให้กำหนดสีผ่านเครื่องหมายวงเล็บปีกกา `{...}`:
+- ใช้รหัสสี Hex: `{#95a5a6 **ข้อความ**}`
+- ใช้ชื่อสีมาตรฐาน: `{.tomato ข้อความ}` หรือ `{.steelblue ข้อความ}`
+
+```{r}
+#| message: false
+#| warning: false
+#| fig-width: 7
+#| fig-height: 4.5
+library(marquee)
+library(ggplot2)
+
+df <- data.frame(
+  stage = c("Phase 1", "Phase 2", "Phase 3", "Phase 4"),
+  score = c(62, 74, 81, 93),
+  group = c("Baseline", "Baseline", "Improved", "Improved")
+)
+
+ggplot(df, aes(x = stage, y = score, fill = group)) +
+  geom_col(width = 0.6) +
+  scale_fill_manual(
+    values = c("Baseline" = "#95a5a6", "Improved" = "#16a085")
+  ) +
+  labs(
+    title = "แนวโน้มคะแนนประสิทธิภาพหลังปรับปรุงกระบวนการ",
+    # ไฮไลต์สีคำสำคัญใน Subtitle ให้ตรงกับสีแท่งกราฟโดยไม่ต้องพึ่งพากล่อง Legend
+    subtitle = "เปรียบเทียบผลลัพธ์ระหว่างช่วง {#95a5a6 **Baseline**} กับช่วง {#16a085 **Improved**}",
+    x = NULL,
+    y = "คะแนนเฉลี่ย"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    # สั่งให้ plot.subtitle แปลงผลด้วย marquee engine
+    plot.subtitle = element_marquee(size = 12),
+    legend.position = "none"
+  )
+```
+
+::: {.callout-note}
+### ข้อดีของ `element_marquee()`
+นอกจาก `plot.subtitle` แล้ว สามารถใช้ `element_marquee()` กับ `plot.title`, `plot.caption`, `axis.title` หรือส่วนหัวของแกนข้อมูล เพื่อจัดรูปแบบตัวหนา ตัวเอียง ขีดเส้นใต้ หรือเปลี่ยนสีบางคำได้เช่นเดียวกัน
+:::
+
+---
+
+## 3. จัดย่อหน้าและตัดคำอัตโนมัติด้วย `geom_marquee()`
+
+เมื่อต้องการใส่คำอธิบายประกอบ (Annotation) ที่มีขนาดยาวบนพื้นที่ว่างของกราฟ ฟังก์ชัน `geom_text()` ปกติจะไม่รองรับการขึ้นบรรทัดใหม่อัตโนมัติและไม่รองรับ Markdown แต่ `geom_marquee()` สามารถกำหนดข้อความแบบ CommonMark พร้อมทั้งควบคุมความกว้าง (Width) และรูปแบบข้อความย่อยได้ครบถ้วน:
+
+```{r}
+#| message: false
+#| warning: false
+#| fig-width: 7
+#| fig-height: 4.5
+annotation_df <- data.frame(
+  x = 1.2,
+  y = 85,
+  note = paste(
+    "### ข้อสังเกตสำคัญ",
+    "- อัตราการเติบโตเพิ่มขึ้น **+25.6%** หลังเข้าสู่ Phase 3",
+    "- การปรับปรุงรอบที่ 2 ส่งผลต่อคะแนนอย่างมีนัยสำคัญ",
+    sep = "\n"
+  )
+)
+
+ggplot(df, aes(x = stage, y = score)) +
+  geom_col(aes(fill = group), width = 0.6) +
+  scale_fill_manual(
+    values = c("Baseline" = "#95a5a6", "Improved" = "#16a085")
+  ) +
+  geom_marquee(
+    data = annotation_df,
+    aes(x = x, y = y, label = note),
+    width = 0.45,
+    hjust = 0,
+    vjust = 1,
+    size = 3.5
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(legend.position = "none")
+```
+
+---
+
+## 4. รวมคำอธิบายสัญลักษณ์เข้ากับเนื้อความด้วย `guide_marquee()`
+
+ฟังก์ชัน `guide_marquee()` คือฟีเจอร์ระดับสูงที่เปลี่ยนกล่องสัญลักษณ์แบบเดิมๆ ให้กลายเป็นข้อความบรรยายแบบ Inline Legend โดยดึงค่า Breaks และ Labels ของสเกลสีมาแทรกเป็นสัญลักษณ์หรือสีเฉพาะตัวในข้อความ:
+
+```{r}
+#| message: false
+#| warning: false
+#| fig-width: 7.5
+#| fig-height: 4.8
+ggplot(mpg, aes(x = displ, y = hwy, colour = drv)) +
+  geom_point(alpha = 0.7, size = 2) +
+  labs(
+    title = "ความสัมพันธ์ระหว่างขนาดเครื่องยนต์กับอัตราสิ้นเปลืองน้ำมัน",
+    colour = "ระบบขับเคลื่อน: {.4 ขับเคลื่อน 4 ล้อ (4)}, {.f ขับเคลื่อนล้อหน้า (f)} และ {.r ขับเคลื่อนล้อหลัง (r)}"
+  ) +
+  guides(
+    colour = guide_marquee()
+  ) +
+  theme_minimal(base_size = 13)
+```
+
+ฟังก์ชันนี้จะแปลงรายการตัวแปรจัดกลุ่มให้กลายเป็นข้อความแถวเดียวที่มีเครื่องหมายสีกลมกลืนไปกับหัวเรื่องหรือใต้กราฟ ช่วยประหยัดพื้นที่แสดงผลและเพิ่มความคมชัดให้กับชิ้นงาน
+
+---
+
+## 5. จุดเด่นทางสถาปัตยกรรมของ `marquee`
+
+- **เบื้องหลังขับเคลื่อนด้วย `textshaping` และ `systemfonts`**: รองรับฟอนต์ระบบ OpenType การจัดระยะห่างระหว่างตัวอักษร (Kerning) และคำนวณมิติกล่องข้อความได้อย่างแม่นยำสูง
+- **มาตรฐาน CommonMark**: ใช้เครื่องหมายที่สากล เช่น `**หนา**`, `*เอียง*`, `~~ขีดฆ่า~~`, `` `code` `` และลิสต์รายการ โดยไม่ต้องกังวลเรื่องการปิด Tag ผิดพลาด
+- **สถาปัตยกรรมทันสมัย**: ออกแบบมาให้เข้ากับ ggplot2 รุ่นล่าสุดและระบบกราฟิก `grid` ได้อย่างไร้รอยต่อ
+
+---
+
+## 6. ลิงก์และเอกสารอ้างอิง
+
+- **GitHub Repository**: [r-lib/marquee](https://github.com/r-lib/marquee) — ซอร์สโค้ดและรายงานการพัฒนา
+- **Official Documentation**: [marquee.r-lib.org](https://marquee.r-lib.org/) — คู่มือการใช้งานอย่างละเอียดและตัวอย่างการปรับแต่ง Custom Styles
