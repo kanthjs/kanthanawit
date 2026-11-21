@@ -28,3 +28,6 @@ pnpm-debug.log*
 
 # claude
 .claude/
+
+# quarto intermediate figure folders (rendered output lives in _freeze/_site)
+/blog/**/*_files/
