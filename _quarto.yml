@@ -11,6 +11,7 @@ project:
     - "talks/**/*.qmd"
   resources:
     - "images/**"
+    - "fonts/**"
     - "robots.txt"
     - "CNAME"
 
@@ -54,6 +55,8 @@ format:
     theme:
       light: [cosmo, styles.scss]
       dark: [cosmo, styles.scss, styles-dark.scss]
+    mainfont: "IBM Plex Sans Thai Looped"
+    monofont: "Fira Code"
     include-in-header: header.html
     toc: true
     toc-title: "สารบัญ"
@@ -61,3 +64,8 @@ format:
       body-width: 860px
     html-math-method: mathjax
     lang: th
+
+knitr:
+  opts_chunk:
+    fig.showtext: true
+    dpi: 300

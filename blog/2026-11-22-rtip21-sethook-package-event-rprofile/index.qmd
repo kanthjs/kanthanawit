@@ -1,0 +1,159 @@
+---
+title: "R Tips 21: ตั้งค่าแพ็กเกจล่วงหน้าด้วย setHook ใน .Rprofile"
+date: 2026-11-22
+description: "แก้ปัญหา R Startup ช้าและสคริปต์พังจากการโหลด library() ทิ้งไว้ใน .Rprofile ด้วยกลไก User Hooks ผ่าน setHook(packageEvent()) เพื่อหน่วงเวลาตั้งค่าธีมและ Option เฉพาะเมื่อแพ็กเกจถูกเรียกใช้งานจริง"
+categories: [r, r-tip, rprofile, base-r, workflow]
+draft: false
+---
+
+ผู้ใช้ R หลายคนต้องการปรับแต่งสภาพแวดล้อมเริ่มต้นในทุก R Session เช่น การตั้งธีมประจำตัว `theme_bw()` สำหรับ `ggplot2` หรือการกำหนดพฤติกรรมการพิมพ์ของบางแพ็กเกจ จึงเลือกเขียนคำสั่ง `library(ggplot2)` และฟังก์ชันตั้งค่าลงในไฟล์ `~/.Rprofile` ตรงๆ
+
+แม้จะดูสะดวก แต่วิธีนี้ก่อให้เกิดปัญหาสำคัญ 2 ประการ:
+
+1. **R Startup ช้าลง**: R ต้องใช้เวลาโหลดแพ็กเกจหนักๆ เข้าหน่วยความจำตั้งแต่เริ่มเปิดโปรแกรม แม้ว่าใน Session นั้นเราอาจต้องการเปิดมารันสคริปต์สั้นๆ ที่ไม่ได้ใช้แพ็กเกจเหล่านั้นเลย
+2. **เกิด Hidden Dependencies**: สคริปต์ที่รันผ่านบนเครื่องเราอาจพังบนเครื่องของเพื่อนร่วมทีม หรือบนระบบ CI/CD เพราะเราลืมใส่คำสั่ง `library()` ในสคริปต์เนื่องจากแพ็กเกจถูกแอบโหลดล่วงหน้าผ่าน `.Rprofile` ส่วนตัว
+
+Base R มีกลไกภายในที่เรียกว่า **User Hooks** ผ่านฟังก์ชัน `setHook()` ร่วมกับ `packageEvent()` ที่ช่วยให้เราสั่ง R ไว้ล่วงหน้าได้ว่า: *"เมื่อไหร่ก็ตามที่แพ็กเกจนี้ถูกโหลดเข้ามา ค่อยรันคำสั่งตั้งค่านี้ตามหลัง"* โดยไม่ต้องโหลดแพ็กเกจทิ้งไว้ตั้งแต่เริ่มเปิด R
+
+---
+
+## 1. กลไกการทำงานของ `setHook()` และ `packageEvent()`
+
+ฟังก์ชัน `packageEvent(pkgname, event)` ทำหน้าที่สร้างชื่อ Event Key ตามรูปแบบมาตรฐานของ R และ `setHook()` จะนำฟังก์ชัน Callback ที่เราเขียนไปผูกไว้กับ Event นั้น
+
+```r
+# รูปแบบการตั้งค่าใน ~/.Rprofile
+if (interactive()) {
+  setHook(
+    packageEvent("ggplot2", "onLoad"),
+    function(pkgname, pkgpath) {
+      ggplot2::theme_set(ggplot2::theme_bw(base_size = 13))
+    }
+  )
+}
+```
+
+ฟังก์ชัน Callback จะรับอาร์กิวเมนต์ 2 ตัวเสมอคือ `pkgname` (ชื่อแพ็กเกจ) และ `pkgpath` (พาธที่ตั้งของแพ็กเกจ) โดย R จะครอบฟังก์ชันนี้ด้วย `try()` โดยอัตโนมัติ ทำให้หากมีข้อผิดพลาดเกิดขึ้นภายใน Hook ก็จะไม่ทำให้กระบวนการโหลดแพ็กเกจหลักหยุดชะงัก
+
+---
+
+## 2. ทดลองรันจริง: ตั้งค่าธีม ggplot2 อัตโนมัติ
+
+มาดูการทำงานทีละขั้นตอน โดยเริ่มต้นตรวจเช็กว่า ณ จุดเริ่มต้นยังไม่มี `ggplot2` ถูกโหลดเข้ามาใน Namespace:
+
+```{r}
+# 1. ลงทะเบียน Hook ล่วงหน้า
+setHook(
+  packageEvent("ggplot2", "onLoad"),
+  function(pkgname, pkgpath) {
+    ggplot2::theme_set(ggplot2::theme_bw(base_size = 13))
+  }
+)
+
+# 2. ตรวจสอบสถานะ: ยังไม่มี ggplot2 ใน loadedNamespaces
+"ggplot2" %in% loadedNamespaces()
+
+# 3. ดูฟังก์ชัน Callback ที่ถูกลงทะเบียนไว้ใน Hook Registry
+getHook(packageEvent("ggplot2", "onLoad"))
+```
+
+สร้างชุดข้อมูลตัวอย่างการทดสอบโรคไหม้ในข้าว (Rice Blast Disease) เพื่อดูระดับความรุนแรงของโรค (% Leaf Area Severity) ในพันธุ์ข้าว กข85 (RD85) และ ขาวดอกมะลิ 105 (KDML105) ตามวันหลังปลูก (DAP):
+
+```{r}
+# ข้อมูลความรุนแรงโรคไหม้ (% leaf area) ตามวันหลังปลูก
+blast <- data.frame(
+  dap      = rep(seq(30, 70, by = 10), 2),
+  variety  = rep(c("RD85", "KDML105"), each = 5),
+  severity = c(2, 5, 11, 18, 24,  4, 9, 20, 33, 41)
+)
+
+blast
+```
+
+เมื่อเรียกคำสั่ง `library(ggplot2)` กลไก Hook จะทำงานทันที และเปลี่ยนธีมเริ่มต้นให้เป็น `theme_bw(base_size = 13)` โดยอัตโนมัติ:
+
+```{r}
+#| message: false
+#| warning: false
+#| fig-width: 7
+#| fig-height: 4.5
+library(ggplot2)  # Hook ทำงานตรงนี้ → theme_bw() ถูกตั้งเป็นธีมเริ่มต้นทันที
+
+ggplot(blast, aes(x = dap, y = severity, colour = variety)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 2.5) +
+  labs(
+    title = "การพัฒนาของโรคไหม้ในข้าวตามอายุหลังปลูก",
+    x = "วันหลังปลูก (Days after planting; DAP)",
+    y = "ความรุนแรงของโรค (%)",
+    colour = "พันธุ์ข้าว"
+  )
+```
+
+กราฟที่ได้จะใช้พื้นหลังสีขาวและกรอบสีดำตามแบบฉบับของ `theme_bw` โดยที่เราไม่ต้องสั่ง `+ theme_bw()` ต่อท้ายในทุกกราฟ
+
+---
+
+## 3. ความแตกต่างระหว่าง `"onLoad"` และ `"attach"`
+
+พารามิเตอร์ `event` ใน `packageEvent()` รองรับ 4 สถานะหลัก:
+
+| Event Name | จังหวะเวลาที่ Hook ทำงาน | เหมาะสำหรับ |
+| :--- | :--- | :--- |
+| **`"onLoad"`** | ทำงานเมื่อ Namespace ของแพ็กเกจถูกโหลดเข้าสู่หน่วยความจำ (Memory) | ฟังก์ชันที่ต้องการให้มีผลแม้จะเรียกแบบ `pkg::fn()` โดยไม่ผ่าน `library()` |
+| **`"attach"`** | ทำงานเมื่อแพ็กเกจถูกผูกเข้ากับ Search Path ผ่าน `library()` หรือ `require()` | งานที่ต้องการให้มีผลเฉพาะเมื่อผู้ใช้สั่งโหลดแพ็กเกจแบบ Interactive ชัดเจน |
+| **`"detach"`** | ทำงานก่อนที่แพ็กเกจจะถูกถอดออกจาก Search Path (`detach("package:...")`) | การคืนค่า Environment หรือล้างตัวแปรชั่วคราว |
+| **`"onUnload"`** | ทำงานเมื่อ Namespace ถูกลบออกจากหน่วยความจำ (`unloadNamespace()`) | การปิด Connection หรือล้าง Resource ระดับระบบ |
+
+> **คำแนะนำ**: การตั้งค่าธีมหรือ Options ส่วนใหญ่แนะนำให้ใช้ `"onLoad"` เพื่อให้ครอบคลุมกรณีที่มีแพ็กเกจอื่นดึงเข้ามาเป็น Dependency ภายในด้วย
+
+---
+
+## 4. ตัวอย่างการประยุกต์ใช้กับแพ็กเกจอื่น
+
+รูปแบบนี้สามารถนำไปใช้กับแพ็กเกจวิเคราะห์ข้อมูลอื่นๆ เพื่อกำหนด Option เฉพาะทางได้ทันทีเมื่อแพ็กเกจถูกเรียกใช้งาน:
+
+```r
+if (interactive()) {
+  # ตั้งค่าตัวเลือกการแสดงผลของ data.table
+  setHook(
+    packageEvent("data.table", "onLoad"),
+    function(pkgname, pkgpath) {
+      options(datatable.print.nrows = 20)
+    }
+  )
+
+  # ปรับแต่งพฤติกรรมเริ่มต้นของแพ็กเกจเชิงพื้นที่ (sf)
+  setHook(
+    packageEvent("sf", "onLoad"),
+    function(pkgname, pkgpath) {
+      # แสดงข้อความต้อนรับหรือตั้งค่าการแสดงผลแบบเฉพาะเจาะจง
+      options(sf_max.plot = 1)
+    }
+  )
+}
+```
+
+---
+
+## 5. ข้อควรระวังและแนวทางปฏิบัติที่ดี (Caveats & Best Practices)
+
+1. **ต้องลงทะเบียน Hook ก่อนแพ็กเกจถูกโหลด**: Hook จะไม่มีผลย้อนหลัง หากแพ็กเกจนั้นถูกโหลดไปแล้วก่อนที่คำสั่ง `setHook()` จะทำงาน
+2. **ต้องอ้างอิงฟังก์ชันด้วย `pkg::` เสมอ**: ในช่วงจังหวะที่ `"onLoad"` ทำงาน แพ็กเกจนั้นเพิ่งโหลด Namespace เข้าหน่วยความจำ แต่ยังไม่ได้ถูก attach เข้าสู่ Search Path การเรียกชื่อฟังก์ชันตรงๆ เช่น `theme_set()` จะเกิดข้อผิดพลาด ต้องใช้ `ggplot2::theme_set()` เสมอ
+3. **ลำดับการอ่านไฟล์ `.Rprofile`**: R จะอ่าน User Profile เพียงไฟล์เดียวตามลำดับ:
+   - ตรวจสอบ Environment Variable `R_PROFILE_USER`
+   - หากไม่มี จะอ่าน `.Rprofile` ใน Working Directory ปัจจุบัน
+   - หากไม่มี จะอ่าน `~/.Rprofile` ใน User Home Directory  
+   *ข้อสำคัญ:* ในโปรเจกต์ที่ใช้งาน `renv` ระบบจะมี `.Rprofile` เฉพาะของโปรเจกต์ ทำให้ไฟล์ `~/.Rprofile` ใน Home ถูกข้ามไป เว้นแต่จะสั่ง `source("~/.Rprofile")` เพิ่มเติม และการรันแบบ `R --vanilla` จะข้ามการอ่าน Profile ทั้งหมด
+4. **จำกัดเฉพาะความสะดวกเชิงรูปลักษณ์ (Cosmetic Changes)**: ครอบโค้ดด้วย `if (interactive())` เสมอ และห้ามใส่สิ่งที่เปลี่ยนแปลงผลลัพธ์ทางสถิติหรือการคำนวณ เช่น `set.seed()`, `options(digits = ...)` หรือการปรับอัลกอริทึม เพราะจะทำให้สคริปต์ของงานวิจัยไม่สามารถทำซ้ำ (Reproduce) ได้อย่างถูกต้องบนเครื่องอื่น
+5. **การยกเลิกหรือลบ Hook**: หากต้องการคืนค่าเดิม สามารถส่ง `NULL` พร้อมกำหนด `action = "replace"`:
+   ```r
+   setHook(packageEvent("ggplot2", "onLoad"), NULL, "replace")
+   ```
+
+---
+
+## 6. ลิงก์และเอกสารอ้างอิง
+
+- **Base R Help**: `?userhooks` — [Hooks for User Actions (search.r-project.org)](https://search.r-project.org/R/refmans/base/html/userhooks.html)
+- **Base R Help**: `?Startup` — [Initialization at Start of an R Session (search.r-project.org)](https://search.r-project.org/R/refmans/base/html/Startup.html)
