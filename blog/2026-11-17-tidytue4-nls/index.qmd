@@ -1,5 +1,5 @@
 ---
-title: "tidyTuesday EP.4: ทำไมสมการ Quadratic ถึงหลอกเราเรื่องผลผลิตพืช — ก้าวสู่ Nonlinear Regression (Mitscherlich, Linear-Plateau & Cate–Nelson)"
+title: "tidyTuesday EP.4: หาค่าวิกฤตของผลผลิตพืชด้วย Nonlinear Regression"
 date: 2026-11-17
 description: "หาค่าวิกฤตของโพแทสเซียมในดินจาก agridat::cate.potassium และความหนาแน่นปลูกที่เหมาะสมจาก agridat::mead.turnip ด้วย Nonlinear Least Squares (NLS) เปรียบเทียบ Mitscherlich, Linear-Plateau, Cate–Nelson และ Michaelis–Menten กับพหุนามกำลังสอง (Quadratic Polynomial)"
 categories: [research, statistics, r, tidytuesday, agriculture, nonlinear-regression, nls]

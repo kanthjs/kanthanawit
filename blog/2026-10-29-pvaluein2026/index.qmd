@@ -1,7 +1,7 @@
 ---
-title: "p-value In 2026"
+title: "ตีความและรายงาน p-value ให้ถูกต้องตามแนวทาง ASA"
 date: 2026-10-29
-description: "ทบทวนนิยามที่แท้จริงของ p-value"
+description: "สรุปนิยาม p-value ตามแถลงการณ์ ASA ความเข้าใจผิดที่พบบ่อย และมาตรฐานการรายงานค่า p จริงพร้อมตัวอย่างการเขียนผล"
 categories: [research, statistics]
 draft: false
 ---

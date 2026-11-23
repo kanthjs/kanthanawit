@@ -1,5 +1,5 @@
 ---
-title: "R Tips 12: ทลายกำแพงสถิติ สกัดผลโมเดล R ทุกตระกูลเป็นตัวเลขจริงด้วย marginaleffects"
+title: "R Tips 12: แปลงผลโมเดลเป็นค่าที่ตีความได้ด้วย marginaleffects"
 date: 2026-11-13
 description: "เปลี่ยนค่าสัมประสิทธิ์และ Log-odds จากโมเดลสถิติยากๆ กว่า 100 ตระกูลใน R ให้กลายเป็นคำตอบเชิงนโยบายและความเสี่ยงจริงในคำสั่งเดียว ด้วยแพ็กเกจ marginaleffects"
 categories: [r, r-tip, statistics, modeling, marginaleffects, glm, machine-learning]

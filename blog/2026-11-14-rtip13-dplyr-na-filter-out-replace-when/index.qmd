@@ -1,5 +1,5 @@
 ---
-title: "R Tips 13: เลิกเขียนโค้ดดัก NA รกๆ ใน filter() และ case_when() ด้วยฟังก์ชันใหม่ใน dplyr 1.2.0+"
+title: "R Tips 13: จัดการ NA ใน filter() และ case_when() ด้วย dplyr 1.2.0+"
 date: 2026-11-14
 description: "แก้ปัญหาแถว NA หายเงียบๆ จากการกรองข้อมูล และลดโค้ดดักค่าซ้ำซ้อนใน case_when() ด้วยชุดฟังก์ชันใหม่ filter_out(), when_any() และ replace_when() บน dplyr 1.2.0+"
 categories: [r, r-tip, tidyverse, dplyr, data-wrangling]
