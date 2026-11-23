@@ -51,6 +51,28 @@ about:
 `Rstats` `Spatial Analysis` `Mixed Models` `Shiny / Shinylive` `Plant pathology`
 :::
 
+::: {.home-metrics}
+::: {.metric-card}
+[RESEARCH]{.metric-label}
+[Rice Pathology]{.metric-value}
+:::
+
+::: {.metric-card}
+[FOCUS]{.metric-label}
+[Epidemiology]{.metric-value}
+:::
+
+::: {.metric-card}
+[TOOLSET]{.metric-label}
+[R & Shinylive]{.metric-value}
+:::
+
+::: {.metric-card}
+[SOFTWARE]{.metric-label}
+[ricecooker ∙ RDstat]{.metric-value}
+:::
+:::
+
 ::: {.home-section}
 ## บทความล่าสุด
 
