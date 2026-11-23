@@ -75,7 +75,10 @@ survey_schema <- type_object(
     "ชื่อศัตรูพืชหรือโรคที่พบ หากไม่พบให้เว้นว่าง",
     required = FALSE
   ),
-  severity_pct = type_number("เปอร์เซ็นต์ความเสียหาย (0-100) หากปกติให้ใส่ 0"),
+  severity_pct = type_number(
+    "เปอร์เซ็นต์ความเสียหาย (0-100) ใส่ 0 เฉพาะเมื่อข้อความระบุว่าปกติหรือไม่พบความเสียหาย หากไม่ระบุตัวเลขให้เว้นว่าง",
+    required = FALSE
+  ),
   status = type_enum(
     values = c("normal", "watch", "critical"),
     description = "ระดับความรุนแรงประเมินจากความเสียหาย"
@@ -101,7 +104,7 @@ clean_df
 #> 3  ลำลูกกา     กข85       60            โรคใบไหม้           10    watch
 ```
 
-สังเกตว่า `age_days` ออกมาเป็น `integer` และ `severity_pct` เป็น `double` จริงๆ ไม่ใช่ `character` ที่ต้องมา `as.numeric()` ต่อ ส่วนฟิลด์ที่ตั้ง `required = FALSE` เมื่อโมเดลไม่พบข้อมูลจะได้ค่า `NA` ตามธรรมชาติของ R แทนสตริง `"None"`
+สังเกตว่า `age_days` ออกมาเป็น `integer` และ `severity_pct` เป็น `double` จริงๆ ไม่ใช่ `character` ที่ต้องมา `as.numeric()` ต่อ ส่วนฟิลด์ที่ตั้ง `required = FALSE` เมื่อโมเดลไม่พบข้อมูลจะได้ค่า `NA` ตามธรรมชาติของ R แทนสตริง `"None"` และใช้กับ `severity_pct` ด้วย เพื่อไม่ให้โมเดลแต่งค่า 0 เองเมื่อข้อความไม่ได้ระบุตัวเลข (ดู [R Tips 22](../2026-11-23-rtip22-ellmer-required-false/index.qmd))
 
 จากนั้นก็ต่อ Pipeline ได้ตามปกติ:
 

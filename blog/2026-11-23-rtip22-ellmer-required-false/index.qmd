@@ -1,0 +1,125 @@
+---
+title: "R Tips 22: กัน LLM แต่งค่า 0 ใน ellmer ด้วย required = FALSE"
+date: 2026-11-23
+description: "ฟิลด์ใน type_*() ของ ellmer ตั้งค่าเริ่มต้นเป็น required = TRUE ทำให้โมเดลเติมค่าเอง เช่น 0 เมื่อข้อความไม่มีข้อมูล แก้ได้ด้วย required = FALSE คู่กับ description ที่ระบุกติกา null และตรวจผลด้วย is.na()"
+categories: [r, r-tip, ellmer, llm, data-quality]
+draft: false
+---
+
+`ellmer` สกัดข้อมูลเชิงโครงสร้าง (Structured Data Extraction) จากข้อความอิสระออกมาเป็น tibble ได้ด้วย `parallel_chat_structured()` แต่ฟังก์ชันตระกูล `type_*()` ตั้งค่าเริ่มต้นเป็น `required = TRUE` ซึ่งหมายความว่าทุกฟิลด์ **ต้องมีค่า** แม้ข้อความต้นทางไม่ได้พูดถึงเลย
+
+เมื่อ Schema บังคับให้ต้องตอบ โมเดลจึงเติมค่าที่ดูสมเหตุสมผลเข้าไปเอง และค่าที่เติมบ่อยที่สุดคือ `0` สำหรับงานระบาดวิทยา นี่เป็นปัญหาร้ายแรง เพราะ "ความรุนแรงโรค 0%" (ตรวจแล้วไม่พบ) กับ "ไม่ได้บันทึก" (ไม่รู้) มีความหมายต่างกันโดยสิ้นเชิง และค่า 0 ที่แต่งขึ้นจะดึงค่าเฉลี่ยของ incidence/severity ให้ต่ำลงโดยไม่มีใครสังเกต
+
+โพสต์นี้แสดงวิธีใช้ `required = FALSE` ร่วมกับ `description` ที่ระบุกติกาชัดเจน เพื่อให้ข้อมูลที่ไม่มีอยู่จริงกลายเป็น `NA` แทนที่จะเป็นเลขที่โมเดลเดาขึ้นมา
+
+---
+
+## 1. ต้นตอ: `required = TRUE` เป็นค่าเริ่มต้น
+
+ตรวจ signature ของ `type_number()` ได้โดยตรง:
+
+```{r}
+library(ellmer)
+args(type_number)
+```
+
+ฟิลด์ทุกตัวที่ไม่ได้ระบุ `required` จึงถูกส่งไปใน JSON Schema ว่า "ต้องมี" และมีอีกจุดที่พลาดบ่อยคือ `description` ที่เขียนสั่งโมเดลให้ **ใส่ 0 เมื่อปกติ** เช่น `"เปอร์เซ็นต์ความเสียหาย (0-100) หากปกติให้ใส่ 0"` คำสั่งแบบนี้ทำให้โมเดลขยายความไปถึงกรณีที่ข้อความ *ไม่ได้บอกว่าปกติ* ด้วย
+
+---
+
+## 2. วิธีแก้: 3 กติกาใน Schema
+
+1. **ตั้ง `required = FALSE`** ให้ฟิลด์ที่ข้อความอาจไม่มีข้อมูล โมเดลจะตอบ `null` ได้อย่างถูกต้อง และ ellmer แปลงเป็น `NA` ใน R
+2. **เขียนกติกาใน `description`** ว่าให้ใช้ `null` เมื่อไม่ระบุ และห้ามเดา ระบุด้วยว่า `0` ใช้ได้เฉพาะเมื่อข้อความยืนยันว่าไม่พบอาการ
+3. **จำกัดค่าด้วย `type_enum()`** และกำหนดเงื่อนไขของค่า `"none"` ให้ชัด เช่น ใช้ได้เฉพาะเมื่อข้อความบอกว่าพืชดูปกติ
+
+---
+
+## 3. ตัวอย่างโค้ด: บันทึกภาคสนามสองภาษา
+
+บันทึกสี่รายการนี้มีข้อมูลครบไม่เท่ากัน: แปลง D4 พบอาการแต่ **ไม่ได้ให้คะแนน** ส่วนแปลง C2 ระบุชัดว่าปกติ
+
+```{r}
+#| eval: false
+library(ellmer)
+
+notes <- list(
+  "แปลง A3 สุพรรณบุรี กข85 ระยะแตกกอ พบใบไหม้ ประเมินความรุนแรงราว 15%",
+  "Plot B1: sheath blight lesions near water line, booting stage, ~30% tillers",
+  "เดินสำรวจแปลง C2 แล้ว ต้นข้าวดูปกติดี",
+  "D4 มีอาการใบจุดสีน้ำตาล ยังไม่ได้ให้คะแนน"
+)
+
+type_obs <- type_object(
+  "Rice disease field observation. Use null when not stated; do not guess.",
+  plot = type_string("Plot ID", required = FALSE),
+  disease = type_enum(
+    c("blast", "brown_spot", "bacterial_leaf_blight", "sheath_blight", "none"),
+    "Disease observed; 'none' only if the note says plants look healthy",
+    required = FALSE
+  ),
+  stage = type_string("Crop growth stage", required = FALSE),
+  severity = type_number(
+    "Severity in percent, 0-100. Use 0 only if the note says no symptoms; use null if no number is given",
+    required = FALSE
+  )
+)
+
+chat <- chat_anthropic() # หรือ chat_openai(), chat_ollama() ฯลฯ
+obs <- parallel_chat_structured(chat, notes, type = type_obs)
+```
+
+คำสั่ง `type_object()` รับ `.description` เป็นอาร์กิวเมนต์แรก จึงใช้ประโยค "Use null when not stated; do not guess." เป็นกติการะดับทั้งอ็อบเจกต์ได้ ส่วนแต่ละฟิลด์ใช้ `required = FALSE` ตามที่ต้องการ
+
+---
+
+## 4. ตรวจผลทันที: นับแถวที่ขาดค่า
+
+หลังสกัดเสร็จ ให้นับว่ามีกี่แถวที่ `severity` เป็น `NA` ก่อนนำไปวิเคราะห์ ตัวอย่างด้านล่างจำลองผลลัพธ์ที่คาดหวังเพื่อสาธิตขั้นตอนตรวจ (ไม่ได้เรียก API จริง):
+
+```{r}
+library(dplyr)
+
+# ผลลัพธ์จำลองสำหรับสาธิต ไม่ใช่ output จริงจากโมเดล
+obs <- tibble(
+  plot     = c("A3", "B1", "C2", "D4"),
+  disease  = c("blast", "sheath_blight", "none", "brown_spot"),
+  stage    = c("tillering", "booting", NA, NA),
+  severity = c(15, 30, 0, NA)
+)
+
+obs |>
+  count(disease, severity_missing = is.na(severity))
+```
+
+แถว `D4` ได้ `NA` ตามที่ควรเป็น ขณะที่ `C2` ได้ `0` เพราะข้อความยืนยันว่าปกติ ซึ่งแยก "ตรวจแล้วไม่พบ" ออกจาก "ไม่ได้บันทึก" ได้ชัดเจน
+
+ผลต่างต่อการคำนวณก็ชัดเช่นกัน:
+
+```{r}
+obs |>
+  summarise(
+    mean_severity   = mean(severity, na.rm = TRUE),
+    n_with_severity = sum(!is.na(severity)),
+    n_missing       = sum(is.na(severity))
+  )
+```
+
+---
+
+## 5. ข้อควรระวัง
+
+1. **`required = FALSE` ลดความเสี่ยง ไม่ใช่รับประกัน**: โมเดลยังอาจเดาค่าได้ ควรสุ่มตรวจแถวที่ได้ค่าเทียบกับข้อความต้นฉบับ โดยเฉพาะค่าตัวเลขของงานที่จะตีพิมพ์
+2. **ห้ามใช้ `replace_na(severity, 0)` ภายหลัง**: การทำเช่นนั้นสร้างปัญหาเดียวกันขึ้นมาใหม่ ให้ใช้ `na.rm = TRUE` ในการสรุป หรือรายงานจำนวนค่าที่ขาดควบคู่กับค่าเฉลี่ยเสมอ
+3. **ระบุเงื่อนไขของค่า `0` และ `"none"` ใน `description`**: คำสั่งแบบ "หากปกติให้ใส่ 0" กว้างเกินไป ควรผูกกับข้อความยืนยันในต้นฉบับเสมอ
+4. **ใช้ฟิลด์หลักเป็น `required = TRUE` เฉพาะที่มีในทุกบันทึกจริง**: เช่น รหัสแปลงที่ระบบกรอกให้อัตโนมัติ เพราะถ้าบังคับฟิลด์ที่ไม่มีข้อมูล ปัญหาเดิมจะกลับมา
+5. **ข้อมูลที่ส่งไปยัง LLM Provider**: ห้ามส่งข้อมูลที่ยังไม่ตีพิมพ์หรือข้อมูลส่วนบุคคลของเกษตรกรไปยัง API ภายนอก หากจำเป็นให้ใช้ `chat_ollama()` รันโมเดลบนเครื่องตัวเอง
+
+---
+
+## 6. ลิงก์และเอกสารอ้างอิง
+
+- **ellmer**: [Structured data](https://ellmer.tidyverse.org/articles/structured-data.html)
+- **ellmer**: [Reference: type_boolean(), type_string(), type_object() และตระกูล type_*()](https://ellmer.tidyverse.org/reference/type_boolean.html)
+- **ellmer**: [Reference: parallel_chat_structured()](https://ellmer.tidyverse.org/reference/parallel_chat.html)
+- **โพสต์ก่อนหน้า**: [R Tips 04: สกัดข้อความและรูปภาพเป็นตารางด้วย ellmer](../2026-11-05-rtip4/index.qmd)

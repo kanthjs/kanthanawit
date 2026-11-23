@@ -6,12 +6,12 @@ categories: [r, r-tip, pointblank, data-validation, data-quality, production]
 draft: false
 ---
 
-เวลาเราสั่งให้ AI ช่วยเขียนสคริปต์วิเคราะห์ข้อมูล ทำ Feature Engineering หรือเตรียมตารางป้อนเข้าโมเดล Machine Learning... สิ่งหนึ่งที่ AI มัก "มองโลกในแง่ดีเกินไป" เสมอคือ **มันมักจะสมมติว่าข้อมูลต้นทางสะอาดเอี่ยมเรียบร้อยแล้ว**
+สคริปต์วิเคราะห์ข้อมูล, Feature Engineering หรือการเตรียมตารางป้อนเข้าโมเดล Machine Learning มักเขียนขึ้นโดย **สมมติว่าข้อมูลต้นทางสะอาดเอี่ยมเรียบร้อยแล้ว**
 
-หรืออย่างเก่งที่สุด AI ก็มักจะเขียนโค้ดดักข้อมูลด้วยคำสั่งดั้งเดิมอย่าง `stopifnot()` หรือ `if (any(is.na(...))) stop(...)` แบบดิบๆ:
+อย่างเก่งที่สุดก็แค่ดักข้อมูลด้วยคำสั่งดั้งเดิมอย่าง `stopifnot()` หรือ `if (any(is.na(...))) stop(...)` แบบดิบๆ:
 
 ```r
-# ตัวอย่างโค้ดเช็กข้อมูลแบบคลาสสิกที่ AI มักเขียนให้
+# ตัวอย่างโค้ดเช็กข้อมูลแบบคลาสสิก
 stopifnot(!any(is.na(df$lat)))
 stopifnot(all(df$severity_pct >= 0 & df$severity_pct <= 100))
 if (any(duplicated(df$plot_id))) stop("มี plot_id ซ้ำ!")
