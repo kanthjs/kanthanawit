@@ -137,7 +137,7 @@ code, kbd, samp, pre {
 
 p code:not(.sourceCode), li code:not(.sourceCode), td code:not(.sourceCode) {
   font-family: $font-family-monospace;
-  background-color: #FFFFFF !important;
+  background-color: $surfaceColorCustom !important;
   color: $inlineCodeTextCustom;
   border: 1.5px solid $borderColorCustom;
   padding: 0.15em 0.45em;
@@ -152,14 +152,14 @@ pre code {
 }
 
 div.sourceCode {
-  background-color: #FFFFFF !important;
+  background-color: $surfaceColorCustom !important;
   border: $borderInkWidth solid $borderColorCustom;
   border-radius: 12px;
   box-shadow: 2.5px 2.5px 0px $borderColorCustom;
 }
 
 div.cell-output pre {
-  background-color: #FFFFFF !important;
+  background-color: $surfaceColorCustom !important;
   border: $borderInkWidth solid $borderColorCustom;
   border-radius: 12px;
   box-shadow: 2.5px 2.5px 0px $borderColorCustom;
@@ -210,7 +210,7 @@ div.cell-output pre {
   margin: 0 0.15rem;
 
   &:hover {
-    background-color: #FFFFFF;
+    background-color: $surfaceColorCustom;
     border-color: $borderColorCustom;
     box-shadow: 2px 2px 0px $borderColorCustom;
     transform: translate(-1px, -1px);
@@ -240,7 +240,7 @@ div.cell-output pre {
   transition: all 0.15s ease-in-out;
 
   &:hover {
-    background-color: #FFFFFF;
+    background-color: $surfaceColorCustom;
     border-color: $borderColorCustom;
     box-shadow: 2px 2px 0px $borderColorCustom;
   }
@@ -325,7 +325,7 @@ div.quarto-about-jolla {
       margin-bottom: 0.5rem;
 
       code {
-        background-color: #FFFFFF !important;
+        background-color: $surfaceColorCustom !important;
         color: $textColorCustom !important;
         border: $borderInkWidth solid $borderColorCustom !important;
         border-radius: 9999px;
@@ -334,6 +334,7 @@ div.quarto-about-jolla {
         font-family: $font-family-monospace !important;
         font-weight: 600;
         letter-spacing: 0.01em;
+        white-space: nowrap; // keep each pill on one line
         box-shadow: 2px 2px 0px $borderColorCustom;
         transition: all 0.15s ease;
 
@@ -372,7 +373,7 @@ div.quarto-about-jolla {
       padding: 0.45rem 1.15rem;
       border: $borderInkWidth solid $borderColorCustom;
       border-radius: 9999px;
-      background-color: #FFFFFF;
+      background-color: $surfaceColorCustom;
       color: $headingColorCustom;
       text-decoration: none;
       font-size: 0.92rem;
@@ -493,7 +494,7 @@ div.quarto-about-trestles {
         padding: 0;
         border: $borderInkWidth solid $borderColorCustom;
         border-radius: 10px;
-        background-color: #FFFFFF;
+        background-color: $surfaceColorCustom;
         color: $headlineColorCustom;
         text-decoration: none;
         font-size: 1.15rem;
@@ -647,7 +648,7 @@ div.quarto-post {
 .quarto-grid-item {
   border: $borderInkWidth solid $borderColorCustom !important;
   border-radius: 14px;
-  background-color: #FFFFFF;
+  background-color: $surfaceColorCustom;
   box-shadow: 2.5px 2.5px 0px $borderColorCustom;
   transition: all 0.18s ease;
 
@@ -664,7 +665,7 @@ div.quarto-post {
 
 .listing-category,
 .quarto-category {
-  background-color: #FFFFFF !important;
+  background-color: $surfaceColorCustom !important;
   border: 1px solid $borderColorCustom !important;
   color: $textColorCustom !important;
   border-radius: 9999px !important;
@@ -807,7 +808,7 @@ body:has(.post-list) {
     border: $borderInkWidth solid $borderColorCustom;
     border-radius: 9999px;
     padding: 0.35rem 1rem;
-    background: #FFFFFF;
+    background: $surfaceColorCustom;
     color: $textColorCustom;
     font-family: $font-family-sans-serif;
     font-size: 0.92rem;
@@ -818,7 +819,7 @@ body:has(.post-list) {
     transition: all 0.15s ease;
 
     &:hover {
-      background: #FFFFFF;
+      background: $surfaceColorCustom;
       transform: translate(-1px, -1px);
       box-shadow: 2.5px 2.5px 0px $borderColorCustom;
     }
@@ -916,10 +917,11 @@ body:has(.post-list) {
   .post-thumb {
     flex: 0 0 200px;
     display: block;
-    border-radius: 14px;
+    border-radius: 12px;
     overflow: hidden;
-    border: 1px solid $borderColorCustom;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: $borderInkWidth solid $borderColorCustom;
+    box-shadow: 2px 2px 0px $borderColorCustom;
+    transition: all 0.15s ease;
 
     img {
       width: 100%;
@@ -930,8 +932,8 @@ body:has(.post-list) {
     }
 
     &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(42, 76, 57, 0.14);
+      transform: translate(-1.5px, -1.5px);
+      box-shadow: 3.5px 3.5px 0px $borderColorCustom;
     }
   }
 
@@ -982,7 +984,7 @@ body:has(.post-list) {
       padding: 0.25rem 0.8rem;
       border: 1px solid $borderColorCustom;
       border-radius: 9999px;
-      background: #FFFFFF;
+      background: $surfaceColorCustom;
       color: $textColorCustom;
       font-size: 0.88rem;
       line-height: 1.5;
@@ -992,7 +994,7 @@ body:has(.post-list) {
 
       &:not([data-category=""])::before { content: "#"; margin-right: -0.3rem; }
       &:hover {
-        background: #FFFFFF;
+        background: $surfaceColorCustom;
         transform: translate(-1px, -1px);
         box-shadow: 2px 2px 0px $borderColorCustom;
       }
@@ -1034,17 +1036,17 @@ body:has(.post-list) {
 
   .talk-card {
     background-color: $cardBgColorCustom;
-    border: 1px solid $borderColorCustom;
-    border-radius: 12px;
+    border: $borderInkWidth solid $borderColorCustom;
+    border-radius: 14px;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    box-shadow: 2.5px 2.5px 0px $borderColorCustom;
     display: flex;
     flex-direction: column;
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    transition: all 0.18s ease;
 
     &:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 10px 24px rgba(42, 76, 57, 0.12);
+      transform: translate(-1.5px, -1.5px);
+      box-shadow: 4.5px 4.5px 0px $borderColorCustom;
     }
 
     .talk-thumb {
@@ -1053,8 +1055,9 @@ body:has(.post-list) {
       object-fit: cover;
       object-position: top;
       background-color: $thumbBgColorCustom;
-      border-bottom: 1px solid $borderColorCustom;
+      border-bottom: $borderInkWidth solid $borderColorCustom;
       display: block;
+      border-radius: 0;
       transition: opacity 0.2s ease;
 
       &:hover {
@@ -1073,23 +1076,19 @@ body:has(.post-list) {
         gap: 0.5rem;
         margin-bottom: 0.75rem;
 
-        .talk-badge {
-          background-color: rgba($headingColorCustom, 0.1);
-          color: $headingColorCustom;
-          font-size: 0.8rem;
+        .talk-badge,
+        .talk-badge-type {
+          font-family: $font-family-monospace;
+          font-size: 0.76rem;
           font-weight: 600;
-          padding: 0.2rem 0.6rem;
-          border-radius: 4px;
+          padding: 0.12rem 0.65rem;
+          border: 1px solid $borderColorCustom;
+          border-radius: 9999px;
+          color: $textColorCustom;
         }
 
-        .talk-badge-type {
-          background-color: rgba(201, 123, 74, 0.12);
-          color: $accentWarmColorCustom;
-          font-size: 0.8rem;
-          font-weight: 600;
-          padding: 0.2rem 0.6rem;
-          border-radius: 4px;
-        }
+        .talk-badge { background-color: $accentMintCustom; }
+        .talk-badge-type { background-color: $accentButterCustom; }
       }
 
       h3 {
@@ -1116,7 +1115,7 @@ body:has(.post-list) {
         gap: 0.65rem;
         margin-top: auto;
         padding-top: 0.85rem;
-        border-top: 1px solid rgba(221, 220, 210, 0.6);
+        border-top: 1px dashed rgba($textColorCustom, 0.3);
 
         .talk-btn {
           display: inline-flex;
@@ -1146,7 +1145,7 @@ body:has(.post-list) {
           display: inline-flex;
           align-items: center;
           gap: 0.4rem;
-          background-color: #FFFFFF;
+          background-color: $surfaceColorCustom;
           color: $headlineColorCustom !important;
           border: $borderInkWidth solid $borderColorCustom;
           border-radius: 9999px;
@@ -1158,7 +1157,7 @@ body:has(.post-list) {
           transition: all 0.15s ease;
 
           &:hover {
-            background-color: #FFFFFF;
+            background-color: $surfaceColorCustom;
             transform: translate(-1px, -1px);
             box-shadow: 3px 3px 0px $borderColorCustom;
             color: $headlineColorCustom !important;
@@ -1216,7 +1215,7 @@ div.quarto-about-jolla #quarto-document-content .home-section {
     display: block;
     padding: 1rem 1.25rem;
     margin-bottom: 0.85rem;
-    background-color: #FFFFFF;
+    background-color: $surfaceColorCustom;
     border: $borderInkWidth solid $borderColorCustom;
     border-radius: 12px;
     box-shadow: 2.5px 2.5px 0px $borderColorCustom;
@@ -1285,7 +1284,7 @@ div.quarto-about-jolla #quarto-document-content .home-section {
     gap: 0.35rem;
     margin-top: 1.1rem;
     padding: 0.45rem 1.15rem;
-    background-color: #FFFFFF;
+    background-color: $surfaceColorCustom;
     border: $borderInkWidth solid $borderColorCustom;
     border-radius: 9999px;
     box-shadow: 2px 2px 0px $borderColorCustom;
@@ -1323,7 +1322,7 @@ div.quarto-about-jolla #quarto-document-content .home-section {
   text-align: left;
 
   .metric-card {
-    background-color: #FFFFFF;
+    background-color: $surfaceColorCustom;
     border: $borderInkWidth solid $borderColorCustom;
     border-radius: 12px;
     padding: 0.75rem 0.95rem;
@@ -1372,7 +1371,7 @@ div.quarto-about-jolla #quarto-document-content .home-section {
   .work-card {
     display: block;
     padding: 1.1rem 1.25rem;
-    background-color: #FFFFFF;
+    background-color: $surfaceColorCustom;
     border: $borderInkWidth solid $borderColorCustom;
     border-radius: 14px;
     box-shadow: 3px 3px 0px $borderColorCustom;
@@ -1419,7 +1418,7 @@ div.quarto-about-jolla #quarto-document-content .home-section {
   box-shadow: 2.5px 2.5px 0px $borderColorCustom !important;
   margin: 1.5rem 0 !important;
   overflow: hidden;
-  background-color: #FFFFFF !important;
+  background-color: $surfaceColorCustom !important;
 
   .callout-header {
     font-family: $font-family-monospace;
@@ -1506,12 +1505,13 @@ div.quarto-about-jolla #quarto-document-content .home-section {
     display: block;
     padding: 0.9rem 1.05rem;
     background-color: $cardBgColorCustom;
-    border: 1px solid $borderColorCustom;
-    border-radius: 10px;
+    border: $borderInkWidth solid $borderColorCustom;
+    border-radius: 12px;
+    box-shadow: 2px 2px 0px $borderColorCustom;
     text-decoration: none;
-    transition: border-color 0.2s ease, transform 0.2s ease;
+    transition: all 0.15s ease;
 
-    &:hover { border-color: $headingColorCustom; transform: translateY(-2px); }
+    &:hover { transform: translate(-1.5px, -1.5px); box-shadow: 3.5px 3.5px 0px $borderColorCustom; }
   }
 
   .post-nav-next { text-align: right; grid-column: 2; }
@@ -1565,6 +1565,23 @@ div.quarto-about-trestles .about-entity .about-links {
   }
 
   .work-grid { max-width: 640px; margin-left: auto; margin-right: auto; }
+}
+
+// =============================================================================
+// ACCESSIBILITY: visible keyboard focus, reduced motion
+// =============================================================================
+:is(a, button, [role="button"], [role="switch"], .post-filter, .category):focus-visible {
+  outline: 2.5px solid $headingColorCustom;
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition: none !important;
+    animation: none !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 // Long URLs and inline code in prose wrap instead of widening the page
