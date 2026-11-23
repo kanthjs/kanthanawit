@@ -3,10 +3,10 @@ title: "R Tips 21: ตั้งค่าแพ็กเกจล่วงหน�
 date: 2026-11-22
 description: "แก้ปัญหา R Startup ช้าและสคริปต์พังจากการโหลด library() ทิ้งไว้ใน .Rprofile ด้วยกลไก User Hooks ผ่าน setHook(packageEvent()) เพื่อหน่วงเวลาตั้งค่าธีมและ Option เฉพาะเมื่อแพ็กเกจถูกเรียกใช้งานจริง"
 categories: [r, r-tip, rprofile, base-r, workflow]
-draft: false
+draft: true
 ---
 
-ผู้ใช้ R หลายคนต้องการปรับแต่งสภาพแวดล้อมเริ่มต้นในทุก R Session เช่น การตั้งธีมประจำตัว `theme_bw()` สำหรับ `ggplot2` หรือการกำหนดพฤติกรรมการพิมพ์ของบางแพ็กเกจ จึงเลือกเขียนคำสั่ง `library(ggplot2)` และฟังก์ชันตั้งค่าลงในไฟล์ `~/.Rprofile` ตรงๆ
+ผู้ใช้ R หลายคนต้องการปรับแต่ง environment เริ่มต้นในทุก R Session เช่น การเซ็ทธีมประจำตัว `theme_bw()` สำหรับ `ggplot2` หรือการกำหนดพฤติกรรมการพิมพ์ของบางแพ็กเกจ จึงเลือกเขียนคำสั่ง `library(ggplot2)` และฟังก์ชันตั้งค่าลงในไฟล์ `~/.Rprofile` ตรงๆ
 
 แม้จะดูสะดวก แต่วิธีนี้ก่อให้เกิดปัญหาสำคัญ 2 ประการ:
 
@@ -62,9 +62,9 @@ getHook(packageEvent("ggplot2", "onLoad"))
 ```{r}
 # ข้อมูลความรุนแรงโรคไหม้ (% leaf area) ตามวันหลังปลูก
 blast <- data.frame(
-  dap      = rep(seq(30, 70, by = 10), 2),
-  variety  = rep(c("RD85", "KDML105"), each = 5),
-  severity = c(2, 5, 11, 18, 24,  4, 9, 20, 33, 41)
+  dap = rep(seq(30, 70, by = 10), 2),
+  variety = rep(c("RD85", "KDML105"), each = 5),
+  severity = c(2, 5, 11, 18, 24, 4, 9, 20, 33, 41)
 )
 
 blast
@@ -77,7 +77,7 @@ blast
 #| warning: false
 #| fig-width: 7
 #| fig-height: 4.5
-library(ggplot2)  # Hook ทำงานตรงนี้ → theme_bw() ถูกตั้งเป็นธีมเริ่มต้นทันที
+library(ggplot2) # Hook ทำงานตรงนี้ → theme_bw() ถูกตั้งเป็นธีมเริ่มต้นทันที
 
 ggplot(blast, aes(x = dap, y = severity, colour = variety)) +
   geom_line(linewidth = 1) +
@@ -143,7 +143,7 @@ if (interactive()) {
 3. **ลำดับการอ่านไฟล์ `.Rprofile`**: R จะอ่าน User Profile เพียงไฟล์เดียวตามลำดับ:
    - ตรวจสอบ Environment Variable `R_PROFILE_USER`
    - หากไม่มี จะอ่าน `.Rprofile` ใน Working Directory ปัจจุบัน
-   - หากไม่มี จะอ่าน `~/.Rprofile` ใน User Home Directory  
+   - หากไม่มี จะอ่าน `~/.Rprofile` ใน User Home Directory
    *ข้อสำคัญ:* ในโปรเจกต์ที่ใช้งาน `renv` ระบบจะมี `.Rprofile` เฉพาะของโปรเจกต์ ทำให้ไฟล์ `~/.Rprofile` ใน Home ถูกข้ามไป เว้นแต่จะสั่ง `source("~/.Rprofile")` เพิ่มเติม และการรันแบบ `R --vanilla` จะข้ามการอ่าน Profile ทั้งหมด
 4. **จำกัดเฉพาะความสะดวกเชิงรูปลักษณ์ (Cosmetic Changes)**: ครอบโค้ดด้วย `if (interactive())` เสมอ และห้ามใส่สิ่งที่เปลี่ยนแปลงผลลัพธ์ทางสถิติหรือการคำนวณ เช่น `set.seed()`, `options(digits = ...)` หรือการปรับอัลกอริทึม เพราะจะทำให้สคริปต์ของงานวิจัยไม่สามารถทำซ้ำ (Reproduce) ได้อย่างถูกต้องบนเครื่องอื่น
 5. **การยกเลิกหรือลบ Hook**: หากต้องการคืนค่าเดิม สามารถส่ง `NULL` พร้อมกำหนด `action = "replace"`:
