@@ -72,7 +72,12 @@ div.cell-output pre,
   box-shadow: 2px 2px 0px #0B100D !important;
 }
 
-p code:not(.sourceCode), li code:not(.sourceCode), td code:not(.sourceCode),
+p code:not(.sourceCode), li code:not(.sourceCode), td code:not(.sourceCode), th code:not(.sourceCode) {
+  background-color: $surfaceColorCustom !important;
+  border-color: rgba($borderColorCustom, 0.9) !important;
+  color: $inlineCodeTextCustom !important;
+}
+
 .listing-category,
 .quarto-category,
 .home-badges code,

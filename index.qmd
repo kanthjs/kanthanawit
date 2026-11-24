@@ -17,7 +17,7 @@ listing:
   id: home-posts
   contents: "blog/*/index.qmd"
   sort: "date desc"
-  max-items: 5
+  max-items: 2
   template: _templates/home-posts.ejs
   fields: [date, title, description]
   date-format: "D MMM YYYY"
@@ -48,7 +48,7 @@ about:
 ผมเป็นนักวิชาการเกษตร ทำงานที่ศูนย์วิจัยข้าวปทุมธานี สนใจด้านระบาดวิทยาของโรคและศัตรูข้าว (Rice Pathology & Epidemiology) และวิเคราะห์ข้อมูลต่าง ๆ ด้วย **R**
 
 ::: {.home-badges}
-`Rstats` `Spatial Analysis` `Mixed Models` `Shiny / Shinylive` `Plant pathology`
+`Rstats` `Spatial Analysis` `Mixed Models` `Plant pathology`
 :::
 
 ::: {.home-metrics}
@@ -69,7 +69,7 @@ about:
 
 ::: {.metric-card}
 [SOFTWARE]{.metric-label}
-[ricecooker ∙ RDstat]{.metric-value}
+[RDstat ∙ RBTool]{.metric-value}
 :::
 :::
 
@@ -86,9 +86,8 @@ about:
 ## ผลงานเด่น
 
 ::: {.work-grid}
+[**หนังสือ**<br>[หนังสือ R และการออกแบบการทดลองทางการเกษตร ทั้งเล่มที่เสร็จแล้วและที่กำลังเขียน]{.work-desc}](books/index.qmd){.work-card}
 [**ricecooker**<br>[R package วิเคราะห์งานทดลองเกษตร CRD, RCBD, split-plot]{.work-desc}](https://github.com/kanthjs/ricecooker){.work-card}
-[**RDstat**<br>[วิเคราะห์สถิติบนเบราว์เซอร์ ข้อมูลไม่ออกจากเครื่อง]{.work-desc}](https://kanthjs.github.io/RDstat/){.work-card}
-[**Rice Blast Forecast**<br>[เครื่องมือพยากรณ์โรคไหม้ข้าว]{.work-desc}](https://kanthjs.github.io/rice_blast_forcast_app/){.work-card}
 :::
 
 [ดู Software ทั้งหมด →](r-packages/index.qmd){.home-more}
