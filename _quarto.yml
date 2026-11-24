@@ -60,7 +60,9 @@ format:
       dark: [cosmo, styles.scss, styles-dark.scss]
     mainfont: "IBM Plex Sans Thai Looped"
     monofont: "Fira Code"
-    include-in-header: header.html
+    include-in-header:
+      - header.html
+      - _seasonal.html
     toc: true
     toc-title: "สารบัญ"
     grid:
