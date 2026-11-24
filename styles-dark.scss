@@ -7,21 +7,28 @@ $sidebarBgColorCustom:    #1B221D;
 $textColorCustom:         #E3E8E0;
 $sidebarTextColorCustom:  #DCE3D9;
 
-$headlineColorCustom:     #CDE2D2;
+$headlineColorCustom:     #F0FDF4;
 $headingColorCustom:      #8FC3A4;
 $bodyLinkColorCustom:     #8FC3A4;
-$navLinkColorCustom:      #8FC3A4;
+$navLinkColorCustom:      #E3E8E0;
 $sidebarLinkColorCustom:  #8FC3A4;
-$footerTextColorCustom:   #8FC3A4;
+$subtitleColorCustom:     #A7BBAF;
+$footerTextColorCustom:   #94A398;
 
-$buttonTextColorCustom:      #1F2722;
-$buttonHoverTextColorCustom: #242D27;
-$buttonBgColorCustom:        #5A9175;
-$buttonHoverBgColorCustom:   #6BA487;
-$borderColorCustom:          #2F3A33;
-$cardBgColorCustom:          #1B221D;
+$buttonTextColorCustom:      #121814;
+$buttonHoverTextColorCustom: #000000;
+$buttonBgColorCustom:        #8FC3A4;
+$buttonHoverBgColorCustom:   #A3D4B7;
+$borderColorCustom:          #36443B;
+$cardBgColorCustom:          #1C2520;
 
-$surfaceColorCustom:      #2A332D;
+$accentMintCustom:        #2E4D3B;
+$accentLavenderCustom:    #35314D;
+$accentBlueCustom:        #263B4D;
+$accentButterCustom:      #4D4426;
+$accentRoseCustom:        #4D2B2B;
+
+$surfaceColorCustom:      #242F29;
 $inlineCodeTextCustom:    #D5E6D9;
 $mutedTextColorCustom:    #94A398;
 $thumbBgColorCustom:      #222A25;
@@ -48,4 +55,31 @@ main.content .cell-output-display img,
 main.content figure img {
   background-color: #F5F4EE;
   border-radius: 6px;
+}
+
+// Dark tactile adjustments
+.home-post,
+.work-card,
+.talk-card,
+.post-nav a,
+.metric-card,
+.callout,
+div.sourceCode,
+div.cell-output pre,
+.quarto-grid-item {
+  background-color: $cardBgColorCustom !important;
+  border-color: $borderColorCustom !important;
+  box-shadow: 2px 2px 0px #0B100D !important;
+}
+
+p code:not(.sourceCode), li code:not(.sourceCode), td code:not(.sourceCode),
+.listing-category,
+.quarto-category,
+.home-badges code,
+.about-links .about-link,
+.home-more {
+  background-color: $surfaceColorCustom !important;
+  border-color: $borderColorCustom !important;
+  color: $textColorCustom !important;
+  box-shadow: 1.5px 1.5px 0px #0B100D !important;
 }

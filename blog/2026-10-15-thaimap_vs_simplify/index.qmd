@@ -1,7 +1,7 @@
 ---
-title: "Map of Thailand with R"
+title: "ดึงแผนที่ประเทศไทยด้วย geodata และลดขนาดด้วย rmapshaper"
 date: 2026-10-15
-description: "แผนที่ประเทศไทย ด้วย R"
+description: "ดึงขอบเขตจังหวัดและอำเภอจาก GADM ด้วย geodata และ sf เทียบกับ Shapefile มาตรฐาน HDX แล้วลดขนาดข้อมูลด้วย ms_simplify() ให้แผนที่โหลดเร็วโดยเส้นขอบยังคมชัด"
 categories: [map, r]
 draft: false
 ---

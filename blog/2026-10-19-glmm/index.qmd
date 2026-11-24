@@ -1,7 +1,7 @@
 ---
-title: "GLMM"
+title: "เข้าใจ GLMM ผ่าน 3 องค์ประกอบ: การแจกแจง, Link และ Random Effect"
 date: 2026-10-19
-description: "ทำความรู้จัก glmm กัน แบบงงๆ"
+description: "แสดงว่า lm, glm และ lmm เป็นกรณีพิเศษของ GLMM ที่ต่างกันที่การแจกแจงของ y, link function และ random effect พร้อมตัวอย่างใน glmmTMB ที่เทียบค่าสัมประสิทธิ์กับ lm"
 categories: [glmm, r]
 draft: false
 ---

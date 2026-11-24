@@ -1,7 +1,7 @@
 ---
-title: "Map of Thailand EP1"
+title: "วาดแผนที่จังหวัดไทยด้วย ggplot2 และ ggspatial"
 date: 2026-10-25
-description: "แผนที่ประเทศไทยแสดงข้อมูลผลผลิตข้าว"
+description: "ลดขนาด geometry ของแผนที่จังหวัดจาก GADM ด้วย rmapshaper แล้ววาดด้วย ggplot2 พร้อม scale bar และสัญลักษณ์ทิศเหนือจาก ggspatial"
 categories: [map, r]
 draft: true
 ---
