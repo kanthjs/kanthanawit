@@ -1,0 +1,114 @@
+<!--
+  Seasonal Christmas colour theme for the whole site. Included in <head> from
+  _quarto.yml. The script adds `xmas` to <html> only between 20 Nov and 31 Jan,
+  so every rule below is scoped to `html.xmas` and the normal green theme comes
+  back by itself after the holidays. Remove the include line to drop it.
+
+  Palette: berry red #A0061B, antique gold #B27F49 / #D9AE6A,
+  pine green #28604C / #3E5647, deep pine ink #1A2821, cream #FBF3E4.
+-->
+<script>
+  (() => {
+    const now = new Date();
+    const m = now.getMonth() + 1;
+    const d = now.getDate();
+    if ((m === 11 && d >= 20) || m === 12 || m === 1) {
+      document.documentElement.classList.add("xmas");
+    }
+  })();
+</script>
+
+<style>
+  /* ---------- light theme ---------- */
+
+  /* festive stripe under the navbar */
+  html.xmas .navbar { position: relative; }
+  html.xmas .navbar::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -5px;
+    height: 4px;
+    background: repeating-linear-gradient(
+      90deg,
+      #A0061B 0 24px, #D9AE6A 24px 30px,
+      #28604C 30px 54px, #D9AE6A 54px 60px
+    );
+    pointer-events: none;
+  }
+
+  /* headings and links: pine green, red on hover */
+  html.xmas body:not(.quarto-dark) :is(h1, .h1, h1.title) { color: #1A2821 !important; }
+  html.xmas body:not(.quarto-dark) :is(h2, h3, h4, .h2, .h3) { color: #28604C !important; }
+  html.xmas body:not(.quarto-dark) main a:not(.btn):not(.home-post):not(.work-card):not(.home-more):not(.about-link):not(.talk-btn):not(.talk-btn-outline):hover { color: #A0061B; }
+  html.xmas body:not(.quarto-dark) .post-title a:hover,
+  html.xmas body:not(.quarto-dark) .home-post:hover .home-post-title { color: #A0061B !important; }
+
+  /* selected state: berry red with cream text */
+  html.xmas .navbar .nav-link.active,
+  html.xmas .post-filter.active,
+  html.xmas .quarto-listing-category .category.active,
+  html.xmas .listing-pagination .page-item.active .page-link {
+    background-color: #A0061B !important;
+    color: #FBF3E4 !important;
+  }
+  html.xmas .quarto-listing-category .category.active .quarto-category-count { color: #FBF3E4 !important; }
+
+  /* hover fills: soft gold instead of mint */
+  html.xmas body:not(.quarto-dark) :is(
+    .listing-category:hover, .quarto-category:hover,
+    .home-badges code:hover, .about-link:hover, .home-more:hover,
+    .post-filter:not(.active):hover
+  ) {
+    background-color: #F2E2C2 !important;
+    color: #1A2821 !important;
+  }
+
+  /* section marker on the homepage and the talk buttons */
+  html.xmas .home-section h2::before { background-color: #A0061B !important; }
+  html.xmas .talk-btn { background-color: #A0061B !important; color: #FBF3E4 !important; }
+  html.xmas .talk-badge { background-color: #F2E2C2 !important; color: #1A2821 !important; }
+  html.xmas .talk-card h3 a { color: inherit !important; }
+
+  /* code in headings: gold tint instead of mint */
+  html.xmas body:not(.quarto-dark) :is(h1, h2, h3, h4, h5, h6) code:not(.sourceCode) { background-color: #F2E2C2; }
+
+  /* blockquote rule */
+  html.xmas blockquote { border-left-color: #A0061B; }
+
+  /* ---------- dark theme: deep pine night with gold headings ---------- */
+
+  html.xmas body.quarto-dark,
+  html.xmas body.quarto-dark .navbar,
+  html.xmas body.quarto-dark .nav-footer {
+    background-color: #111A15 !important;
+  }
+
+  html.xmas body.quarto-dark :is(
+    .home-post, .work-card, .talk-card, .callout, .post-nav a,
+    div.sourceCode, div.cell-output pre, .quarto-grid-item
+  ) {
+    background-color: #182520 !important;
+  }
+
+  html.xmas body.quarto-dark :is(h1, .h1, h1.title) { color: #E9CB8F !important; }
+  html.xmas body.quarto-dark :is(h2, h3, h4, .h2, .h3) { color: #D9AE6A !important; }
+  html.xmas body.quarto-dark .post-title a,
+  html.xmas body.quarto-dark .home-post-title { color: #F3E7CF !important; }
+
+  html.xmas body.quarto-dark :is(
+    .listing-category:hover, .quarto-category:hover,
+    .home-badges code:hover, .about-link:hover, .home-more:hover,
+    .post-filter:not(.active):hover
+  ) {
+    background-color: #3A3020 !important;
+    color: #F3E7CF !important;
+  }
+
+  html.xmas body.quarto-dark .talk-badge { background-color: #3A3020 !important; color: #F3E7CF !important; }
+
+  html.xmas body.quarto-dark :is(h1, h2, h3, h4, h5, h6) code:not(.sourceCode) {
+    background-color: #3A3020;
+  }
+</style>
