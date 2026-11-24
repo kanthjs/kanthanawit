@@ -135,15 +135,28 @@ code, kbd, samp, pre {
   font-family: $font-family-monospace;
 }
 
-p code:not(.sourceCode), li code:not(.sourceCode), td code:not(.sourceCode) {
+p code:not(.sourceCode), li code:not(.sourceCode), td code:not(.sourceCode), th code:not(.sourceCode) {
   font-family: $font-family-monospace;
   background-color: $surfaceColorCustom !important;
   color: $inlineCodeTextCustom;
-  border: 1.5px solid $borderColorCustom;
-  padding: 0.15em 0.45em;
+  border: 1px solid rgba($borderColorCustom, 0.45);
+  padding: 0.1em 0.4em;
   border-radius: 6px;
   font-size: 0.88em;
-  box-shadow: 1px 1px 0px $borderColorCustom;
+  box-shadow: none;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone; // wrapped code keeps its rounded ends
+}
+
+// Code inside headings: tinted pill in the site palette, not Bootstrap purple
+:is(h1, h2, h3, h4, h5, h6) code:not(.sourceCode) {
+  font-family: $font-family-monospace;
+  font-size: 0.9em;
+  color: inherit;
+  background-color: $accentMintCustom;
+  border: 1px solid rgba($borderColorCustom, 0.45);
+  border-radius: 6px;
+  padding: 0.05em 0.35em;
 }
 
 pre code {
@@ -244,6 +257,24 @@ div.cell-output pre {
     border-color: $borderColorCustom;
     box-shadow: 2px 2px 0px $borderColorCustom;
   }
+}
+
+// Small screens: keep brand, tools and search on one row
+@media (max-width: 991.98px) {
+  // Bootstrap's `.navbar > .container-fluid { flex-wrap: inherit }` wraps the
+  // search icon onto a second row; only wrap while the menu is open
+  .navbar > .navbar-container { flex-wrap: nowrap; }
+  .navbar > .navbar-container:has(.navbar-collapse.show, .navbar-collapse.collapsing) { flex-wrap: wrap; }
+  .navbar-brand-container { min-width: 0; }
+  .navbar-brand { font-size: 1.1rem; }
+  .navbar-brand img, .navbar-brand .navbar-logo { margin-right: 0.3rem; }
+  .navbar > .navbar-container > .quarto-navbar-tools {
+    display: flex;
+    flex-wrap: nowrap;
+    flex-shrink: 0;
+    align-items: center;
+  }
+  .quarto-navigation-tool { padding: 0.2rem 0.3rem; }
 }
 
 // =============================================================================
@@ -664,7 +695,8 @@ div.quarto-post {
 }
 
 .listing-category,
-.quarto-category {
+.quarto-category,
+.quarto-title .quarto-categories .quarto-category {
   background-color: $surfaceColorCustom !important;
   border: 1px solid $borderColorCustom !important;
   color: $textColorCustom !important;
@@ -1361,12 +1393,15 @@ div.quarto-about-jolla #quarto-document-content .home-section {
 // =============================================================================
 .work-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 0.95rem;
   margin: 1rem 0 2rem 0;
   text-align: left;
 
   p { display: contents; margin: 0; }
+
+  // .work-desc is already a block; the <br> only adds an empty line
+  .work-card br { display: none; }
 
   .work-card {
     display: block;
@@ -1482,9 +1517,10 @@ div.quarto-about-jolla #quarto-document-content .home-section {
   // code in headings: plain text here, no pill
   code {
     font-size: inherit;
-    color: inherit;
+    color: inherit !important;
     background: none !important;
-    border: 0;
+    border: 0 !important;
+    box-shadow: none !important;
     padding: 0;
     white-space: normal;
   }
