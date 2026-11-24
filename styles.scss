@@ -1344,51 +1344,6 @@ div.quarto-about-jolla #quarto-document-content .home-section {
 }
 
 // =============================================================================
-// METRICS STRIP (Bento Metric Badges)
-// =============================================================================
-.home-metrics {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
-  gap: 0.75rem;
-  margin: 1.75rem 0 0.5rem 0;
-  text-align: left;
-
-  .metric-card {
-    background-color: $surfaceColorCustom;
-    border: $borderInkWidth solid $borderColorCustom;
-    border-radius: 12px;
-    padding: 0.75rem 0.95rem;
-    box-shadow: 2.5px 2.5px 0px $borderColorCustom;
-    transition: all 0.15s ease;
-
-    &:hover {
-      transform: translate(-1px, -1px);
-      box-shadow: 3.5px 3.5px 0px $borderColorCustom;
-    }
-
-    .metric-label {
-      display: block;
-      font-family: $font-family-monospace;
-      font-size: 0.7rem;
-      font-weight: 600;
-      color: rgba($textColorCustom, 0.65);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 0.2rem;
-    }
-
-    .metric-value {
-      display: block;
-      font-family: $font-family-serif;
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: $headlineColorCustom;
-      line-height: 1.35;
-    }
-  }
-}
-
-// =============================================================================
 // WORK CARDS (homepage "featured work" and the Software page)
 // =============================================================================
 .work-grid {
