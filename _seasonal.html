@@ -1,6 +1,6 @@
 <!--
   Seasonal Christmas colour theme for the whole site. Included in <head> from
-  _quarto.yml. The script adds `xmas` to <html> only between 20 Nov and 15 Jan,
+  _quarto.yml. The script adds `xmas` to <html> only between 20 Nov and 31 Jan,
   so every rule below is scoped to `html.xmas` and the normal green theme comes
   back by itself after the holidays. Remove the include line to drop it.
 
@@ -12,7 +12,7 @@
     const now = new Date();
     const m = now.getMonth() + 1;
     const d = now.getDate();
-    if ((m === 11 && d >= 20) || m === 12 || (m === 1 && d <= 15)) {
+    if ((m === 11 && d >= 20) || m === 12 || m === 1) {
       document.documentElement.classList.add("xmas");
     }
   })();
@@ -68,7 +68,8 @@
   /* section marker on the homepage and the talk buttons */
   html.xmas .home-section h2::before { background-color: #A0061B !important; }
   html.xmas .talk-btn { background-color: #A0061B !important; color: #FBF3E4 !important; }
-  html.xmas .talk-badge { background-color: #F2E2C2 !important; }
+  html.xmas .talk-badge { background-color: #F2E2C2 !important; color: #1A2821 !important; }
+  html.xmas .talk-card h3 a { color: inherit !important; }
 
   /* code in headings: gold tint instead of mint */
   html.xmas body:not(.quarto-dark) :is(h1, h2, h3, h4, h5, h6) code:not(.sourceCode) { background-color: #F2E2C2; }
@@ -104,6 +105,8 @@
     background-color: #3A3020 !important;
     color: #F3E7CF !important;
   }
+
+  html.xmas body.quarto-dark .talk-badge { background-color: #3A3020 !important; color: #F3E7CF !important; }
 
   html.xmas body.quarto-dark :is(h1, h2, h3, h4, h5, h6) code:not(.sourceCode) {
     background-color: #3A3020;

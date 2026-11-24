@@ -1,7 +1,7 @@
 <!--
   Seasonal frame for the homepage avatar: red/green/gold striped mat, string lights,
   and a "Merry Xmas & Happy New Year" ribbon. Included from index.qmd via
-  `include-after-body`. It only turns on between 20 Nov and 15 Jan, so it
+  `include-after-body`. It only turns on between 20 Nov and 31 Jan, so it
   switches itself off after the holidays; delete the include line to drop it.
 -->
 <style>
@@ -119,7 +119,7 @@
     const now = new Date();
     const m = now.getMonth() + 1;
     const d = now.getDate();
-    const inSeason = (m === 11 && d >= 20) || m === 12 || (m === 1 && d <= 15);
+    const inSeason = (m === 11 && d >= 20) || m === 12 || m === 1;
     if (!inSeason) return;
 
     const img = document.querySelector(".quarto-about-jolla > .about-image");
