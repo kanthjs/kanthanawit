@@ -13,6 +13,7 @@ toc: false
 
 ::: {.work-grid}
 [**Blog**[บทความ R และสถิติการเกษตร]{.work-desc}](/blog/){.work-card}
+[**Books**[หนังสือ R และการออกแบบการทดลอง]{.work-desc}](/books/){.work-card}
 [**Software**[R packages และเว็บแอป]{.work-desc}](/r-packages/){.work-card}
 [**หน้าแรก**[กลับไปที่ kanthanawit.in.th]{.work-desc}](/){.work-card}
 :::

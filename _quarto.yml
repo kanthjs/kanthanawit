@@ -7,6 +7,7 @@ project:
     - "about/index.qmd"
     - "talks/index.qmd"
     - "r-packages/**/*.qmd"
+    - "books/**/*.qmd"
     - "blog/**/*.qmd"
     - "talks/**/*.qmd"
   resources:
@@ -42,6 +43,8 @@ website:
         href: about/index.qmd
       - text: "Blog"
         href: blog/index.qmd
+      - text: "Books"
+        href: books/index.qmd
       - text: "Software"
         href: r-packages/index.qmd
       - text: "Talks"

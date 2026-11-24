@@ -55,6 +55,6 @@ page-layout: full
 ---
 
 ### ผลงานต่าง ๆ
-R packages และ Web Apps ที่พัฒนาได้ที่ [Software](../r-packages/index.qmd) หรืออ่านบทความทางสถิติและเทคนิคการเขียน R ได้ที่หน้า [Blog](../blog/index.qmd)
+R packages และ Web Apps ที่พัฒนาได้ที่ [Software](../r-packages/index.qmd) หนังสือที่เขียนได้ที่ [Books](../books/index.qmd) หรืออ่านบทความทางสถิติและเทคนิคการเขียน R ได้ที่หน้า [Blog](../blog/index.qmd)
 
 :::

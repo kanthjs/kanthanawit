@@ -86,7 +86,7 @@ about:
 ## ผลงานเด่น
 
 ::: {.work-grid}
-[**Tech Rice Exp Book**<br>[หนังสือเทคนิคการวิจัยและการออกแบบการทดลองทางข้าว]{.work-desc}](https://kanthjs.github.io/tech_rice_exp_book/){.work-card}
+[**หนังสือ**<br>[หนังสือ R และการออกแบบการทดลองทางการเกษตร ทั้งเล่มที่เสร็จแล้วและที่กำลังเขียน]{.work-desc}](books/index.qmd){.work-card}
 [**ricecooker**<br>[R package วิเคราะห์งานทดลองเกษตร CRD, RCBD, split-plot]{.work-desc}](https://github.com/kanthjs/ricecooker){.work-card}
 :::
 
