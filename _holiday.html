@@ -1,0 +1,140 @@
+<!--
+  Seasonal frame for the homepage avatar: red/green/gold striped mat, string lights,
+  and a "Merry Xmas & Happy New Year" ribbon. Included from index.qmd via
+  `include-after-body`. It only turns on between 20 Nov and 15 Jan, so it
+  switches itself off after the holidays; delete the include line to drop it.
+-->
+<style>
+  /* Palette: deep berry red, antique gold, pine greens (from a Christmas
+     ornament palette), with a warm cream so the stripes stay readable. */
+  .holiday-frame {
+    --xmas-red: #A0061B;
+    --xmas-gold: #B27F49;
+    --xmas-gold-light: #D9AE6A;
+    --xmas-green: #28604C;
+    --xmas-pine: #3E5647;
+    --xmas-ink: #1A2821;
+    --xmas-cream: #F6EBD7;
+
+    position: relative;
+    display: block;
+    width: max-content;
+    margin: 0.75rem auto 2.75rem auto;
+    padding: 12px;
+    border: 2px solid var(--xmas-ink);
+    border-radius: 34px;
+    background:
+      repeating-linear-gradient(
+        45deg,
+        var(--xmas-red) 0 10px, var(--xmas-cream) 10px 14px,
+        var(--xmas-green) 14px 24px, var(--xmas-cream) 24px 28px
+      );
+    box-shadow: 4px 4px 0 var(--xmas-ink);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .holiday-frame:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 var(--xmas-ink);
+  }
+
+  /* the photo sits inside the striped mat behind a thin gold ring */
+  div.quarto-about-jolla .holiday-frame .about-image {
+    display: block;
+    margin: 0 !important;
+    border: 2px solid var(--xmas-ink) !important;
+    border-radius: 22px !important;
+    box-shadow: 0 0 0 3px var(--xmas-gold-light) !important;
+    transform: none !important;
+  }
+
+  /* string lights draped over the top edge */
+  .holiday-frame::before {
+    content: "";
+    position: absolute;
+    top: -9px;
+    left: 10%;
+    width: 80%;
+    height: 18px;
+    border-top: 2px solid var(--xmas-ink);
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+    background:
+      radial-gradient(circle at 7px 9px, #D1293D 0 5px, var(--xmas-ink) 5px 6.5px, transparent 7px) 0 0 / 42px 18px repeat-x,
+      radial-gradient(circle at 7px 9px, var(--xmas-gold-light) 0 5px, var(--xmas-ink) 5px 6.5px, transparent 7px) 14px 0 / 42px 18px repeat-x,
+      radial-gradient(circle at 7px 9px, #3E9A72 0 5px, var(--xmas-ink) 5px 6.5px, transparent 7px) 28px 0 / 42px 18px repeat-x;
+    animation: holiday-twinkle 0.8s steps(2, jump-none) infinite alternate;
+  }
+
+  @keyframes holiday-twinkle {
+    from { filter: brightness(1); }
+    to   { filter: brightness(1.3) saturate(1.15); }
+  }
+
+  /* greeting ribbon under the photo: berry red with a gold inner line */
+  .holiday-ribbon {
+    position: absolute;
+    left: 50%;
+    bottom: -20px;
+    transform: translateX(-50%) rotate(-3deg);
+    white-space: nowrap;
+    padding: 0.3rem 0.95rem;
+    font-family: "Fira Code", monospace;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: var(--xmas-cream);
+    background: var(--xmas-red);
+    border: 2px solid var(--xmas-ink);
+    border-radius: 9999px;
+    box-shadow:
+      inset 0 0 0 1.5px var(--xmas-gold-light),
+      2px 2px 0 var(--xmas-ink);
+  }
+
+  /* antique-gold stars on the corners */
+  .holiday-star {
+    position: absolute;
+    font-size: 1.35rem;
+    line-height: 1;
+    color: var(--xmas-gold-light);
+    -webkit-text-stroke: 1px var(--xmas-ink);
+    text-shadow: 1.5px 1.5px 0 var(--xmas-ink);
+  }
+  .holiday-star.s1 { top: -14px; right: -12px; transform: rotate(14deg); }
+  .holiday-star.s2 { bottom: 18px; left: -14px; font-size: 1rem; transform: rotate(-12deg); }
+
+  /* dark theme: deeper ink and a slightly dimmer cream */
+  body.quarto-dark .holiday-frame {
+    --xmas-ink: #0B100D;
+    --xmas-cream: #E6D8BE;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .holiday-frame::before { animation: none; }
+  }
+</style>
+
+<script>
+  (() => {
+    const now = new Date();
+    const m = now.getMonth() + 1;
+    const d = now.getDate();
+    const inSeason = (m === 11 && d >= 20) || m === 12 || (m === 1 && d <= 15);
+    if (!inSeason) return;
+
+    const img = document.querySelector(".quarto-about-jolla > .about-image");
+    if (!img) return;
+
+    const newYear = m === 1 ? now.getFullYear() : now.getFullYear() + 1;
+    const frame = document.createElement("div");
+    frame.className = "holiday-frame";
+    img.replaceWith(frame);
+    frame.append(img);
+    frame.insertAdjacentHTML(
+      "beforeend",
+      `<span class="holiday-star s1" aria-hidden="true">★</span>` +
+      `<span class="holiday-star s2" aria-hidden="true">★</span>` +
+      `<span class="holiday-ribbon">Merry Xmas &amp; Happy New Year ${newYear}</span>`
+    );
+  })();
+</script>
