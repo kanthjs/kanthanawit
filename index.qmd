@@ -59,14 +59,3 @@ about:
 
 [ดูบทความทั้งหมด →](blog/index.qmd){.home-more}
 :::
-
-::: {.home-section}
-## ผลงานเด่น
-
-::: {.work-grid}
-[**หนังสือ**<br>[หนังสือ R และการออกแบบการทดลองทางการเกษตร ทั้งเล่มที่เสร็จแล้วและที่กำลังเขียน]{.work-desc}](books/index.qmd){.work-card}
-[**ricecooker**<br>[R package วิเคราะห์งานทดลองเกษตร CRD, RCBD, split-plot]{.work-desc}](https://github.com/kanthjs/ricecooker){.work-card}
-:::
-
-[ดู Software ทั้งหมด →](r-packages/index.qmd){.home-more}
-:::
