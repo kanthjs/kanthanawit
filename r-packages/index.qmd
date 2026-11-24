@@ -2,13 +2,7 @@
 title: "Software"
 pagetitle: "Software — Kanthanawit"
 description: "R packages and web apps for agricultural data and statistics."
-listing:
-  contents: "*/index.qmd"
-  type: grid
-  fields: [title, description]
 ---
-
-R package และเว็บแอปที่พัฒนาขึ้น ส่วนหนังสืออยู่ที่หน้า [Books](../books/index.qmd)
 
 ## R packages
 
@@ -26,5 +20,3 @@ R package และเว็บแอปที่พัฒนาขึ้น ส
 [**RDstat**[Statistical analysis in the browser — R runs on your own machine, so uploaded data never leaves your computer]{.work-desc}](https://kanthjs.github.io/RDstat/){.work-card}
 [**RBTool**[Plant breeding trial analysis in the browser — single-environment, multi-environment, and GxE / stability analyses (IRRI PBTools re-engineered with Shinylive)]{.work-desc}](https://kanthjs.github.io/RBTool/){.work-card}
 :::
-
-## Details
