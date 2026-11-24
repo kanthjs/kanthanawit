@@ -1,7 +1,7 @@
 ---
 title: "About Me"
 pagetitle: "About — Kanthanawit"
-subtitle: "Agricultural Researcher ∙ Plant Pathology & Epidemiology ∙ R Developer"
+subtitle: "Agricultural Researcher ∙ Plant Disease & Epidemiology ∙ R programmer"
 image: ../images/about-portrait.jpg
 image-alt: "Portrait of Kanthanawit"
 comments: false
@@ -41,16 +41,16 @@ page-layout: full
 
 งานวิจัยเน้นไปที่:
 
-- **ระบาดวิทยาของโรคและศัตรูข้าว (Rice Pathology & Epidemiology)**: ติดตาม คาดการณ์ และวิเคราะห์การระบาดของโรคไหม้และแมลงศัตรูพืช
-- **การวิเคราะห์ข้อมูลและวางแผนการทดลอง (Agricultural Statistics & Experimental Designs)**: ตั้งแต่ CRD, RCBD, Split-plot จนถึง Linear Mixed Models (LMM/GLMM) และการวิเคราะห์ GxE Interactions ในบริบทของโรคพืช
+- **ระบาดวิทยาของโรคและศัตรูข้าว (Rice Pathology & Epidemiology)**: ติดตาม พยากรณ์การเกิดโรคหรือผลผลิต และวิเคราะห์การระบาดของโรคข้าวและแมลงศัตรูข้าว
+- **การวิเคราะห์ข้อมูลและวางแผนการทดลอง (Agricultural Statistics & Experimental Designs)**: ตั้งแต่ CRD, RCBD, Split-plot จนถึง Linear Mixed Models (LMM/GLMM)
 - **การพัฒนาเครื่องมือด้วยภาษา R**: สร้าง R Packages, Web Application (Shinylive/Shiny) และเขียนคู่มือการวิเคราะห์เพื่อช่วยให้นักวิจัยสายเกษตรทำงานได้รวดเร็วและแม่นยำยิ่งขึ้น
 
 ---
 
 ### ความสนใจเฉพาะทาง (Interests)
 - **Spatial Analysis & Disease Mapping**: การวิเคราะห์เชิงพื้นที่ แผนที่การระบาดด้วย `sf`, `terra`
-- **Modern R Workflow**: การประมวลผลข้อมูลด้วย Tidyverse, DuckDB, และการจัดการข้อมูลขนาดใหญ่
-- **Open Science & Reproducible Research**: การทำงานวิจัยที่ตรวจสอบและทำซ้ำได้ด้วย Quarto
+- **Yield Loss Assessment & Decision Making**: การประเมินความเสียหายของผลผลิตและการตัดสินใจด้วย `lme4`, `glmmTMB`, `emmeans`
+- **Modern R Workflow**: การประมวลผลข้อมูลด้วย `Tidyverse`, `ellmer`, `glm`
 
 ---
 

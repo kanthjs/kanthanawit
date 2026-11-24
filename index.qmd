@@ -1,7 +1,7 @@
 ---
 title: "Kanthanawit"
 pagetitle: "Kanthanawit"
-subtitle: "Agricultural Researcher ∙ Rice Pathology & Epidemiology ∙ R Developer"
+subtitle: "Agricultural Researcher ∙ Plant Disease Epidemiology ∙ R programmer"
 image: images/avatar-3d-chibi.jpg
 image-alt: "Kanthanawit Avatar"
 page-layout: article
@@ -46,7 +46,7 @@ about:
       href: mailto:kanthanawit.j@rice.mail.go.th
 ---
 
-ผมเป็นนักวิชาการเกษตร ทำงานที่ศูนย์วิจัยข้าวปทุมธานี สนใจด้านระบาดวิทยาของโรคและศัตรูข้าว (Rice Pathology & Epidemiology) และวิเคราะห์ข้อมูลต่าง ๆ ด้วย **R**
+เป็นนักวิชาการเกษตรทำงานที่ศูนย์วิจัยข้าวปทุมธานี สนใจด้านระบาดวิทยาโรคพืช (Plant Disease Epidemiology) และวิเคราะห์ข้อมูลต่าง ๆ ด้วย **R**
 
 ::: {.home-badges}
 `Rstats` `Spatial Analysis` `Mixed Models` `Plant pathology`

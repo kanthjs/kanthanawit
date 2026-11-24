@@ -1,13 +1,14 @@
 ---
-title: "Exercise in Plant Disease Epidemiology"
-subtitle: "แบบฝึกหัดระบาดวิทยาโรคพืช (ฉบับพิมพ์ครั้งที่ 2)"
-description: "แบบฝึกหัดระบาดวิทยาโรคพืชด้วย R ตั้งแต่ disease progress curve รูปแบบเชิงพื้นที่ การสุ่มตัวอย่าง Bayesian จนถึงการประเมินการสูญเสียผลผลิตและการตัดสินใจ"
+title: "Exercise in Plant Disease Epidemiology with R"
+subtitle: "แบบฝึกหัดระบาดวิทยาโรคพืช"
+description: "นำเสนอเนื้อหา จากหนังสือ Exercises in Plant Disease Epidemiology, Second Edition โดยใช้ R เพื่อเป็นแนวทางในการเรียนรู้ด้วยการทดลองและปฏิบัติ"
 categories: [กำลังเขียน]
 book-repo: "https://github.com/kanthjs/exer_pdisease_epi_book_ed2"
 order: 3
 ---
 
-แบบฝึกหัดระบาดวิทยาโรคพืชฉบับพิมพ์ครั้งที่ 2 มีกว่า 30 บท เช่น แบบจำลองการพัฒนาของโรค การวิเคราะห์รูปแบบเชิงพื้นที่ การแพร่ของเชื้อทางอากาศและในดิน วิธี Bayesian survival analysis การประเมินความรุนแรงของโรค และ ROC สำหรับเกณฑ์การตัดสินใจ
+เรียนรู้ระบาดวิทยาโรคพืช ด้วยแบบฝึกหัดต่าง ๆ โดย นำเนื้อหาทั้งหมดจาก หนังสือ [Exercises in Plant Disease Epidemiology, Second Edition](https://apsjournals.apsnet.org/doi/book/10.1094/9780890544426)
+
 
 ::: {.callout-note}
 ## กำลังเขียน

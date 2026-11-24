@@ -5,7 +5,7 @@ description: "โปสเตอร์วิชาการ งานวิจ�
 page-layout: full
 ---
 
-งานนำเสนอในการประชุมวิชาการ โปสเตอร์วิจัย และเอกสารเผยแพร่ที่ผ่านมา สามารถคลิกที่รูปภาพหรือปุ่มเพื่อดูภาพขนาดเต็มและดาวน์โหลดเอกสาร PDF ได้ครับ
+งานนำเสนอในการประชุมวิชาการ และ โปสเตอร์วิจัย ที่ผ่านมา สามารถคลิกที่รูปภาพหรือปุ่มเพื่อดูภาพขนาดเต็มและดาวน์โหลดเอกสาร PDF ได้ครับ
 
 ::: {.talks-grid}
 
@@ -20,7 +20,7 @@ page-layout: full
 
 ### Spatial Distribution of Rice Blast Disease in Thailand
 
-งานวิเคราะห์การกระจายตัวเชิงพื้นที่ของโรคไหม้ข้าว (Rice Blast Disease) ในประเทศไทย นำเสนอในการประชุมวิชาการ Rice Vth Joint Conference 2025
+งานวิเคราะห์การกระจายตัวเชิงพื้นที่ของโรคไหม้ข้าว (Rice Blast Disease) ในประเทศไทย นำเสนอที่ Joint International Conference on Sustainable Rice Cultivation and Vegetable Science & Innovation  24 October 24 2025
 
 <div class="talk-actions">
   <a href="https://raw.githubusercontent.com/kanthjs/my_work_done/main/blast_distribution_riceveg_poster2025.pdf" target="_blank" class="talk-btn"><i class="bi bi-file-earmark-pdf"></i> PDF Poster</a>
@@ -80,7 +80,7 @@ page-layout: full
 
 ### Rice Department Annual Conference 2019
 
-โปสเตอร์นำเสนอผลงานวิจัยในการประชุมวิชาการข้าว ประจำปี 2562 (Poster Session RD Conference 2019)
+โปสเตอร์นำเสนอผลงานวิจัยในการประชุมวิชาการข้าว ประจำปี 2562 (Rice Department Annual Conference 2019)
 
 <div class="talk-actions">
   <a href="https://raw.githubusercontent.com/kanthjs/my_work_done/main/SJ%20rdconf_2019%20poster%20session.pdf" target="_blank" class="talk-btn"><i class="bi bi-file-earmark-pdf"></i> PDF Poster</a>

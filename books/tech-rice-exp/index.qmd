@@ -1,6 +1,6 @@
 ---
-title: "Tech Rice Exp Book"
-description: "หนังสือเทคนิคการวิจัยและการออกแบบการทดลองทางข้าว พร้อมตัวอย่างวิเคราะห์ข้อมูลด้วย R"
+title: "Technique for field experiments with Rice"
+description: "หนังสือเทคนิคการวิจัยและการออกแบบการทดลองข้าว พร้อมตัวอย่างวิเคราะห์ข้อมูลด้วย R"
 categories: [อ่านออนไลน์ได้]
 book-read: "https://kanthjs.github.io/tech_rice_exp_book/"
 book-repo: "https://github.com/kanthjs/tech_rice_exp_book"
@@ -9,6 +9,6 @@ aliases:
   - /r-packages/tech-rice-exp-book/
 ---
 
-An online book on experimental design and data analysis for rice research, written by Kanthanawit.
+An online book on experimental design and data analysis for rice research.
 
 [Read the book](https://kanthjs.github.io/tech_rice_exp_book/){.btn-link-out target="_blank"} [GitHub](https://github.com/kanthjs/tech_rice_exp_book){.btn-link-out target="_blank"}
