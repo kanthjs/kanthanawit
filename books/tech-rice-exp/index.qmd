@@ -2,6 +2,7 @@
 title: "Tech Rice Exp Book"
 description: "หนังสือเทคนิคการวิจัยและการออกแบบการทดลองทางข้าว พร้อมตัวอย่างวิเคราะห์ข้อมูลด้วย R"
 categories: [อ่านออนไลน์ได้]
+order: 1
 aliases:
   - /r-packages/tech-rice-exp-book/
 ---

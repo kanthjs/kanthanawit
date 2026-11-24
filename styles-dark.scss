@@ -87,3 +87,10 @@ p code:not(.sourceCode), li code:not(.sourceCode), td code:not(.sourceCode), th 
   color: $textColorCustom !important;
   box-shadow: 1.5px 1.5px 0px #0B100D !important;
 }
+
+// Callout headers: the light theme's dark-brown/green text vanishes on the
+// dark accent fills, so use the body text colour here
+.callout .callout-header,
+.callout .callout-header .callout-title-container {
+  color: $textColorCustom !important;
+}
