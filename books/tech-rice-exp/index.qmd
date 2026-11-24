@@ -2,6 +2,8 @@
 title: "Tech Rice Exp Book"
 description: "หนังสือเทคนิคการวิจัยและการออกแบบการทดลองทางข้าว พร้อมตัวอย่างวิเคราะห์ข้อมูลด้วย R"
 categories: [อ่านออนไลน์ได้]
+book-read: "https://kanthjs.github.io/tech_rice_exp_book/"
+book-repo: "https://github.com/kanthjs/tech_rice_exp_book"
 order: 1
 aliases:
   - /r-packages/tech-rice-exp-book/
