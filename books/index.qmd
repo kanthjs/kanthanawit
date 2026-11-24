@@ -4,11 +4,10 @@ pagetitle: "Books — Kanthanawit"
 description: "หนังสือออนไลน์ด้าน R สถิติ และการออกแบบการทดลองทางการเกษตร"
 listing:
   contents: "*/index.qmd"
-  type: grid
+  template: _book-list.ejs
   sort: "order"
   categories: true
-  fields: [title, description, categories]
-  grid-columns: 2
+  fields: [title, description, categories, book-read, book-repo]
   page-size: 50
 toc: false
 ---
@@ -22,6 +21,8 @@ toc: false
 title: "ชื่อหนังสือ"
 description: "เนื้อหาหลัก 1-2 ประโยค"
 order: 4                    # ลำดับบนหน้า Books (น้อยขึ้นก่อน)
+book-read: "https://..."      # (ไม่บังคับ) ลิงก์อ่านออนไลน์ ถ้ามี จะขึ้นปุ่ม "อ่านออนไลน์"
+book-repo: "https://github.com/..."  # ลิงก์ GitHub repo
 categories: [กำลังเขียน]     # สถานะ: อ่านออนไลน์ได้ | กำลังเขียน | ฉบับร่าง
 ---
 -->

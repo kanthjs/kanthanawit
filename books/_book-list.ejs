@@ -1,0 +1,28 @@
+```{=html}
+<div class="list book-grid">
+<% for (const item of items) { %>
+<div class="book-card" <%= metadataAttrs(item) %>>
+  <h3 class="no-anchor listing-title book-title"><a href="<%- item.path %>"><%= item.title %></a></h3>
+  <% if (item.categories) { %>
+  <div class="listing-categories book-status">
+    <% for (const category of item.categories) { %>
+    <span class="listing-category"><%= category %></span>
+    <% } %>
+  </div>
+  <% } %>
+  <% if (item.description) { %>
+  <div class="listing-description book-desc"><%= item.description %></div>
+  <% } %>
+  <div class="book-actions">
+    <% if (item['book-read']) { %>
+    <a class="book-btn book-btn-primary" href="<%- item['book-read'] %>" target="_blank" rel="noopener"><i class="bi bi-book"></i> อ่านออนไลน์</a>
+    <% } %>
+    <% if (item['book-repo']) { %>
+    <a class="book-btn" href="<%- item['book-repo'] %>" target="_blank" rel="noopener"><i class="bi bi-github"></i> GitHub</a>
+    <% } %>
+    <a class="book-btn book-btn-plain" href="<%- item.path %>">รายละเอียด →</a>
+  </div>
+</div>
+<% } %>
+</div>
+```
