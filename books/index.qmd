@@ -5,7 +5,7 @@ description: "หนังสือออนไลน์ด้าน R สถิ
 listing:
   contents: "*/index.qmd"
   type: grid
-  sort: "date desc"
+  sort: "order"
   categories: true
   fields: [title, description, categories]
   grid-columns: 2
@@ -21,7 +21,7 @@ toc: false
 ---
 title: "ชื่อหนังสือ"
 description: "เนื้อหาหลัก 1-2 ประโยค"
-date: YYYY-MM-DD            # ใช้เรียงลำดับ ล่าสุดขึ้นก่อน
+order: 4                    # ลำดับบนหน้า Books (น้อยขึ้นก่อน)
 categories: [กำลังเขียน]     # สถานะ: อ่านออนไลน์ได้ | กำลังเขียน | ฉบับร่าง
 ---
 -->
