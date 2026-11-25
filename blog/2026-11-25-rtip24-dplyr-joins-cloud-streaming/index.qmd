@@ -1,0 +1,191 @@
+---
+title: "R Tips 24: ป้องกันแถวบวมใน dplyr Joins และดึงข้อมูล Cloud แบบ Streaming"
+date: 2026-11-25
+description: "ป้องกันปัญหาการเชื่อมตารางที่ขยายจำนวนแถวแบบไม่รู้ตัว (Many-to-Many Explosion) ด้วยอาร์กิวเมนต์ relationship = และ join_by() ใน dplyr พร้อมแนวทางดึงข้อมูลขนาดใหญ่แบบ Streaming ผ่าน httr2, DuckDB และ Parquet โดยไม่เปลือง RAM"
+categories: [r, r-tip, tidyverse, dplyr, duckdb, httr2, parquet, data-wrangling]
+draft: false
+---
+
+การเชื่อมตารางด้วย `left_join()`, `inner_join()` หรือ `full_join()` ใน `dplyr` มี Silent Bug ที่พบบ่อยคือ **คีย์ (Key) ในตารางฝั่งซ้ายหรือฝั่งขวามีค่าซ้ำกันโดยไม่ตั้งใจ** ส่งผลให้เกิดการจับคู่แบบ จนตารางขนาด 10,000 แถวขยายตัวเป็นหลายแสนแถว ค่าเฉลี่ยหรือผลรวมทางสถิติเพี้ยน และใช้ RAM จนเต็มโดยไม่แจ้ง Error
+
+เช่นเดียวกับงานดึงข้อมูลขนาดใหญ่ผ่าน HTTP API หรือ Cloud Storage หากดาวน์โหลดทั้งไฟล์เข้าหน่วยความจำ R (`read_csv()`, `jsonlite::fromJSON()`) พร้อมกันย่อมเสี่ยงต่อปัญหา Out-of-Memory บทความนี้สรุปเทคนิคป้องกันการเชื่อมตารางผิดความสัมพันธ์ด้วย `relationship =` และ `join_by()` ใน `dplyr` ควบคู่กับแนวคิด Cloud-Native Streaming ผ่าน `httr2`, `duckdb` และ `r2parquet`
+
+---
+
+## 1. ปัญหา Many-to-Many Explosion vs การบังคับความสัมพันธ์ด้วย `relationship =`
+
+:::: {layout-ncol="2"}
+
+::: {}
+**แบบเดิม: ปล่อย `left_join()` ทำงานอิสระ**
+
+```{mermaid}
+flowchart TD
+  A["ตารางหลัก (มี plot_id ซ้ำตามรอบสำรวจ)"] --> C["left_join() โดยไม่ระบุ relationship"]
+  B["ตารางอ้างอิง (เผลอมี plot_id ซ้ำ)"] --> C
+  C --> D["❌ เกิด Many-to-Many จับคู่คูณไขว้"]
+  D --> E["จำนวนแถวบวมเงียบๆ ค่าสถิติเพี้ยน"]
+```
+:::
+
+::: {}
+**แบบปลอดภัย: ระบุ `relationship =` ชัดเจน**
+
+```{mermaid}
+flowchart TD
+  A["ตารางหลัก"] --> C["left_join(..., relationship = 'many-to-one')"]
+  B["ตารางอ้างอิง (มีคีย์ซ้ำผิดปกติ)"] --> C
+  C --> D["✅ ตรวจพบความสัมพันธ์ผิดพลาดทันที"]
+  D --> E["หยุดรันและแจ้ง Error ก่อนข้อมูลพัง"]
+```
+:::
+
+::::
+
+---
+
+## 2. บังคับทิศทางความสัมพันธ์ของการ Join ด้วย `relationship =`
+
+ใน `dplyr` 1.1.0+ สามารถระบุความสัมพันธ์ที่คาดหวังลงในฟังก์ชันตระกูล `*_join()` ผ่านอาร์กิวเมนต์ `relationship =` ได้โดยตรง:
+
+- `"one-to-one"`: 1 แถวฝั่งซ้าย จับคู่กับไม่เกิน 1 แถวฝั่งขวา
+- `"many-to-one"`: หลายแถวฝั่งซ้าย จับคู่กับไม่เกิน 1 แถวฝั่งขวา (พบบ่อยเมื่อเชื่อมตารางข้อมูลหลักเข้ากับตาราง Lookup/Metadata)
+- `"one-to-many"`: 1 แถวฝั่งซ้าย จับคู่ได้หลายแถวฝั่งขวา
+- `"many-to-many"`: ยอมรับการจับคู่หลายต่อหลายอย่างเปิดเผย (ต้องระบุเองเมื่อตั้งใจให้เกิด)
+
+หากข้อมูลจริงละเมิดความสัมพันธ์ที่กำหนด `dplyr` จะหยุดทำงานและแจ้ง Error ทันที:
+
+```r
+library(dplyr)
+
+# ตารางหลัก (มีรหัสแปลงซ้ำกัน 2 แถวจากการสำรวจหลายรอบ)
+plots_df <- tibble(
+  plot_id = c("P01", "P01", "P02"),
+  survey_round = c(1, 2, 1),
+  district = c("ธัญบุรี", "ธัญบุรี", "คลองหลวง")
+)
+
+# ตารางข้อมูลอ้างอิงรายแปลง (ควรมี plot_id ไม่ซ้ำกัน แถวละ 1 รายการ)
+# สมมติเผลอมี P01 ซ้ำในตารางอ้างอิงด้วย
+plot_meta <- tibble(
+  plot_id = c("P01", "P01", "P02"),
+  soil_type = c("ดินเหนียว", "ดินร่วนปนทราย", "ดินเหนียว")
+)
+
+# 1. ท่าที่เสี่ยงบั๊กเงียบ: left_join() ปกติจะขยายแถวจาก 3 เป็น 5 แถวโดยไม่แจ้ง Error
+# plots_df |> left_join(plot_meta, by = "plot_id")
+
+# 2. ท่าที่ปลอดภัยกว่า: ระบุ relationship = "many-to-one"
+# ถ้าฝั่งขวา (plot_meta) มี plot_id ซ้ำกันจริง ระบบจะหยุดและแจ้ง Error ทันที
+plots_df |>
+  left_join(
+    plot_meta,
+    by = "plot_id",
+    relationship = "many-to-one",
+    unmatched = "drop" # หรือ "error" หากต้องการให้หยุดเมื่อคีย์ฝั่งขวาไม่ตรงกับฝั่งซ้ายเลย
+  )
+#> Error in `left_join()`:
+#> ! Each row in `x` must match at most 1 row in `y`.
+#> ℹ Row 1 of `x` matches multiple rows in `y`.
+```
+
+การใส่อาร์กิวเมนต์ `relationship = "many-to-one"` ร่วมกับ `unmatched = "error"` ช่วยให้ตรวจจับทั้งคีย์ซ้ำ (Duplicate Keys) และคีย์ตกหล่น (Missing Keys) ได้ในคำสั่งเดียว รวมถึงสื่อสารโครงสร้างข้อมูลของตารางให้ผู้ร่วมทีมอ่านเข้าใจได้ทันที
+
+---
+
+## 3. ใช้ `join_by()` สำหรับเงื่อนไขช่วงเวลาและอสมการ
+
+นอกจากการจับคู่แบบเท่ากับ (`==`) ฟังก์ชัน `join_by()` ยังรองรับเงื่อนไขเปรียบเทียบช่วงค่า (`between()`, `overlaps()`, `within()`, `>=`, `<=`) และ Rolling Join (`closest()`) ทำให้ไม่ต้องเขียนลูปหรือ Cross-join แล้วกรองออกภายหลัง:
+
+```r
+# ตารางเหตุการณ์การระบาดหรือการใส่ปุ๋ยรายแปลง
+events <- tibble(
+  area_id = c("A1", "A1", "A2"),
+  event_date = as.Date(c("2026-06-15", "2026-08-20", "2026-07-05")),
+  severity = c(12, 28, 9)
+)
+
+# ตารางช่วงฤดูเพาะปลูกหรือช่วงเวลาจัดการแปลง
+periods <- tibble(
+  area_id = c("A1", "A1", "A2"),
+  season = c("ต้นฤดู", "กลางฤดู", "ต้นฤดู"),
+  start_date = as.Date(c("2026-06-01", "2026-08-01", "2026-06-01")),
+  end_date = as.Date(c("2026-07-31", "2026-09-30", "2026-08-31"))
+)
+
+# จับคู่ event_date ให้อยู่ในช่วง start_date ถึง end_date ด้วย join_by()
+events |>
+  left_join(
+    periods,
+    join_by(area_id == area_id, between(event_date, start_date, end_date)),
+    relationship = "many-to-one"
+  )
+```
+
+---
+
+## 4. แนวคิด Cloud-Native Data: ดึงและประมวลผลข้อมูลขนาดใหญ่แบบ Streaming
+
+เมื่อข้อมูลมีขนาดใหญ่เกินกว่าจะโหลดทั้งก้อนเข้า RAM หรืออยู่บนเซิร์ฟเวอร์ระยะไกล การผสมผสาน `httr2`, `duckdb` และรูปแบบไฟล์ **Parquet** ช่วยให้ประมวลผลแบบ Streaming และ Out-of-Core ได้อย่างมีประสิทธิภาพ:
+
+### 4.1 ดึงข้อมูลจาก HTTP API แบบ Streaming ด้วย `httr2`
+
+แทนที่จะเก็บ Response ทั้งหมดไว้ในหน่วยความจำ ใช้ `req_perform_stream()` เพื่ออ่านและประมวลผลข้อมูลเป็นก้อน (Chunk) หรือเขียนลงดิสก์โดยตรง:
+
+```r
+library(httr2)
+
+# ดึงไฟล์ขนาดใหญ่แบบ Streaming ลงดิสก์โดยไม่พักข้อมูลทั้งหมดใน RAM
+req <- request("https://example.org/data/rice_survey_2026.ndjson")
+
+resp <- req |>
+  req_perform_stream(
+    callback = function(x) {
+      # เขียนข้อมูลแต่ละ chunk ลงไฟล์หรือส่งต่อเข้าตัวแปลงทีละส่วน
+      writeBin(x, con)
+      TRUE
+    },
+    buffer_kb = 64
+  )
+```
+
+### 4.2 คิวรีและ Join ไฟล์ Parquet บนคลาวด์โดยตรงด้วย `duckdb` + `dplyr`
+
+`duckdb` สามารถอ่านไฟล์ Parquet ผ่าน HTTP/S3 แบบ Lazy Evaluation (ดึงเฉพาะคอลัมน์และแถวที่ต้องใช้ตามเงื่อนไข `filter()` และ `select()`) และใช้งานร่วมกับไวยากรณ์ `dplyr` ผ่าน `dbplyr` ได้ทันที รวมถึงแปลงผลลัพธ์เป็นไฟล์ Parquet ประสิทธิภาพสูงด้วย `duckdb` หรือ `r2parquet`:
+
+```r
+library(DBI)
+library(duckdb)
+library(dplyr)
+
+con <- dbConnect(duckdb())
+dbExecute(con, "INSTALL httpfs; LOAD httpfs;")
+
+# สร้าง Lazy Table ชี้ไปยังไฟล์ Parquet บน HTTP/Cloud โดยยังไม่โหลดเข้า RAM
+remote_plots <- tbl(con, "read_parquet('https://example.org/data/plots_2026.parquet')")
+
+# กรองและสรุปผลบน DuckDB ก่อนดึงเฉพาะผลลัพธ์ขนาดเล็กเข้าสู่ R ด้วย collect()
+summary_tbl <- remote_plots |>
+  filter(region == "Central", year == 2026) |>
+  group_by(district) |>
+  summarise(
+    n_plots = n(),
+    mean_yield = mean(yield_kg_rai, na.rm = TRUE)
+  ) |>
+  collect()
+
+dbDisconnect(con, shutdown = TRUE)
+```
+
+> [!TIP]
+> **สรุปหลักปฏิบัติ**:
+> 1. ระบุ `relationship =` ในทุก `*_join()` เมื่อทำงานกับตารางที่รู้โครงสร้างความสัมพันธ์ชัดเจน (`"many-to-one"` หรือ `"one-to-one"`)
+> 2. ใช้ `join_by()` แทน `by = c(...)` เพื่อรองรับการจับคู่ช่วงเวลาและอสมการอย่างปลอดภัย
+> 3. สำหรับข้อมูลขนาดใหญ่หรือไฟล์บน Cloud ให้ใช้ `httr2::req_perform_stream()` และ `duckdb` + Parquet ประมวลผลแบบ Streaming/Lazy ก่อน `collect()` เข้า R
+
+---
+
+## แหล่งติดตามเพิ่มเติม
+
+- [tidyverse/dplyr](https://github.com/tidyverse/dplyr) — ซอร์สโค้ดและเอกสารอ้างอิงฟังก์ชันจัดการข้อมูลใน `dplyr`
+- [R Weekly](https://rweekly.org/) — แหล่งรวมข่าวสาร แพ็กเกจใหม่ และบทความเทคนิค R รายสัปดาห์จากชุมชน R ทั่วโลก
