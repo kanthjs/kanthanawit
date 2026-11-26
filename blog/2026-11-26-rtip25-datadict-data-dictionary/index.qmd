@@ -1,0 +1,161 @@
+---
+title: "R Tips 25: เก็บและตรวจ Data Dictionary ด้วย data-dict.yaml และ datadict"
+date: 2026-11-26
+description: "นิยาม Data Dictionary มาตรฐานเดียวในไฟล์ data-dict.yaml เพื่ออธิบายโครงสร้างตาราง ชนิดข้อมูล ข้อจำกัด และความสัมพันธ์ พร้อมตรวจสอบความถูกต้องกับข้อมูลจริงและสร้างรายงาน HTML อัตโนมัติด้วยแพ็กเกจ datadict"
+categories: [r, r-tip, tidyverse, datadict, data-validation, parquet, yaml]
+draft: false
+---
+
+การทำงานข้อมูลร่วมกับทีมหรือส่งต่อโปรเจกต์ R มักเจอปัญหาเดียวกันคือ **คำอธิบายคอลัมน์ถูกเก็บแยกไว้ในไฟล์ Word, Excel หรือคอมเมนต์ในสคริปต์ที่ไม่ได้อัปเดตตามข้อมูลจริง** เมื่อโครงสร้างตารางเปลี่ยน ชนิดข้อมูลคลาดเคลื่อน หรือมีค่าผิดปกติแทรกเข้ามา จึงไม่มีตัวกลางคอยตรวจสอบความถูกต้องเทียบกับข้อตกลงของข้อมูลชุดนั้น
+
+แพ็กเกจ **`datadict`** (`tidyverse/data-dict` จากทีม Tidyverse และ Posit) แก้ปัญหานี้ด้วยการกำหนดมาตรฐานไฟล์ **`data-dict.yaml`** สำหรับนิยามโครงสร้างตาราง ชนิดข้อมูล ข้อจำกัด (Constraints) ความสัมพันธ์ระหว่างตาราง และคำศัพท์เฉพาะ (Glossary) ไว้ในจุดเดียว จากนั้นนำมาตรวจสอบเทียบกับข้อมูลจริง (เช่น ไฟล์ Parquet) และสร้าง **HTML Report** สรุปผลออกมาให้อ่านง่ายในคำสั่งเดียว
+
+---
+
+## 1. เปรียบเทียบ: เอกสารแยกส่วน vs `data-dict.yaml` + `datadict`
+
+:::: {layout-ncol="2"}
+
+::: {}
+**แบบเดิม: แยกเอกสารกับโค้ดตรวจสอบ**
+
+```{mermaid}
+flowchart TD
+  A["คำอธิบายคอลัมน์ใน Word / Excel"] --> C["ข้อมูลจริงเปลี่ยน (ชนิดข้อมูล / ค่าว่าง / คีย์ซ้ำ)"]
+  B["โค้ดเช็กข้อมูลกระจัดกระจายในสคริปต์"] --> C
+  C --> D["❌ เอกสารล้าสมัย ไม่ตรงกับข้อมูลจริง"]
+  D --> E["พบข้อผิดพลาดช้าเมื่อรันวิเคราะห์"]
+```
+:::
+
+::: {}
+**แบบใหม่: ศูนย์กลางเดียวด้วย `data-dict.yaml`**
+
+```{mermaid}
+flowchart TD
+  A["ไฟล์ data-dict.yaml (Schema + Constraints + Glossary)"] --> B["dd_validate_data() ตรวจเทียบข้อมูลจริง"]
+  B --> C["✅ คืนค่าสถานะการตรวจโดยไม่พัง Pipeline"]
+  C --> D["สร้างรายงาน HTML แบบ Self-contained"]
+```
+:::
+
+::::
+
+---
+
+## 2. โครงสร้างมาตรฐานของไฟล์ `data-dict.yaml`
+
+ไฟล์ `data-dict.yaml` ออกแบบให้อ่านง่ายทั้งสำหรับคนและเครื่องมืออัตโนมัติ รวมถึงติดตามการเปลี่ยนแปลงผ่าน Git ได้สะดวก โดยสามารถระบุข้อมูลระดับโปรเจกต์ ตาราง แหล่งข้อมูล (`source`), คอลัมน์, ชนิดข้อมูล (`type`), ค่าตัวอย่าง (`examples`), และข้อจำกัด (`constraints`) ได้อย่างเป็นระบบ:
+
+```yaml
+$version: "0.1.0"
+$learn_more: https://data-dict.tidyverse.org/
+
+name: rice-trial-2026
+description: >
+  ข้อมูลการทดลองปลูกข้าวและผลการประเมินความรุนแรงของโรคพืชรายแปลง
+
+tables:
+  - name: plots
+    source: { parquet: plots.parquet }
+    description: ข้อมูลลักษณะแปลงทดลอง (1 แถวต่อ 1 แปลง)
+    columns:
+      - name: plot_id
+        type: string
+        constraints: [primary_key]
+        description: รหัสประจำแปลงทดลอง (ไม่ซ้ำและห้ามเป็นค่าว่าง)
+        examples: ["P001", "P002", "P003"]
+
+      - name: rice_variety
+        type: enum
+        values:
+          RD41: กข41
+          KDML105: ขาวดอกมะลิ 105
+          PT1: ปทุมธานี 1
+        description: พันธุ์ข้าวที่ปลูกในแปลง
+
+  - name: disease_surveys
+    source: { parquet: disease_surveys.parquet }
+    description: ผลการสำรวจโรคพืชในแต่ละรอบการตรวจ
+    columns:
+      - name: survey_id
+        type: number(id)
+        constraints: [primary_key]
+        description: รหัสอ้างอิงรอบการสำรวจ
+
+      - name: plot_id
+        type: string
+        constraints: [required, foreign_key]
+        description: รหัสแปลงที่เชื่อมโยงไปยังตาราง plots
+
+      - name: severity_pct
+        type: number
+        constraints: [required]
+        description: เปอร์เซ็นต์ความรุนแรงของโรค (0-100)
+```
+
+---
+
+## 3. ติดตั้งและตรวจสอบข้อมูลใน R ด้วย `datadict`
+
+แพ็กเกจ `datadict` ทำหน้าที่เชื่อมต่อ R เข้ากับตัวประมวลผล `data-dict` (ที่พัฒนาด้วย Rust เพื่อความเร็วในการสแกนไฟล์ขนาดใหญ่) โดยมีขั้นตอนใช้งานหลักดังนี้:
+
+```r
+# ติดตั้งแพ็กเกจจาก CRAN หรือ R-universe / GitHub
+# pak::pkg_install("datadict")
+# pak::pkg_install("tidyverse/data-dict/r")
+
+library(datadict)
+
+# 1. ดาวน์โหลดและติดตั้ง data-dict binary (ทำครั้งเดียวต่อเครื่อง)
+# ระบบจะดาวน์โหลดและตรวจสอบ SHA-256 checksum เก็บไว้ใน user cache ของ R
+dd_install()
+
+# 2. ตรวจสอบข้อมูลที่อ้างอิงในไฟล์ data-dict.yaml (หรือโฟลเดอร์ที่มีไฟล์นี้อยู่)
+# พร้อมสร้างรายงานผลลัพธ์เป็นไฟล์ HTML แบบ self-contained และเปิดดูได้ทันที
+res <- dd_validate_data("path/to/data-dict.yaml")
+
+# 3. ตรวจสอบสถานะการผ่านเกณฑ์
+print(res)
+```
+
+---
+
+## 4. จุดเด่นระดับ Production: ตรวจ 3 ระดับและไม่ทำให้ Pipeline หยุดชะงัก
+
+### 4.1 คืนค่าสถานะแทนการโยน Error กลางคัน
+จุดเด่นสำคัญของ `dd_validate_data()` คือ **เน้นการรายงานผลเป็นหลัก** เมื่อพบข้อมูลที่ไม่ตรงตามข้อกำหนดใน `data-dict.yaml` (เช่น ค่าว่างในคอลัมน์ `required` หรือคีย์ซ้ำใน `primary_key`) ฟังก์ชันจะสรุปรายละเอียดลงในรายงาน HTML และคืนค่าสถานะกลับมาให้โค้ด R ตัดสินใจต่อ แทนที่จะโยน Error จน Pipeline หยุดทำงานทันที
+
+### 4.2 รองรับการตรวจ 3 ระดับและ CLI Workflow
+นอกจากฟังก์ชันใน R แล้ว เครื่องมือ `data-dict` CLI ยังแบ่งการตรวจสอบออกเป็น 3 ระดับตามความเข้มข้น:
+
+1. **Spec Validation (`validate-spec`)**: ตรวจสอบความถูกต้องของไวยากรณ์และความสอดคล้องภายในไฟล์ `data-dict.yaml` เอง
+2. **Metadata Validation (`validate-meta`)**: ตรวจโครงสร้างชื่อคอลัมน์และชนิดข้อมูลจาก Metadata (เช่น Parquet Footer) โดยไม่ต้องสแกนข้อมูลทุกแถว
+3. **Data Validation (`validate-data`)**: ตรวจสอบค่าข้อมูลจริงทุกแถวเทียบกับข้อจำกัดและคีย์ความสัมพันธ์
+
+```bash
+# สร้างร่าง data-dict.yaml อัตโนมัติจากไฟล์ Parquet ที่มีอยู่
+data-dict draft plots.parquet > data-dict.yaml
+
+# ตรวจสอบข้อมูลจริงเทียบกับพจนานุกรมข้อมูล
+data-dict validate-data data-dict.yaml
+
+# สร้างเอกสาร HTML จากสเปก data-dict.yaml
+data-dict render-spec data-dict.yaml
+```
+
+### 4.3 เชื่อมโยงกับ Parquet และ Semantic Layer
+การอ้างอิงแหล่งข้อมูลผ่านไฟล์ **Parquet** ช่วยให้ตรวจสอบตารางขนาดใหญ่ได้รวดเร็วโดยไม่ต้องโหลดทั้งก้อนเข้า RAM และรูปแบบไฟล์ `data-dict.yaml` ยังถูกออกแบบให้เป็นมาตรฐานกลางที่นำไปต่อยอดกับเครื่องมือ Semantic Layer อย่าง `commons` รวมถึงช่วยให้ทั้งเพื่อนร่วมทีมและเครื่องมือช่วยเขียนโค้ดเข้าใจความหมายของตัวแปรตรงกัน ลดการเดาชื่อหรือชนิดคอลัมน์ผิดพลาด
+
+> [!TIP]
+> **แนวทางปฏิบัติแนะนำ**:
+> 1. เก็บไฟล์ `data-dict.yaml` ไว้ในโฟลเดอร์ข้อมูลของโปรเจกต์และติดตามการเปลี่ยนแปลงด้วย Git ร่วมกับโค้ดวิเคราะห์
+> 2. ใช้ `data-dict draft` สร้างโครงร่างเริ่มต้นจากไฟล์ Parquet แล้วค่อยเติมคำอธิบายทางธุรกิจและ `constraints` เพิ่มเติม
+> 3. รัน `dd_validate_data()` เป็นด่านแรกก่อนเข้าสู่สคริปต์วิเคราะห์หรือรายงาน Quarto เพื่อรับประกันคุณภาพข้อมูล
+
+---
+
+## แหล่งติดตามเพิ่มเติม
+
+- [tidyverse/data-dict](https://github.com/tidyverse/data-dict) — ซอร์สโค้ด สเปกของ `data-dict.yaml` และแพ็กเกจ `datadict`
+- [data-dict.tidyverse.org](https://data-dict.tidyverse.org/) — เว็บไซต์คู่มือ ตัวอย่างโครงสร้างพจนานุกรมข้อมูล และรายละเอียดการตรวจสอบแต่ละระดับ
