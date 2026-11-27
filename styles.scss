@@ -1375,6 +1375,18 @@ body:has(.post-list) {
 // =============================================================================
 // HOMEPAGE: latest posts and featured work (below the jolla hero)
 // =============================================================================
+// Rice seedlings (index.qmd) standing on the .home-section border below.
+// The negative bottom margin cancels the section's 3rem top margin.
+div.quarto-about-jolla #quarto-document-content .home-sprouts {
+  --c-stem: #{$headingColorCustom};
+  --c-leaf: #{$bodyLinkColorCustom};
+  --c-grain: #{$accentWarmColorCustom};
+  margin: 2.5rem 0 -3rem 0;
+  line-height: 0;
+
+  svg { display: block; width: min(280px, 80%); height: auto; margin: 0 auto; }
+}
+
 div.quarto-about-jolla #quarto-document-content .home-section {
   text-align: left;
   margin-top: 3rem;

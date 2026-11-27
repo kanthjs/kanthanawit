@@ -52,6 +52,73 @@ about:
 `Rstats` `Spatial Analysis` `Mixed Models` `Plant pathology`
 :::
 
+::: {.home-sprouts}
+```{=html}
+<!-- Rice seedlings growing from the section's soil line. Colours: styles.scss (.home-sprouts). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 64" class="smk-sprouts" aria-hidden="true" focusable="false">
+  <style>
+    .smk-sprouts path { fill: none; stroke-linecap: round; }
+    .smk-sprouts .stem  { stroke: var(--c-stem); stroke-width: 2.5; }
+    .smk-sprouts .leaf  { stroke: var(--c-stem); stroke-width: 2.2; }
+    .smk-sprouts .leaf-b { stroke: var(--c-leaf); }
+    .smk-sprouts .panicle { stroke: var(--c-grain); stroke-width: 1.5; }
+    .smk-sprouts .grains { fill: var(--c-grain); }
+    .smk-sprouts .grow  { stroke-dasharray: 1; stroke-dashoffset: 0; animation: smk-sprouts-grow .7s cubic-bezier(.65, 0, .35, 1) both; }
+    .smk-sprouts .pop   { animation: smk-sprouts-pop .5s ease-out both; }
+    .smk-sprouts .sway  { animation: smk-sprouts-sway 4.5s ease-in-out infinite alternate; }
+    .smk-sprouts.smk-wait * { animation-play-state: paused; }
+    @keyframes smk-sprouts-grow { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+    @keyframes smk-sprouts-pop  { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes smk-sprouts-sway { from { transform: rotate(-2.5deg); } to { transform: rotate(2.5deg); } }
+    @media (prefers-reduced-motion: reduce) { .smk-sprouts * { animation: none !important; } }
+  </style>
+  <g class="sway" style="transform-origin:30px 64px;animation-delay:1.6s">
+    <path class="stem grow" pathLength="1" d="M30 64 C31 53 32 45 34 42" style="animation-delay:0.00s"/>
+    <path class="leaf grow" pathLength="1" d="M30 64 C29 52 23 45 17 49" style="animation-delay:0.25s"/>
+    <path class="leaf leaf-b grow" pathLength="1" d="M30 64 C31 53 37 46 44 50" style="animation-delay:0.40s"/>
+    <path class="leaf leaf-b grow" pathLength="1" d="M30 64 C29 57 22 54 19 57" style="animation-delay:0.55s"/>
+  </g>
+  <g class="sway" style="transform-origin:75px 64px;animation-delay:1.9s">
+    <path class="stem grow" pathLength="1" d="M75 64 C76 49 77 38 79 34" style="animation-delay:0.15s"/>
+    <path class="leaf grow" pathLength="1" d="M75 64 C74 48 66 38 57 43" style="animation-delay:0.40s"/>
+    <path class="leaf leaf-b grow" pathLength="1" d="M75 64 C76 49 84 40 94 45" style="animation-delay:0.55s"/>
+    <path class="leaf leaf-b grow" pathLength="1" d="M75 64 C74 55 64 50 60 55" style="animation-delay:0.70s"/>
+  </g>
+  <g class="sway" style="transform-origin:120px 64px;animation-delay:2.2s">
+    <path class="stem grow" pathLength="1" d="M120 64 C121 45 122 32 124 26" style="animation-delay:0.30s"/>
+    <path class="leaf grow" pathLength="1" d="M120 64 C119 43 109 32 97 37" style="animation-delay:0.55s"/>
+    <path class="leaf leaf-b grow" pathLength="1" d="M120 64 C121 45 131 34 144 40" style="animation-delay:0.70s"/>
+    <path class="leaf leaf-b grow" pathLength="1" d="M120 64 C119 53 107 47 101 53" style="animation-delay:0.85s"/>
+    <path class="panicle grow" pathLength="1" d="M124 26 Q133 21 136 32" style="animation-delay:1.2s"/>
+    <g class="grains pop" style="animation-delay:1.6s"><ellipse cx="129.0" cy="24" rx="2.4" ry="1.5" transform="rotate(-25 129.0 24)"/><ellipse cx="133.0" cy="25" rx="2.4" ry="1.5" transform="rotate(20 133.0 25)"/><ellipse cx="135.5" cy="30" rx="2.4" ry="1.5" transform="rotate(70 135.5 30)"/></g>
+  </g>
+  <g class="sway" style="transform-origin:165px 64px;animation-delay:2.5s">
+    <path class="stem grow" pathLength="1" d="M165 64 C166 50 167 40 169 36" style="animation-delay:0.45s"/>
+    <path class="leaf grow" pathLength="1" d="M165 64 C164 49 157 40 148 44" style="animation-delay:0.70s"/>
+    <path class="leaf leaf-b grow" pathLength="1" d="M165 64 C166 50 173 42 182 47" style="animation-delay:0.85s"/>
+    <path class="leaf leaf-b grow" pathLength="1" d="M165 64 C164 56 155 51 151 56" style="animation-delay:1.00s"/>
+  </g>
+  <g class="sway" style="transform-origin:210px 64px;animation-delay:2.8s">
+    <path class="stem grow" pathLength="1" d="M210 64 C211 54 212 47 214 44" style="animation-delay:0.60s"/>
+    <path class="leaf grow" pathLength="1" d="M210 64 C209 53 204 47 198 50" style="animation-delay:0.85s"/>
+    <path class="leaf leaf-b grow" pathLength="1" d="M210 64 C211 54 216 48 222 52" style="animation-delay:1.00s"/>
+    <path class="leaf leaf-b grow" pathLength="1" d="M210 64 C209 58 203 55 200 58" style="animation-delay:1.15s"/>
+  </g>
+</svg>
+<script>
+// Hold the animation until the row scrolls into view; without JS it plays on load.
+(() => {
+  const el = document.currentScript.previousElementSibling;
+  if (!("IntersectionObserver" in window)) return;
+  el.classList.add("smk-wait");
+  new IntersectionObserver((es, io) => {
+    if (es.some((e) => e.isIntersecting)) { el.classList.remove("smk-wait"); io.disconnect(); }
+  }, { threshold: 0.6 }).observe(el);
+})();
+</script>
+```
+:::
+
 ::: {.home-section}
 ## บทความล่าสุด
 
