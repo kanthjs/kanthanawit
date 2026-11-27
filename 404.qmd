@@ -5,6 +5,39 @@ toc: false
 ---
 
 ::: {.not-found}
+::: {.not-found-art}
+```{=html}
+<!-- Animated broken-link illustration, adapted from svg-motion-kit's error template. Colours: styles.scss (.not-found-art). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 180" class="smk-404" aria-hidden="true" focusable="false">
+  <style>
+    .smk-404 .node   { fill: var(--c-bg); stroke: var(--c-fg); stroke-width: 2.5; }
+    .smk-404 .wire   { fill: none; stroke: var(--c-muted); stroke-width: 2.5; stroke-linecap: round; stroke-dasharray: 5 6; }
+    .smk-404 .disc   { fill: var(--c-soft); }
+    .smk-404 .mark   { fill: none; stroke: var(--c-danger); stroke-width: 6; stroke-linecap: round; }
+    .smk-404 .dot    { fill: var(--c-danger); }
+    .smk-404 .snap-l { animation: smk-404-snap-l .5s .4s cubic-bezier(.3, 1.6, .5, 1) both; }
+    .smk-404 .snap-r { animation: smk-404-snap-r .5s .4s cubic-bezier(.3, 1.6, .5, 1) both; }
+    .smk-404 .draw   { stroke-dasharray: 1; stroke-dashoffset: 0; animation: smk-404-draw .5s cubic-bezier(.65, 0, .35, 1) both; }
+    .smk-404 .shake  { transform-origin: 180px 100px; animation: smk-404-shake .5s 1.3s ease-in-out both; }
+    .smk-404 .rise   { animation: smk-404-rise .6s ease-out both; }
+    @keyframes smk-404-snap-l { from { transform: translateX(10px); } to { transform: translateX(0); } }
+    @keyframes smk-404-snap-r { from { transform: translateX(-10px); } to { transform: translateX(0); } }
+    @keyframes smk-404-draw   { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+    @keyframes smk-404-shake  { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-6deg); } 50% { transform: rotate(5deg); } 75% { transform: rotate(-3deg); } }
+    @keyframes smk-404-rise   { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    @media (prefers-reduced-motion: reduce) { .smk-404 * { animation: none !important; } }
+  </style>
+  <g class="snap-l"><path class="wire" d="M66 100 H128"/><circle class="node" cx="58" cy="100" r="9"/></g>
+  <g class="snap-r"><path class="wire" d="M232 100 H294"/><circle class="node" cx="302" cy="100" r="9"/></g>
+  <g class="shake">
+    <circle class="disc" cx="180" cy="100" r="42"/>
+    <path class="mark draw" pathLength="1" d="M167 87 A13 13 0 0 1 193 87 C193 96 180 97 180 106" style="animation-delay:.8s"/>
+    <circle class="dot rise" cx="180" cy="121" r="4.5" style="animation-delay:1.1s"/>
+  </g>
+</svg>
+```
+:::
+
 ::: {.not-found-code}
 404
 :::

@@ -1707,6 +1707,17 @@ div.quarto-about-trestles .about-entity .about-links {
   text-align: center;
   padding: 3rem 0 2rem 0;
 
+  // Broken-link illustration (404.qmd). Colours follow the light/dark palette.
+  .not-found-art {
+    --c-bg: #{$siteBgColorCustom};
+    --c-fg: #{$textColorCustom};
+    --c-muted: #{$mutedTextColorCustom};
+    --c-danger: #{$accentWarmColorCustom};
+    --c-soft: color-mix(in srgb, #{$accentWarmColorCustom} 14%, #{$siteBgColorCustom});
+
+    svg { display: block; width: min(320px, 80%); height: auto; margin: 0 auto 0.5rem; }
+  }
+
   .not-found-code {
     font-family: $font-family-serif;
     font-size: clamp(4rem, 14vw, 7rem);
@@ -1714,6 +1725,8 @@ div.quarto-about-trestles .about-entity .about-links {
     line-height: 1;
     color: $headingColorCustom;
     margin-bottom: 0.5rem;
+
+    p { font: inherit; margin: 0; }
   }
 
   .work-grid { max-width: 640px; margin-left: auto; margin-right: auto; }
