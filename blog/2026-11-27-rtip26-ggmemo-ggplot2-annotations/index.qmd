@@ -1,0 +1,150 @@
+---
+title: "R Tips 26: ชี้จุดสำคัญและคำนวณส่วนต่างบน ggplot2 ด้วย ggmemo"
+date: 2026-11-27
+description: "ลดโค้ดคำนวณพิกัด x/y และส่วนต่างด้วยมือเมื่อต้องทำ Annotation บนกราฟ ggplot2 ด้วยแพ็กเกจ ggmemo ใช้เพียงฟังก์ชัน annotate_callout() ชี้จุดสำคัญและ annotate_change() แสดงเปอร์เซ็นต์หรือค่าเปลี่ยนข้ามจุดโดยอ้างอิงจากแถวข้อมูลโดยตรง"
+categories: [r, r-tip, ggplot2, ggmemo, data-visualization]
+draft: false
+---
+
+การใส่คำอธิบายประกอบ (Annotation) บนกราฟแนวโน้มใน `ggplot2` เช่น การชี้จุดสูงสุด จุดวิกฤต หรือการลากลูกศรเชื่อม 2 ช่วงเวลาเพื่อบอกเปอร์เซ็นต์การเปลี่ยนแปลง มักต้องเขียนโค้ดส่วนตกแต่งยาวหลายบรรทัด ทั้งการกรองข้อมูลแยกออกมา คำนวณค่าผลต่างด้วยตนเอง รวมถึงกะพิกัด `x`, `y`, `xend`, `yend` ของลูกศรและกล่องข้อความทีละจุด ซึ่งเมื่อข้อมูลอัปเดตหรือสเกลแกนเปลี่ยน ตำแหน่งป้ายและลูกศรมักคลาดเคลื่อนหรือทับเส้นกราฟทันที
+
+แพ็กเกจ **`ggmemo`** (`lindsay-lintelman/ggmemo`, เผยแพร่บน CRAN เมื่อมิถุนายน 2026) พัฒนาต่อยอดบน `ggplot2` และ `ggpp` เพื่อแก้ปัญหานี้โดยตรง ด้วยการอ้างอิงตำแหน่ง Annotation จาก **เงื่อนไขของแถวข้อมูลใน Data Frame** แทนการระบุพิกัดตัวเลขแบบตายตัว
+
+---
+
+## 1. เปรียบเทียบ: คำนวณพิกัดเอง vs `ggmemo`
+
+| มิติการทำงาน | วิธีดั้งเดิม (`annotate()` / `geom_curve()`) | ใช้ `ggmemo` |
+| :--- | :--- | :--- |
+| **การระบุตำแหน่งจุด** | กรองข้อมูลแยกแล้วดึงค่า `x`, `y` มาป้อนเอง | ระบุเงื่อนไขแถวข้อมูลด้วย `where =`, `from =`, `to =` |
+| **การคำนวณส่วนต่าง** | เขียนสูตรคำนวณ `%` หรือผลต่างก่อนพล็อต | `annotate_change()` คำนวณอัตโนมัติจากคอลัมน์ `value` |
+| **การจัดวางป้ายข้อความ** | กะระยะออฟเซต `x` และ `y` ด้วยสายตา | กำหนดทิศทางเชิงสัมพัทธ์เช่น `position = "top-right"` |
+| **สีตามทิศทางเปลี่ยนแปลง** | เขียน `ifelse()` แยกสีขึ้น/ลงเอง | กำหนดชุดสี `up`, `down`, `flat` ได้ในอาร์กิวเมนต์เดียว |
+
+---
+
+## 2. ชี้จุดสำคัญและเชื่อมส่วนต่างด้วย `annotate_callout()` และ `annotate_change()`
+
+ฟังก์ชันหลักของ `ggmemo` มี 2 ตัว ได้แก่:
+
+- `annotate_callout(data, where, label, ...)`: ชี้จุดข้อมูลที่ตรงกับเงื่อนไข `where` พร้อมลูกศรและกล่องป้ายกำกับ
+- `annotate_change(data, from, to, value, ...)`: ลากลูกศรโค้งเชื่อมจากจุด `from` ไปยัง `to` พร้อมคำนวณค่าเปลี่ยนแปลงและใส่สีตามทิศทางอัตโนมัติ
+
+ตัวอย่างการใช้งานกับชุดข้อมูลอนุกรมเวลา `economics` ใน `ggplot2`:
+
+```{r}
+#| message: false
+#| warning: false
+#| fig-width: 7.5
+#| fig-height: 4.5
+# ติดตั้งแพ็กเกจจาก CRAN หรือ GitHub
+# pak::pkg_install(c("ggmemo", "ggplot2"))
+library(ggplot2)
+library(ggmemo)
+
+econ <- economics
+econ$unemp_rate <- econ$unemploy / econ$pop * 100
+
+ggplot(econ, aes(x = date, y = unemp_rate)) +
+  geom_line(linewidth = 0.8, color = "#2c3e50") +
+  # 1. ชี้จุดที่สนใจด้วยลูกศรและป้ายกำกับ โดยอ้างอิงเงื่อนไขจากแถวข้อมูลโดยตรง
+  annotate_callout(
+    econ,
+    where = date == as.Date("1982-12-01"),
+    label = "ช่วงเศรษฐกิจถดถอย",
+    nudge = c(1800, 0.7),
+    family = "IBM Plex Sans Thai Looped"
+  ) +
+  # 2. แสดงการเปลี่ยนแปลงระหว่าง 2 จุด (คำนวณส่วนต่างและสีอัตโนมัติ)
+  annotate_change(
+    econ,
+    from = date == as.Date("2008-01-01"),
+    to = date == as.Date("2010-01-01"),
+    value = unemp_rate,
+    format = "points",
+    family = "IBM Plex Sans Thai Looped"
+  ) +
+  labs(
+    title = "อัตราการว่างงานในสหรัฐอเมริกา (1967–2015)",
+    x = NULL,
+    y = "อัตราการว่างงาน (%)"
+  ) +
+  theme_minimal(base_size = 12, base_family = "IBM Plex Sans Thai Looped")
+```
+
+::: {.callout-note}
+### การทำงานแบบ Semantic Reference
+อาร์กิวเมนต์ `where`, `from` และ `to` ใช้ระบบ Tidy Evaluation เช่นเดียวกับ `dplyr::filter()` จึงสามารถเขียนเงื่อนไขอย่าง `where = date == max(date)` หรือ `where = unemp_rate == max(unemp_rate)` ได้โดยตรง เมื่อมีข้อมูลใหม่เพิ่มเข้ามาในอนาคต ตำแหน่งลูกศรและข้อความจะขยับตามข้อมูลจริงโดยอัตโนมัติ
+:::
+
+---
+
+## 3. ปรับหน่วยการแสดงผล สี และความโค้งใน `annotate_change()`
+
+ในงานสรุปผลรายเดือน รายไตรมาส หรือกราฟนำเสนอผู้บริหาร สามารถปรับรูปแบบการแสดงผลและทิศทางของ `annotate_change()` ได้ละเอียดผ่านอาร์กิวเมนต์หลักดังนี้:
+
+- `format`: เลือกรูปแบบตัวเลขผลต่าง ได้แก่ `"percent"` (ค่าเริ่มต้น), `"absolute"`, `"points"` (percentage points) หรือ `"both"`
+- `colors`: กำหนดชุดสีตามทิศทางด้วย Named Vector เช่น `c(up = "#1b9e77", down = "#d95f02", flat = "#808080")`
+- `curvature`: ปรับความโค้งของลูกศร (ค่าเริ่มต้น `-0.2`) เพื่อหลบเส้นกราฟไม่ให้ทับซ้อนกัน
+- `expand_y`: ขยายขอบแกน Y อัตโนมัติ (`TRUE` เป็นค่าเริ่มต้น) เพื่อป้องกันป้ายและลูกศรโค้งล้นขอบบนของกราฟ
+
+```{r}
+#| message: false
+#| warning: false
+#| fig-width: 7.5
+#| fig-height: 4.5
+quarterly <- data.frame(
+  quarter = factor(paste0("Q", 1:8), levels = paste0("Q", 1:8)),
+  revenue = c(120, 138, 134, 162, 158, 145, 172, 195)
+)
+
+ggplot(quarterly, aes(x = quarter, y = revenue, group = 1)) +
+  geom_line(linewidth = 0.9, color = "#34495e") +
+  geom_point(size = 2.6, color = "#34495e") +
+  annotate_change(
+    quarterly,
+    from = quarter == "Q1",
+    to = quarter == "Q4",
+    value = revenue,
+    format = "percent",
+    colors = c(up = "#0f766e", down = "#c2410c", flat = "#64748b"),
+    curvature = -0.25,
+    family = "IBM Plex Sans Thai Looped"
+  ) +
+  annotate_change(
+    quarterly,
+    from = quarter == "Q4",
+    to = quarter == "Q6",
+    value = revenue,
+    format = "both",
+    colors = c(up = "#0f766e", down = "#c2410c", flat = "#64748b"),
+    curvature = 0.25,
+    family = "IBM Plex Sans Thai Looped"
+  ) +
+  annotate_callout(
+    quarterly,
+    where = revenue == max(revenue),
+    label = "รายได้สูงสุด",
+    position = "top-left",
+    family = "IBM Plex Sans Thai Looped"
+  ) +
+  labs(
+    title = "รายได้รายไตรมาสและการเปลี่ยนแปลงช่วงสำคัญ",
+    x = NULL,
+    y = "รายได้ (ล้านบาท)"
+  ) +
+  theme_minimal(base_size = 12, base_family = "IBM Plex Sans Thai Looped")
+```
+
+> [!TIP]
+> **สรุปการใช้งาน**:
+> 1. ใช้ `annotate_callout()` เมื่อต้องการชี้จุดเดียวด้วยเงื่อนไขแถวข้อมูล (`where = ...`) และกำหนดมุมจัดวางด้วย `position` (`"top-right"`, `"top-left"`, `"bottom-right"`, `"bottom-left"`) หรือปรับละเอียดด้วย `nudge = c(dx, dy)`
+> 2. ใช้ `annotate_change()` เมื่อต้องการเปรียบเทียบ 2 จุด (`from = ...`, `to = ...`) โดยให้แพ็กเกจคำนวณ `%` หรือผลต่างพร้อมระบายสีทิศทางให้โดยอัตโนมัติ
+
+---
+
+## แหล่งติดตามเพิ่มเติม
+
+- [lindsay-lintelman/ggmemo](https://github.com/lindsay-lintelman/ggmemo) — ซอร์สโค้ดและตัวอย่างการใช้งาน `ggmemo` บน GitHub
+- [lindsay-lintelman.github.io/ggmemo](https://lindsay-lintelman.github.io/ggmemo/) — หน้าคู่มือและตัวอย่างการเล่าเรื่องบนกราฟด้วย `ggmemo`
+- [Using R package structure for data science projects](https://www.youtube.com/watch?v=w1YmNcW19oI) — แนวทางการจัดระเบียบโปรเจกต์และโค้ด R ให้นำกลับมาใช้ซ้ำและดูแลรักษาได้ง่าย
