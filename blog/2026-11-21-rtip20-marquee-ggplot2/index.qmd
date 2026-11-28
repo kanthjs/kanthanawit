@@ -41,6 +41,7 @@ draft: false
 ```{r}
 #| message: false
 #| warning: false
+#| fig-alt: "กราฟแท่งเปรียบเทียบคะแนนเฉลี่ย 4 ระยะ (Phase 1-4) ที่ใช้ element_marquee() ย้อมสีคำว่า Baseline และ Improved ใน Subtitle ให้ตรงกับสีแท่งกราฟ ช่วยให้ผู้อ่านเข้าใจกลุ่มข้อมูลได้ทันทีโดยไม่ต้องใช้กล่อง Legend"
 #| fig-width: 7
 #| fig-height: 4.5
 library(marquee)
@@ -86,6 +87,7 @@ ggplot(df, aes(x = stage, y = score, fill = group)) +
 ```{r}
 #| message: false
 #| warning: false
+#| fig-alt: "กราฟแท่งคะแนนเฉลี่ย 4 ระยะที่แทรกกล่องข้อความข้อสังเกตแบบ Markdown ด้วย geom_marquee() แสดงหัวข้อและรายการกระสุนที่ตัดคำอัตโนมัติอย่างเป็นระเบียบภายในพื้นที่ว่างของกราฟ"
 #| fig-width: 7
 #| fig-height: 4.5
 annotation_df <- data.frame(
@@ -125,6 +127,7 @@ ggplot(df, aes(x = stage, y = score)) +
 ```{r}
 #| message: false
 #| warning: false
+#| fig-alt: "กราฟจุดกระจายจากชุดข้อมูล mpg แสดงความสัมพันธ์ระหว่างขนาดเครื่องยนต์กับอัตราสิ้นเปลืองน้ำมัน โดยใช้ guide_marquee() รวมคำอธิบายสัญลักษณ์สีของระบบขับเคลื่อน 3 แบบเข้าเป็นข้อความแถวเดียวแทนกล่อง Legend แบบเดิม"
 #| fig-width: 7.5
 #| fig-height: 4.8
 ggplot(mpg, aes(x = displ, y = hwy, colour = drv)) +

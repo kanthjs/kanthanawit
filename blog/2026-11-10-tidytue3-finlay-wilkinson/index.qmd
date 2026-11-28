@@ -292,6 +292,7 @@ cat("Crossover Environmental Potential:", round(env_crossover, 2), "bu/ac\n")
 
 ```{r}
 #| label: plot-finlay-wilkinson
+#| fig-alt: "กราฟ Finlay-Wilkinson Joint Regression แสดงเส้นถดถอยผลผลิตข้าวบาร์เลย์ของแต่ละสายพันธุ์เทียบกับศักยภาพสภาพแวดล้อม พร้อมจุดตัด Crossover Point ที่ 72.46 bu/ac ชี้ว่าพันธุ์ Trebi ให้ผลผลิตสูงสุดในพื้นที่อุดมสมบูรณ์แต่อ่อนไหวต่อสภาพแวดล้อม ส่วนพันธุ์เสถียรอย่าง Peatland ทนทานกว่าในพื้นที่ศักยภาพต่ำ"
 #| fig-width: 8.5
 #| fig-height: 5.8
 plot_df <- gxe_df |>

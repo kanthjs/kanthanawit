@@ -150,6 +150,7 @@ $$Y = A - (A - Y_0) \cdot e^{-k X}$$
 
 ```{r}
 #| label: plot-k-raw
+#| fig-alt: "กราฟจุดกระจายแสดงความสัมพันธ์ระหว่างระดับโพแทสเซียมในดิน (ppm) กับผลผลิตฝ้ายสัมพัทธ์ (%) จากข้อมูล agridat::cate.potassium แสดงรูปแบบ classic soil test calibration ที่ผลผลิตเพิ่มเร็วเมื่อ K ต่ำกว่า 45 ppm แล้วเข้าสู่ระดับคงที่ราว 85-107% เมื่อ K สูงขึ้น"
 #| fig-width: 8
 #| fig-height: 4.5
 ggplot(k_df, aes(x = potassium, y = yield)) +
@@ -289,6 +290,7 @@ $$X_{95} = -\frac{1}{k} \ln\left(\frac{0.05 \times A}{A - Y_0}\right)$$
 
 ```{r}
 #| label: plot-k-comparison
+#| fig-alt: "กราฟเปรียบเทียบเส้นโค้งทำนายผลผลิตฝ้ายสัมพัทธ์จาก 3 แบบจำลองพร้อมเส้นแบ่ง Cate-Nelson ที่ 46.5 ppm แสดงให้เห็นว่า Mitscherlich และ Linear-Plateau สะท้อนเพดานอิ่มตัวของผลผลิตได้สมจริง ขณะที่ Quadratic โค้งลงและประมาณค่าวิกฤตสูงเกินจริงเกือบ 2 เท่า"
 #| fig-width: 9
 #| fig-height: 6
 grid_k <- tibble(potassium = seq(min(k_df$potassium), max(k_df$potassium), length.out = 300)) |>
@@ -372,6 +374,7 @@ ggplot() +
 
 ```{r}
 #| label: residual-compare
+#| fig-alt: "กราฟเปรียบเทียบค่าเหลือ (Residuals) ตามระดับโพแทสเซียมในดินระหว่าง Quadratic, Mitscherlich และ Linear-Plateau พร้อมเส้น LOESS แสดงให้เห็นว่า Mitscherlich และ Linear-Plateau มีค่าเหลือกระจายรอบศูนย์สม่ำเสมอกว่า Quadratic ที่มีแนวโน้มเป็นรูปโค้ง"
 #| fig-width: 9
 #| fig-height: 4.5
 resid_df <- bind_rows(
@@ -473,6 +476,7 @@ cat("ความหนาแน่นที่ให้ 95% ของเพด�
 
 ```{r}
 #| label: plot-turnip-comparison
+#| fig-alt: "กราฟเปรียบเทียบ Yield-Density Curve ของหัวผักกาดระหว่าง Quadratic, Asymptotic NLS และ Michaelis-Menten ชี้ให้เห็นว่าแบบจำลอง Asymptotic และ Michaelis-Menten สะท้อนเพดานผลผลิตอิ่มตัวได้ถูกต้อง ส่วน Quadratic ทำนายผลผลิตลดลงผิดธรรมชาติที่ความหนาแน่นสูง"
 #| fig-width: 9
 #| fig-height: 6
 grid_turnip <- tibble(density = seq(0.5, max(turnip_df$density) * 1.3, length.out = 300)) |>
@@ -553,6 +557,7 @@ $$\frac{1}{w} = a + b \cdot d$$
 
 ```{r}
 #| label: yield-per-plant
+#| fig-alt: "กราฟจุดกระจายและเส้นพยากรณ์จากสมการ Holliday Inverse Model แสดงผลผลิตต่อต้นของหัวผักกาดที่ลดลงแบบผกผันเมื่อความหนาแน่นปลูกเพิ่มขึ้น สะท้อนการแข่งขันแย่งทรัพยากรระหว่างต้นพืช"
 #| fig-width: 8
 #| fig-height: 5
 # ตัดแปลงที่ yield = 0 ออก (มี 1 แปลง) เพราะจะทำให้ 1/w = Inf และ lm() error

@@ -35,6 +35,7 @@ draft: false
 ```{r}
 #| message: false
 #| warning: false
+#| fig-alt: "กราฟเส้นอัตราการว่างงานในสหรัฐอเมริกา (1967-2015) ที่ใช้ annotate_callout() ชี้จุดสูงสุดช่วงเศรษฐกิจถดถอยปี 1982 และ annotate_change() ลากลูกศรโค้งแสดงการเปลี่ยนแปลงช่วงปี 2008-2010 อัตโนมัติโดยอ้างอิงจากเงื่อนไขข้อมูลโดยตรง"
 #| fig-width: 7.5
 #| fig-height: 4.5
 # ติดตั้งแพ็กเกจจาก CRAN หรือ GitHub
@@ -91,6 +92,7 @@ ggplot(econ, aes(x = date, y = unemp_rate)) +
 ```{r}
 #| message: false
 #| warning: false
+#| fig-alt: "กราฟเส้นรายได้รายไตรมาส Q1 ถึง Q8 ที่ใช้ annotate_change() แสดงส่วนต่างแบบเปอร์เซ็นต์สีเขียวช่วงขาขึ้น Q1-Q4 และแสดงทั้งค่าจริงและเปอร์เซ็นต์สีส้มช่วงขาลง Q4-Q6 พร้อม annotate_callout() ชี้จุดรายได้สูงสุดที่ Q8"
 #| fig-width: 7.5
 #| fig-height: 4.5
 quarterly <- data.frame(
